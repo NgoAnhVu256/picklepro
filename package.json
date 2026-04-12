@@ -1,0 +1,19 @@
+{
+  "name": "picklepro-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PicklePro - Pickleball E-commerce Platform",
+  "scripts": {
+    "dev": "pnpm --filter front-end dev",
+    "build": "pnpm --filter back-end build && pnpm --filter front-end build",
+    "build:be": "pnpm --filter back-end build",
+    "build:fe": "pnpm --filter front-end build",
+    "lint": "pnpm --filter front-end lint",
+    "seed": "pnpm --filter back-end seed",
+    "clean": "pnpm -r exec rm -rf node_modules dist .next"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

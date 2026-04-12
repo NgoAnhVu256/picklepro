@@ -1,0 +1,6 @@
+export { ProductRepository } from './product.repository'
+export { CategoryRepository } from './category.repository'
+export { OrderRepository } from './order.repository'
+export { ReviewRepository } from './review.repository'
+export { ProfileRepository } from './profile.repository'
+export { ChatRepository } from './chat.repository'
