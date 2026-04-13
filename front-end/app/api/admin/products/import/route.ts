@@ -64,8 +64,6 @@ export async function POST(req: NextRequest) {
           is_active: row.is_active !== 'false' && row.is_active !== false,
           tags: typeof row.tags === 'string' ? row.tags.split(';').map((t: string) => t.trim()).filter(Boolean) : (row.tags || []),
           specs: row.specs ? (() => { try { return JSON.parse(row.specs) } catch { return null } })() : null,
-          rating: Number(row.rating) || 4.5,
-          review_count: Number(row.review_count) || 0,
         }
 
         let imagesToInsert: string[] = []
