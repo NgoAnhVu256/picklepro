@@ -7,9 +7,8 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Package, FolderOpen, ShoppingBag,
   Users, Settings, LogOut, Menu, X, ChevronRight, Store,
-  Percent, UserCog, Sun, Moon
+  Percent, UserCog
 } from 'lucide-react'
-import { useTheme } from 'next-themes'
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -28,7 +27,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
-  const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -83,7 +81,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div>
             <p className="font-bold text-foreground text-sm">PicklePro</p>
-            <p className="text-xs text-lime font-medium">Admin Dashboard</p>
+            <p className="text-xs text-lime-dark font-medium">Admin Dashboard</p>
           </div>
         </Link>
       </div>
@@ -99,13 +97,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               onClick={() => setSidebarOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
                 active
-                  ? 'bg-lime/20 text-lime border border-lime/30'
+                  ? 'bg-lime-dark/10 text-lime-dark border border-lime-dark/20'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
             >
-              <item.icon className={`h-5 w-5 shrink-0 ${active ? 'text-lime' : 'text-muted-foreground group-hover:text-secondary-foreground'}`} />
+              <item.icon className={`h-5 w-5 shrink-0 ${active ? 'text-lime-dark' : 'text-muted-foreground group-hover:text-secondary-foreground'}`} />
               <span className="flex-1">{item.label}</span>
-              {active && <ChevronRight className="h-3.5 w-3.5 text-lime" />}
+              {active && <ChevronRight className="h-3.5 w-3.5 text-lime-dark" />}
             </Link>
           )
         })}
@@ -165,16 +163,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex-1" />
-          
-          {mounted && (
-            <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-lg text-muted-foreground dark:text-muted-foreground hover:text-lime-dark hover:bg-gray-200 dark:hover:bg-muted transition-all"
-              title="Chuyển chế độ giao diện"
-            >
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
-          )}
 
           <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-muted-foreground ml-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime to-lime-dark flex items-center justify-center text-foreground text-xs font-bold">

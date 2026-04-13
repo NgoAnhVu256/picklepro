@@ -44,7 +44,7 @@ export function ChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: 'Xin chào! \nBạn cần tôi hỗ trợ gì?',
+      content: 'Xin chào! Tôi là trợ lý AI của PicklePro. Tôi có thể giúp bạn:\n\n• Tư vấn chọn vợt Pickleball\n• Gợi ý phụ kiện phù hợp\n• So sánh sản phẩm\n\nBạn cần tôi hỗ trợ gì?',
     },
   ])
   const [input, setInput] = useState('')
@@ -138,12 +138,8 @@ export function ChatWidget() {
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-sm">PicklePro AI</h3>
+              <h3 className="font-bold text-white text-sm">PicklePro xin chào</h3>
               <p className="text-white/70 text-xs">Tư vấn sản phẩm thông minh</p>
-            </div>
-            <div className="ml-auto flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
-              <span className="text-white/70 text-xs">Online</span>
             </div>
           </div>
 
