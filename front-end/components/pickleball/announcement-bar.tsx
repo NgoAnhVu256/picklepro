@@ -4,11 +4,11 @@ import { useState } from "react"
 import { X } from "lucide-react"
 
 const announcements = [
-  "🔥 FLASH SALE — Giảm đến 50% tất cả vợt JOOLA!",
-  "🚚 Miễn phí vận chuyển cho đơn hàng từ 500K",
-  "🏆 PicklePro — Cửa hàng Pickleball uy tín #1 Việt Nam",
-  "🎁 Tặng Grip cao cấp khi mua vợt trên 3 triệu",
-  "⭐ Đăng ký VIP — Giảm thêm 10% mọi đơn hàng",
+  "FLASH SALE — Giảm đến 50% tất cả vợt JOOLA!",
+  "Miễn phí vận chuyển cho đơn hàng từ 500K",
+  "PicklePro — Cửa hàng Pickleball uy tín #1 Việt Nam",
+  "Tặng Grip cao cấp khi mua vợt trên 3 triệu",
+  "Đăng ký VIP — Giảm thêm 10% mọi đơn hàng",
 ]
 
 // Repeat text for seamless loop
