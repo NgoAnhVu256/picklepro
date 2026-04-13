@@ -18,8 +18,6 @@ interface Product {
   brand: string
   price: number
   original_price: number | null
-  rating: number
-  review_count: number
   is_featured: boolean
   description: string | null
   tags: string[]
@@ -267,9 +265,7 @@ function ProductsContent() {
                       <h3 className="text-xs sm:text-sm font-bold text-foreground line-clamp-2 leading-snug">{product.name}</h3>
 
                       <div className="flex items-center gap-1 sm:gap-2 mt-1">
-                        <Star className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-lime-dark fill-lime" />
-                        <span className="text-xs sm:text-sm font-semibold">{product.rating}</span>
-                        <span className="text-[10px] sm:text-xs text-muted-foreground">({product.review_count})</span>
+                        <span className="text-[10px] sm:text-xs inline-flex px-1.5 py-0.5 rounded bg-lime/10 text-lime-dark font-medium">{product.brand}</span>
                       </div>
 
                       <div className="flex items-center gap-1 sm:gap-2 mt-auto pt-1 sm:pt-2">

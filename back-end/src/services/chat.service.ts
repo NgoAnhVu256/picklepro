@@ -175,7 +175,6 @@ export class ChatService {
         `[${i + 1}] ${p.name}`,
         `  Thương hiệu: ${p.brand}`,
         `  Giá: ${new Intl.NumberFormat('vi-VN').format(p.price)} VND`,
-        `  Đánh giá: ${p.rating}/5`,
         `  Mô tả: ${p.description || 'Chưa có mô tả'}`,
         `  Thông số:\n${specs}`,
       ].join('\n')

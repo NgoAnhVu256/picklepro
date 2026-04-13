@@ -13,7 +13,7 @@ import { useCart } from '@/hooks/use-cart'
 
 interface ProductFull {
   id: string; name: string; slug: string; brand: string; price: number
-  original_price: number | null; rating: number; review_count: number
+  original_price: number | null
   description: string | null; tags: string[]; specs: Record<string, string> | null
   stock: number; is_featured: boolean; category_id: string
   categories: { name: string; slug: string } | null
@@ -136,12 +136,6 @@ export default function ProductDetailPage() {
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'PicklePro' },
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: product.rating,
-      reviewCount: product.review_count,
-      bestRating: 5,
-    },
   }
 
   const breadcrumbJsonLd = {
@@ -222,16 +216,7 @@ export default function ProductDetailPage() {
             {/* Name */}
             <h1 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">{product.name}</h1>
 
-            {/* Rating */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className={`h-5 w-5 ${i < Math.round(product.rating) ? 'text-lime-dark fill-lime' : 'text-muted/50'}`} />
-                ))}
-              </div>
-              <span className="font-bold text-foreground">{product.rating}</span>
-              <span className="text-muted-foreground">({product.review_count} đánh giá)</span>
-            </div>
+
 
             {/* Price */}
             <div className="flex items-end gap-3 bg-gradient-to-r from-lime/10 via-transparent to-transparent p-4 rounded-2xl">
@@ -344,8 +329,7 @@ export default function ProductDetailPage() {
                   <p className="text-xs font-medium text-lime-dark uppercase">{p.brand}</p>
                   <h3 className="font-bold text-sm text-foreground line-clamp-2 mb-1">{p.name}</h3>
                   <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 text-lime-dark fill-lime" />
-                    <span className="text-xs font-medium">{p.rating}</span>
+                    <span className="text-xs font-medium text-muted-foreground">{p.brand}</span>
                   </div>
                   <p className="font-bold text-lime-dark mt-1">{formatPrice(p.price)}</p>
                 </Link>

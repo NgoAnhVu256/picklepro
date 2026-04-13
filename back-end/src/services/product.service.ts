@@ -64,7 +64,7 @@ export class ProductService {
     const { data } = await this.productRepo.findAll({
       isFeatured: true,
       limit,
-      sortBy: 'rating',
+      sortBy: 'created_at',
       sortOrder: 'desc',
     })
     return data

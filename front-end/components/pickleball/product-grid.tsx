@@ -8,8 +8,7 @@ import { useState, useEffect } from "react"
 
 interface Product {
   id: string; name: string; slug: string; brand: string
-  price: number; original_price: number | null; rating: number
-  review_count: number; is_featured: boolean
+  price: number; original_price: number | null; is_featured: boolean
   categories: { name: string; slug: string } | null
 }
 
@@ -40,7 +39,7 @@ export function ProductGrid() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/products?isFeatured=true&limit=6&sortBy=rating&sortOrder=desc')
+    fetch('/api/products?isFeatured=true&limit=6&sortBy=created_at&sortOrder=desc')
       .then(r => r.json())
       .then(data => {
         setProducts(data.products ?? [])
@@ -138,15 +137,7 @@ export function ProductGrid() {
                       <h3 className="text-xs sm:text-base font-bold text-foreground line-clamp-2 min-h-[2rem] sm:min-h-[3rem] hover:text-lime-dark transition-colors">{product.name}</h3>
                     </Link>
 
-                    {/* Rating */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 mt-1.5 sm:mt-2">
-                      <div className="flex items-center gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 ${i < Math.round(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} />
-                        ))}
-                      </div>
-                      <span className="text-[10px] sm:text-xs text-muted-foreground">({product.review_count})</span>
-                    </div>
+
 
                     {/* Price + CTA */}
                     <div className="flex items-center justify-between mt-2 sm:mt-4">

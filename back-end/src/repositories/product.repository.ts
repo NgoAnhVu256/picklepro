@@ -128,7 +128,7 @@ export class ProductRepository {
       .eq('category_id', categoryId)
       .neq('id', productId)
       .eq('is_active', true)
-      .order('rating', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit)
 
     if (error) throw error
@@ -156,10 +156,10 @@ export class ProductRepository {
 
     const { data, error } = await supabaseAdmin
       .from('products')
-      .select('name, brand, price, description, specs, rating, slug')
+      .select('name, brand, price, description, specs, slug')
       .eq('is_active', true)
       .or(conditions.join(','))
-      .order('rating', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit)
 
     if (error) throw error
@@ -178,9 +178,9 @@ export class ProductRepository {
   async getTopProducts(limit = 10): Promise<Product[]> {
     const { data, error } = await supabaseAdmin
       .from('products')
-      .select('name, brand, price, description, specs, rating, slug')
+      .select('name, brand, price, description, specs, slug')
       .eq('is_active', true)
-      .order('rating', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(limit)
 
     if (error) throw error

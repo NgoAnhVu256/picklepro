@@ -37,9 +37,9 @@ export interface Database {
         Update: OrderItemUpdate
       }
       reviews: {
-        Row: Review
-        Insert: ReviewInsert
-        Update: ReviewUpdate
+        Row: any
+        Insert: any
+        Update: any
       }
       chat_history: {
         Row: ChatMessage
@@ -74,8 +74,6 @@ export interface Product {
   price: number
   original_price: number | null
   category_id: string
-  rating: number
-  review_count: number
   stock: number
   tags: string[]
   specs: Record<string, string> | null
@@ -85,7 +83,7 @@ export interface Product {
   updated_at: string
 }
 
-export type ProductInsert = Omit<Product, 'id' | 'created_at' | 'updated_at' | 'rating' | 'review_count'>
+export type ProductInsert = Omit<Product, 'id' | 'created_at' | 'updated_at'>
 export type ProductUpdate = Partial<ProductInsert>
 
 // --- Product Images ---
@@ -147,18 +145,6 @@ export interface OrderItem {
 export type OrderItemInsert = Omit<OrderItem, 'id'>
 export type OrderItemUpdate = Partial<OrderItemInsert>
 
-// --- Reviews ---
-export interface Review {
-  id: string
-  product_id: string
-  user_id: string
-  rating: number
-  comment: string | null
-  created_at: string
-}
-
-export type ReviewInsert = Omit<Review, 'id' | 'created_at'>
-export type ReviewUpdate = Partial<Omit<Review, 'id' | 'product_id' | 'user_id' | 'created_at'>>
 
 // --- Chat History ---
 export type ChatRole = 'user' | 'assistant'

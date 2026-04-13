@@ -51,8 +51,6 @@ async function runSeed() {
             specs: product.specs,
             is_featured: product.is_featured,
             is_active: true,
-            rating: Math.round((4.5 + Math.random() * 0.5) * 10) / 10, // Random 4.5-5.0
-            review_count: Math.floor(50 + Math.random() * 400),
           },
           { onConflict: 'slug' }
         )

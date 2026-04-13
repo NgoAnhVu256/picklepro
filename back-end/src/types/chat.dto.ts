@@ -31,7 +31,6 @@ export interface RAGContext {
     price: number
     description: string | null
     specs: Record<string, string> | null
-    rating: number
   }[]
   query: string
 }

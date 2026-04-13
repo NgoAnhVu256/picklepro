@@ -15,7 +15,7 @@ export interface ProductFilterDTO {
   maxPrice?: number
   isFeatured?: boolean
   tags?: string[]
-  sortBy?: 'price' | 'rating' | 'created_at' | 'name'
+  sortBy?: 'price' | 'created_at' | 'name'
   sortOrder?: 'asc' | 'desc'
   page?: number
   limit?: number
