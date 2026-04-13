@@ -12,6 +12,7 @@ import { MapPin, Phone, User, CreditCard, Banknote, Loader2, Shield, Lock, Arrow
 import Link from 'next/link'
 import { useCart } from '@/hooks/use-cart'
 import { validatePhone, formatPhoneInput, isPhoneValid } from '@/lib/validate-phone'
+import { AddressPicker } from '@/components/pickleball/address-picker'
 
 function formatPrice(p: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p)
@@ -296,11 +297,13 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Địa chỉ giao hàng</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Số nhà, đường, phường, quận, thành phố" value={form.address} onChange={e => update('address', e.target.value)} className="pl-10 rounded-xl border-lime/30 h-12" required />
-                </div>
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-lime-dark" /> Địa chỉ giao hàng
+                </Label>
+                <AddressPicker
+                  onChange={(addr) => update('address', addr.fullAddress)}
+                  initialAddress={form.address}
+                />
               </div>
             </div>
 

@@ -18,6 +18,18 @@ export class ProductRepository {
    * Lấy danh sách sản phẩm có filter, pagination, sort
    */
   async findAll(filter: ProductFilterDTO): Promise<{ data: ProductWithCategory[]; total: number }> {
+    // If filtering by category slug, first lookup the category_id
+    let categoryId: string | undefined
+    if (filter.categorySlug) {
+      const { data: cat } = await supabaseAdmin
+        .from('categories')
+        .select('id')
+        .eq('slug', filter.categorySlug)
+        .single()
+      if (cat) categoryId = cat.id
+      else return { data: [], total: 0 } // Category not found → no results
+    }
+
     let query = supabaseAdmin
       .from('products')
       .select('*, categories(name, slug)', { count: 'exact' })
@@ -27,8 +39,8 @@ export class ProductRepository {
     if (filter.search) {
       query = query.ilike('name', `%${filter.search}%`)
     }
-    if (filter.categorySlug) {
-      query = query.eq('categories.slug', filter.categorySlug)
+    if (categoryId) {
+      query = query.eq('category_id', categoryId)
     }
     if (filter.brand) {
       query = query.eq('brand', filter.brand)
