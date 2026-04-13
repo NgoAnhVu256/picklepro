@@ -22,6 +22,7 @@ interface Product {
   description: string | null
   tags: string[]
   categories: { name: string; slug: string } | null
+  product_images?: { id: string; url: string; is_primary: boolean }[]
 }
 
 interface ProductResponse {
@@ -255,8 +256,15 @@ function ProductsContent() {
                     </button>
 
                     {/* Image */}
-                    <div className="aspect-square rounded-xl sm:rounded-2xl bg-white/50 flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-105 transition-transform duration-300">
-                      <span className="text-5xl sm:text-7xl">{emoji}</span>
+                    <div className="aspect-square rounded-xl sm:rounded-2xl bg-white/50 flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+                      {(() => {
+                        const primaryImg = product.product_images?.find(i => i.is_primary) || product.product_images?.[0]
+                        return primaryImg?.url ? (
+                          <img src={primaryImg.url} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
+                        ) : (
+                          <span className="text-5xl sm:text-7xl">{emoji}</span>
+                        )
+                      })()}
                     </div>
 
                     {/* Info */}

@@ -40,6 +40,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [liked, setLiked] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const { addItem } = useCart()
 
   useEffect(() => {
@@ -180,28 +181,53 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left — Image */}
           <div className="relative">
-            <div className="sticky top-24">
+            <div className="sticky top-24 space-y-3">
               <div className="aspect-square rounded-3xl bg-gradient-to-br from-lime/10 via-lime-light/20 to-lime/5 border border-lime/20 flex items-center justify-center relative overflow-hidden">
                 {/* Badges */}
-                <div className="absolute top-6 left-6 flex flex-col gap-2 z-10">
-                  {product.is_featured && <Badge className="bg-lime text-lime-dark text-sm font-bold px-3 py-1">⭐ Nổi bật</Badge>}
-                  {discount && <Badge className="bg-red-500 text-white text-sm font-bold px-3 py-1">-{discount}%</Badge>}
+                <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex flex-col gap-2 z-10">
+                  {product.is_featured && <Badge className="bg-lime text-lime-dark text-xs sm:text-sm font-bold px-2 sm:px-3 py-1">⭐ Nổi bật</Badge>}
+                  {discount && <Badge className="bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1">-{discount}%</Badge>}
                 </div>
 
                 {/* Actions */}
-                <div className="absolute top-6 right-6 flex flex-col gap-2 z-10">
-                  <button className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md ${liked ? 'bg-red-500 text-white' : 'bg-white/80 backdrop-blur-sm text-muted-foreground hover:text-red-500 hover:bg-white'}`} onClick={() => setLiked(!liked)}>
-                    <Heart className={`h-5 w-5 ${liked ? 'fill-white' : ''}`} />
+                <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex flex-col gap-2 z-10">
+                  <button className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all shadow-md ${liked ? 'bg-red-500 text-white' : 'bg-white/80 backdrop-blur-sm text-muted-foreground hover:text-red-500 hover:bg-white'}`} onClick={() => setLiked(!liked)}>
+                    <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${liked ? 'fill-white' : ''}`} />
                   </button>
-                  <button className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-lime-dark hover:bg-white transition-all shadow-md">
-                    <Share2 className="h-5 w-5" />
+                  <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-lime-dark hover:bg-white transition-all shadow-md">
+                    <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
                 </div>
 
-                {/* Glow */}
-                <div className="absolute w-64 h-64 bg-lime/20 rounded-full blur-3xl" />
-                <span className="text-[160px] relative z-10 drop-shadow-xl">{emoji}</span>
+                {/* Main Image */}
+                {(() => {
+                  const images = product.product_images || []
+                  const primaryImg = images.find(i => i.is_primary) || images[0]
+                  return primaryImg?.url ? (
+                    <img src={selectedImage || primaryImg.url} alt={product.name} className="w-full h-full object-contain p-4" />
+                  ) : (
+                    <>
+                      <div className="absolute w-64 h-64 bg-lime/20 rounded-full blur-3xl" />
+                      <span className="text-[120px] sm:text-[160px] relative z-10 drop-shadow-xl">{emoji}</span>
+                    </>
+                  )
+                })()}
               </div>
+              
+              {/* Thumbnail Gallery */}
+              {product.product_images && product.product_images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                  {product.product_images.map((img) => (
+                    <button key={img.id} onClick={() => setSelectedImage(img.url)}
+                      className={`shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                        (selectedImage || product.product_images?.find(i => i.is_primary)?.url || product.product_images?.[0]?.url) === img.url 
+                          ? 'border-lime-dark shadow-lg' : 'border-border hover:border-lime/50'
+                      }`}>
+                      <img src={img.url} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

@@ -32,7 +32,7 @@ export class ProductRepository {
 
     let query = supabaseAdmin
       .from('products')
-      .select('*, categories(name, slug)', { count: 'exact' })
+      .select('*, categories(name, slug), product_images(id, url, is_primary)', { count: 'exact' })
       .eq('is_active', true)
 
     // --- Filters ---
