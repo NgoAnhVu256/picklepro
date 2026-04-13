@@ -37,8 +37,9 @@ export async function POST(req: NextRequest) {
       try {
         // Match category
         let categoryId = row.category_id || ''
-        if (!categoryId && row.category) {
-          categoryId = categoryMap.get(row.category.toLowerCase()) || ''
+        const categoryField = row.category || row.category_name || ''
+        if (!categoryId && categoryField) {
+          categoryId = categoryMap.get(categoryField.toLowerCase()) || ''
         }
 
         // Generate slug
@@ -51,6 +52,30 @@ export async function POST(req: NextRequest) {
           .replace(/(^-|-$)/g, '')
           + '-' + Date.now().toString(36) + i
 
+        // Parse tags — handle PostgreSQL array format {tag1, tag2} and semicolons
+        let parsedTags: string[] = []
+        if (typeof row.tags === 'string' && row.tags) {
+          let tagStr = row.tags
+          if (tagStr.startsWith('{') && tagStr.endsWith('}')) {
+            tagStr = tagStr.slice(1, -1)
+          }
+          parsedTags = tagStr.split(/[;,]/).map((t: string) => t.trim()).filter(Boolean)
+        } else if (Array.isArray(row.tags)) {
+          parsedTags = row.tags
+        }
+
+        // Parse specs
+        let parsedSpecs: any = null
+        if (row.specs) {
+          let specStr = typeof row.specs === 'string' ? row.specs : ''
+          if (specStr.startsWith('{') && specStr.endsWith('}') && !specStr.startsWith('{"')) {
+            specStr = '' // empty PostgreSQL array {}
+          }
+          if (specStr) {
+            try { parsedSpecs = JSON.parse(specStr) } catch { parsedSpecs = null }
+          }
+        }
+
         const productData: any = {
           name: row.name,
           slug,
@@ -60,21 +85,26 @@ export async function POST(req: NextRequest) {
           stock: Number(row.stock) || 0,
           description: row.description || null,
           category_id: categoryId || null,
-          is_featured: row.is_featured === 'true' || row.is_featured === true,
-          is_active: row.is_active !== 'false' && row.is_active !== false,
-          tags: typeof row.tags === 'string' ? row.tags.split(';').map((t: string) => t.trim()).filter(Boolean) : (row.tags || []),
-          specs: row.specs ? (() => { try { return JSON.parse(row.specs) } catch { return null } })() : null,
+          is_featured: row.is_featured === 'true' || row.is_featured === 'True' || row.is_featured === true,
+          is_active: row.is_active === 'true' || row.is_active === 'True' || row.is_active === true || row.is_active === '',
+          tags: parsedTags,
+          specs: parsedSpecs,
         }
 
         let imagesToInsert: string[] = []
 
-        // Handle images: image_url (single) or images (semicolon-separated URLs)
+        // Handle images: image_url may contain multiple comma-separated or semicolon-separated URLs
         if (row.image_url) {
-          imagesToInsert.push(row.image_url.trim())
+          const urlStr = row.image_url.trim()
+          // Split by semicolons first, then by comma+space+http pattern
+          const urls = urlStr.includes(';') 
+            ? urlStr.split(';').map((u: string) => u.trim()).filter(Boolean)
+            : urlStr.split(/,\s*(?=http)/).map((u: string) => u.trim()).filter(Boolean)
+          imagesToInsert.push(...urls)
         }
         if (row.images) {
           const imgs = typeof row.images === 'string'
-            ? row.images.split(';').map((u: string) => u.trim()).filter(Boolean)
+            ? row.images.split(/[;,]\s*/).map((u: string) => u.trim()).filter(Boolean)
             : row.images
           imagesToInsert = [...imagesToInsert, ...imgs]
         }

@@ -469,7 +469,13 @@ export default function AdminProductsPage() {
                     reader.onload = (ev) => {
                       const text = ev.target?.result as string
                       
-                      // Smart CSV parser that handles quoted fields
+                      // Auto-detect delimiter: check first line for semicolons vs commas
+                      const firstLine = text.split(/\r?\n/)[0] || ''
+                      const semicolonCount = (firstLine.match(/;/g) || []).length
+                      const commaCount = (firstLine.match(/,/g) || []).length
+                      const delimiter = semicolonCount > commaCount ? ';' : ','
+                      
+                      // Smart CSV parser that handles quoted fields with dynamic delimiter
                       const parseCSVLine = (line: string): string[] => {
                         const result: string[] = []
                         let current = ''
@@ -479,7 +485,7 @@ export default function AdminProductsPage() {
                           if (ch === '"') {
                             if (inQuotes && line[i + 1] === '"') { current += '"'; i++ }
                             else { inQuotes = !inQuotes }
-                          } else if (ch === ',' && !inQuotes) {
+                          } else if (ch === delimiter && !inQuotes) {
                             result.push(current.trim())
                             current = ''
                           } else {
@@ -491,16 +497,41 @@ export default function AdminProductsPage() {
                       }
                       
                       const lines = text.split(/\r?\n/).filter(l => l.trim())
-                      if (lines.length < 2) { alert('File trống hoặc chỉ có header'); return }
+                      if (lines.length < 2) { toast.error('File trống hoặc chỉ có header'); return }
                       const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase().replace(/^\uFEFF/, ''))
                       const rows = lines.slice(1).map(line => {
                         const values = parseCSVLine(line)
                         const obj: any = {}
                         headers.forEach((h, i) => { obj[h] = values[i] || '' })
+                        
+                        // Normalize column name variants
+                        if (obj.category_name && !obj.category) obj.category = obj.category_name
+                        
+                        // Handle PostgreSQL array format for tags: {tag1, tag2} → "tag1;tag2"
+                        if (obj.tags && obj.tags.startsWith('{') && obj.tags.endsWith('}')) {
+                          obj.tags = obj.tags.slice(1, -1) // remove { }
+                        }
+                        // Handle PostgreSQL array format for specs
+                        if (obj.specs && obj.specs.startsWith('{') && obj.specs.endsWith('}')) {
+                          const inner = obj.specs.slice(1, -1).trim()
+                          obj.specs = inner || null
+                        }
+                        
+                        // Handle image_url that may contain multiple comma-separated URLs
+                        if (obj.image_url && !obj.images) {
+                          // Split by comma+space pattern (URLs contain :// so we split by ", http")
+                          const urls = obj.image_url.split(/,\s*(?=http)/).map((u: string) => u.trim()).filter(Boolean)
+                          if (urls.length > 1) {
+                            obj.images = urls.join(';')
+                            obj.image_url = urls[0]
+                          }
+                        }
+                        
                         return obj
                       }).filter(r => r.name)
                       setImportData(rows)
                       setImportResult(null)
+                      if (rows.length > 0) toast.success(`Đã đọc ${rows.length} sản phẩm từ CSV`)
                     }
                     reader.readAsText(file, 'UTF-8')
                   }}
@@ -539,7 +570,7 @@ export default function AdminProductsPage() {
                             <td className="px-3 py-2 text-secondary-foreground">{row.brand}</td>
                             <td className="px-3 py-2 text-lime">{formatVND(Number(row.price) || 0)}</td>
                             <td className="px-3 py-2 text-secondary-foreground">{row.stock}</td>
-                            <td className="px-3 py-2 text-muted-foreground">{row.category}</td>
+                            <td className="px-3 py-2 text-muted-foreground">{row.category || row.category_name}</td>
                           </tr>
                         ))}
                         {importData.length > 20 && (
@@ -593,7 +624,7 @@ export default function AdminProductsPage() {
                       const result = await res.json()
                       setImportResult(result)
                       if (result.success > 0) fetchProducts()
-                    } catch { alert('Lỗi import') }
+                    } catch { toast.error('Lỗi import') }
                     setImporting(false)
                   }}
                   disabled={importing}
