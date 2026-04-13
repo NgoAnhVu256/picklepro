@@ -63,11 +63,11 @@ export class CheckoutService {
       orderId: order.id,
       totalAmount,
       bankInfo: {
-        bankName: 'Vietinbank - Chi nhánh Phú Yên - Hội sở',
-        accountNumber: '116609668888',
-        accountHolder: 'Cong ty TNHH Thuong mai va dich vu ky thuat Dieu Phuc',
+        bankName: 'MBBANK',
+        accountNumber: '2506200466666',
+        accountHolder: 'NGO TRI ANH VU',
         content: `PP${order.id.slice(0, 8).toUpperCase()}`,
-        qrUrl: `https://img.vietqr.io/image/vietinbank-116609668888-compact2.png?amount=${totalAmount}&addInfo=PP${order.id.slice(0, 8).toUpperCase()}&accountName=Cong%20ty%20TNHH%20Thuong%20mai%20va%20dich%20vu%20ky%20thuat%20Dieu%20Phuc`,
+        qrUrl: `https://img.vietqr.io/image/mb-2506200466666-compact2.png?amount=${totalAmount}&addInfo=PP${order.id.slice(0, 8).toUpperCase()}&accountName=NGO%20TRI%20ANH%20VU`,
       },
     }
   }

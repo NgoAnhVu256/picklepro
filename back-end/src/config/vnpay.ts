@@ -5,6 +5,7 @@
 // ============================================
 
 import crypto from 'crypto'
+import qs from 'qs'
 
 export interface VNPayConfig {
   vnp_TmnCode: string
@@ -20,6 +21,21 @@ export function getVNPayConfig(appUrl: string): VNPayConfig {
     vnp_Url: process.env.VNPAY_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
     vnp_ReturnUrl: `${appUrl}/checkout/vnpay-return`,
   }
+}
+
+function sortObject(obj: Record<string, string | number>) {
+  const sorted: Record<string, string> = {}
+  const str = []
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      str.push(encodeURIComponent(key))
+    }
+  }
+  str.sort()
+  for (const key of str) {
+    sorted[key] = encodeURIComponent(String(obj[key as keyof typeof obj])).replace(/%20/g, '+')
+  }
+  return sorted
 }
 
 /**
@@ -59,13 +75,11 @@ export function createVNPayUrl(params: {
   }
 
   // Sort params theo alphabet
-  const sortedParams = Object.keys(vnp_Params).sort().reduce((acc, key) => {
-    acc[key] = vnp_Params[key]
-    return acc
-  }, {} as Record<string, string>)
+  // Sort params
+  const sortedParams = sortObject(vnp_Params)
 
-  // Tạo query string
-  const signData = new URLSearchParams(sortedParams).toString()
+  // Tạo query string đúng chuẩn VNPay
+  const signData = qs.stringify(sortedParams, { encode: false })
 
   // Tạo HMAC SHA512
   const hmac = crypto.createHmac('sha512', config.vnp_HashSecret)
@@ -91,12 +105,8 @@ export function verifyVNPayReturn(query: Record<string, string>): {
   delete params.vnp_SecureHashType
 
   // Sort and sign
-  const sortedParams = Object.keys(params).sort().reduce((acc, key) => {
-    acc[key] = params[key]
-    return acc
-  }, {} as Record<string, string>)
-
-  const signData = new URLSearchParams(sortedParams).toString()
+  const sortedParams = sortObject(params)
+  const signData = qs.stringify(sortedParams, { encode: false })
   const hmac = crypto.createHmac('sha512', config.vnp_HashSecret)
   const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex')
 
