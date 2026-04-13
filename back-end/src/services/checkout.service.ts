@@ -63,11 +63,11 @@ export class CheckoutService {
       orderId: order.id,
       totalAmount,
       bankInfo: {
-        bankName: 'Vietcombank',
-        accountNumber: '1234567890',
-        accountHolder: 'CONG TY PICKLEPRO',
+        bankName: 'Vietinbank - Chi nhánh Phú Yên - Hội sở',
+        accountNumber: '116609668888',
+        accountHolder: 'Cong ty TNHH Thuong mai va dich vu ky thuat Dieu Phuc',
         content: `PP${order.id.slice(0, 8).toUpperCase()}`,
-        qrUrl: `https://img.vietqr.io/image/VCB-1234567890-compact2.png?amount=${totalAmount}&addInfo=PP${order.id.slice(0, 8).toUpperCase()}&accountName=CONG%20TY%20PICKLEPRO`,
+        qrUrl: `https://img.vietqr.io/image/vietinbank-116609668888-compact2.png?amount=${totalAmount}&addInfo=PP${order.id.slice(0, 8).toUpperCase()}&accountName=Cong%20ty%20TNHH%20Thuong%20mai%20va%20dich%20vu%20ky%20thuat%20Dieu%20Phuc`,
       },
     }
   }

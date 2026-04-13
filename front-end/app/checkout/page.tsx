@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/pickleball/header'
@@ -8,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { MapPin, Phone, User, CreditCard, Banknote, Loader2, Shield, Lock, ArrowLeft, AlertCircle, QrCode, Landmark, Copy, CheckCircle, CheckCircle2 } from 'lucide-react'
+import { MapPin, Phone, User, CreditCard, Banknote, Loader2, Shield, Lock, ArrowLeft, AlertCircle, QrCode, Landmark, Copy, CheckCircle, CheckCircle2, Clock, Download } from 'lucide-react'
 import Link from 'next/link'
 import { useCart } from '@/hooks/use-cart'
 import { validatePhone, formatPhoneInput, isPhoneValid } from '@/lib/validate-phone'
@@ -16,6 +18,20 @@ import { AddressPicker } from '@/components/pickleball/address-picker'
 
 function formatPrice(p: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p)
+}
+
+function TimerCountDown({ initialSeconds }: { initialSeconds: number }) {
+  const [timeLeft, setTimeLeft] = useState(initialSeconds)
+  
+  useEffect(() => {
+    if (timeLeft <= 0) return
+    const timer = setInterval(() => setTimeLeft(t => t - 1), 1000)
+    return () => clearInterval(timer)
+  }, [timeLeft])
+
+  const m = Math.floor(timeLeft / 60).toString().padStart(2, '0')
+  const s = (timeLeft % 60).toString().padStart(2, '0')
+  return <span>{m}:{s}</span>
 }
 
 export default function CheckoutPage() {
@@ -132,74 +148,98 @@ export default function CheckoutPage() {
   // Nếu có bankInfo → hiển thị QR chuyển khoản
   if (bankInfo) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-lg mx-auto">
-            <div className="rounded-3xl border border-lime/20 bg-gradient-to-b from-lime/5 to-transparent p-8 text-center space-y-6">
-              <div className="w-16 h-16 mx-auto rounded-full bg-lime/20 flex items-center justify-center">
-                <QrCode className="h-8 w-8 text-lime-dark" />
-              </div>
-              <h2 className="text-2xl font-extrabold">Chuyển khoản ngân hàng</h2>
-              <p className="text-muted-foreground text-sm">Quét QR hoặc chuyển khoản theo thông tin bên dưới</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        {/* Top Warning Banner */}
+        <div className="w-full bg-[#fdfaf0] text-[#d9534f] text-xs sm:text-sm font-bold text-center py-2.5 border-b border-[#f3e5c7] shadow-sm z-10 sticky top-0">
+          Quý Khách vui lòng không tắt trình duyệt cho đến khi nhận được kết quả giao dịch trên website. Xin cảm ơn!
+        </div>
 
-              {/* QR Code */}
-              <div className="bg-white rounded-2xl p-4 inline-block shadow-lg">
+        <Header />
+        
+        <div className="flex-1 w-full mx-auto px-4 py-8 max-w-lg mb-10">
+          
+          {/* Timer */}
+          <div className="text-center flex justify-center items-center gap-1.5 text-[#d9534f] font-bold mb-4">
+            <Clock className="w-[18px] h-[18px]" />
+            <span>Giao dịch hết hạn sau <TimerCountDown initialSeconds={267} /></span>
+          </div>
+
+          <div className="space-y-4">
+            
+            {/* QR Card */}
+            <div className="bg-white rounded-[10px] shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden text-center p-5">
+              <p className="text-[#005baa] font-bold text-sm leading-relaxed mb-3 mt-1 mx-auto max-w-[260px]">
+                VUI LÒNG QUÉT MÃ BÊN DƯỚI ĐỂ THANH TOÁN CHUYỂN KHOẢN
+              </p>
+
+              <div className="flex justify-center p-1 relative mx-auto w-[240px] sm:w-[280px]">
+                {/* VietQR compact2 image directly includes logos and QR */}
                 <img
                   src={bankInfo.qrUrl}
-                  alt="QR Chuyển khoản"
-                  className="w-64 h-64 mx-auto"
+                  alt="VietQR"
+                  className="w-full h-auto"
                 />
               </div>
 
-              {/* Bank Details */}
-              <div className="text-left space-y-3">
-                {[
-                  { label: 'Ngân hàng', value: bankInfo.bankName, field: 'bank' },
-                  { label: 'Số tài khoản', value: bankInfo.accountNumber, field: 'account' },
-                  { label: 'Chủ tài khoản', value: bankInfo.accountHolder, field: 'holder' },
-                  { label: 'Nội dung CK', value: bankInfo.content, field: 'content' },
-                  { label: 'Số tiền', value: formatPrice(grandTotal), field: 'amount' },
-                ].map(({ label, value, field }) => (
-                  <div key={field} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-lime/10">
-                    <div>
-                      <p className="text-xs text-muted-foreground">{label}</p>
-                      <p className="text-sm font-bold text-foreground">{value}</p>
-                    </div>
-                    <button
-                      onClick={() => copyText(String(value), field)}
-                      className="p-2 rounded-lg hover:bg-lime/10 transition-colors"
-                    >
-                      {copied === field ? (
-                        <CheckCircle className="h-4 w-4 text-lime-dark" />
-                      ) : (
-                        <Copy className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs text-left">
-                ⚠️ Vui lòng nhập <b>đúng nội dung chuyển khoản</b> để đơn hàng được xác nhận tự động.
-                Đơn hàng sẽ được xử lý trong vòng 5-10 phút sau khi nhận được thanh toán.
-              </div>
-
-              <div className="flex gap-3">
-                <Link href="/account/orders" className="flex-1">
-                  <Button className="w-full rounded-xl bg-lime-dark hover:bg-lime-dark/80 text-white font-bold">
-                    Xem đơn hàng
-                  </Button>
-                </Link>
-                <Link href="/products" className="flex-1">
-                  <Button variant="outline" className="w-full rounded-xl border-lime/30">
-                    Tiếp tục mua
-                  </Button>
-                </Link>
+              <div className="mt-4 pt-4 border-t border-gray-100 flex justify-center">
+                <a href={bankInfo.qrUrl} download="Thanh_Toan_PicklePro.png" className="flex items-center justify-center gap-2 text-sm text-gray-700 hover:text-gray-900 py-1.5 px-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer w-fit">
+                  <Download className="w-4 h-4 text-gray-500" /> Tải QR Code
+                </a>
               </div>
             </div>
+
+             {/* Bank Detail Box */}
+             <div className="bg-white rounded-[10px] shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-gray-100 p-5 text-[13px] sm:text-[14px]">
+                <div className="text-emerald-700 font-bold mb-1">Thông tin chuyển khoản:</div>
+                <div className="text-emerald-700 mb-1">{bankInfo.accountHolder}</div>
+                <div className="text-emerald-700 mb-3">{bankInfo.bankName}</div>
+
+                <div className="flex items-center justify-between py-1.5 border-t border-dashed border-gray-200">
+                  <span className="text-emerald-700">Số tài khoản: <b>{bankInfo.accountNumber}</b></span>
+                  <button onClick={() => copyText(String(bankInfo.accountNumber), 'account')} className="flex items-center gap-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-800 border border-yellow-200 text-xs px-2 py-1 rounded transition-colors whitespace-nowrap">
+                    {copied === 'account' ? <CheckCircle className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied === 'account' ? 'Đã chép' : 'Sao chép STK'}
+                  </button>
+                </div>
+                
+                <div className="flex items-start justify-between py-1.5 pt-2 border-t border-dashed border-gray-200 mt-1 gap-2">
+                  <span className="text-emerald-700 mt-1 leading-snug">
+                     Nội dung chuyển khoản: <b className="text-emerald-800">{bankInfo.content}</b>
+                  </span>
+                  <button onClick={() => copyText(String(bankInfo.content), 'content')} className="flex items-center gap-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-800 border border-yellow-200 text-xs px-2 py-1 rounded transition-colors whitespace-nowrap shrink-0 mt-0.5">
+                    {copied === 'content' ? <CheckCircle className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied === 'content' ? 'Đã chép' : 'Sao chép'}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between py-1.5 pt-2 border-t border-dashed border-gray-200 mt-1">
+                  <span className="text-emerald-700 mt-1">Số tiền: <b className="text-[#d9534f] text-[15px]">{formatPrice(grandTotal)}</b></span>
+                </div>
+             </div>
+
+            {/* Buttons Group */}
+            <div className="space-y-2 mt-6">
+                <Link href="/account/orders" className="block w-full">
+                  <Button className="w-full h-12 bg-[#dc3545] hover:bg-[#c82333] text-white font-bold rounded shadow-sm text-[15px]">
+                    TÔI ĐÃ CHUYỂN KHOẢN
+                  </Button>
+                </Link>
+                
+                <Link href="/products" className="block w-full">
+                  <Button variant="outline" className="w-full h-11 border-gray-200 text-gray-600 bg-[#f8f9fa] hover:bg-gray-100 rounded text-sm shadow-sm font-medium">
+                    Hủy giao dịch
+                  </Button>
+                </Link>
+            </div>
+
+            {/* Hotline */}
+            <div className="text-center mt-5">
+              <span className="text-[#d9534f] text-[13px] font-bold">Hotline hỗ trợ: <a href="tel:18002097" className="underline">1800.2097</a></span>
+            </div>
+
           </div>
         </div>
+        
         <Footer />
       </div>
     )
