@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ChatWidgetWrapper } from '@/components/pickleball/chat-widget-wrapper'
+import { ZaloWidgetWrapper } from '@/components/pickleball/zalo-widget-wrapper'
 import { Providers } from '@/components/providers'
 import './globals.css'
 
@@ -96,6 +97,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <ChatWidgetWrapper />
+          <ZaloWidgetWrapper />
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </Providers>
       </body>

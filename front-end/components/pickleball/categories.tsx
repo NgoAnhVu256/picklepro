@@ -8,49 +8,49 @@ const categories = [
     name: "Vợt Pickleball",
     slug: "vot-pickleball",
     image: "/categories/vot-pickleball.png",
-    gradient: "from-lime/30 to-lime-light/50",
-    border: "border-lime/20",
-    labelColor: "text-lime-dark",
+    gradient: "from-[#c9deff] to-[#e7ff96]",
+    border: "border-white/50",
+    labelColor: "text-black",
   },
   {
     name: "Bóng Pickleball",
     slug: "bong-pickleball",
     image: "/categories/bong-pickleball.png",
-    gradient: "from-yellow-100 to-orange-100",
-    border: "border-yellow-200",
-    labelColor: "text-orange-700",
+    gradient: "from-[#c9deff] to-[#e7ff96]",
+    border: "border-white/50",
+    labelColor: "text-black",
   },
   {
     name: "Túi & Balo",
     slug: "tui-balo",
     image: "/categories/tui-balo.png",
-    gradient: "from-blue-100 to-cyan-100",
-    border: "border-blue-200",
-    labelColor: "text-blue-700",
+    gradient: "from-[#c9deff] to-[#e7ff96]",
+    border: "border-white/50",
+    labelColor: "text-black",
   },
   {
     name: "Phụ kiện",
     slug: "phu-kien-grip",
     image: "/categories/phu-kien.png",
-    gradient: "from-purple-100 to-pink-100",
-    border: "border-purple-200",
-    labelColor: "text-purple-700",
+    gradient: "from-[#c9deff] to-[#e7ff96]",
+    border: "border-white/50",
+    labelColor: "text-black",
   },
   {
     name: "Giày thể thao",
     slug: "giay-the-thao",
     image: "/categories/giay-the-thao.png",
-    gradient: "from-red-100 to-orange-100",
-    border: "border-red-200",
-    labelColor: "text-red-700",
+    gradient: "from-[#c9deff] to-[#e7ff96]",
+    border: "border-white/50",
+    labelColor: "text-black",
   },
   {
     name: "Quần áo",
     slug: "quan-ao",
     image: "/categories/quan-ao.png",
-    gradient: "from-green-100 to-teal-100",
-    border: "border-green-200",
-    labelColor: "text-green-700",
+    gradient: "from-[#c9deff] to-[#e7ff96]",
+    border: "border-white/50",
+    labelColor: "text-black",
   },
 ]
 
@@ -76,7 +76,7 @@ export function Categories() {
             <Link
               key={category.name}
               href={`/products?category=${category.slug}`}
-              className={`group flex flex-col items-center rounded-2xl sm:rounded-3xl border ${category.border} bg-gradient-to-br ${category.gradient} overflow-hidden hover:shadow-xl hover:shadow-lime/15 transition-all duration-300 hover:-translate-y-1.5`}
+              className={`group flex flex-col items-center rounded-lg border ${category.border} bg-gradient-to-br ${category.gradient} overflow-hidden hover:shadow-xl hover:shadow-lime/15 transition-all duration-300 hover:-translate-y-1.5`}
             >
               {/* Image area */}
               <div className="relative w-full aspect-square overflow-hidden">

@@ -118,7 +118,7 @@ export function Hero() {
                 {/* Button */}
                 <div>
                   <Link href={slide.href}>
-                    <Button size="lg" className="text-white font-bold rounded-full px-8 py-5 text-base shadow-xl transition-all hover:scale-105"
+                    <Button size="lg" className="text-white font-bold rounded-lg px-8 py-5 text-base shadow-xl transition-all hover:scale-105"
                       style={{ background: slide.buttonGradient }}>
                       {slide.buttonText} <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>

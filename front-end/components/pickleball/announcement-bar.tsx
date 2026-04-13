@@ -21,8 +21,8 @@ export function AnnouncementBar() {
 
   return (
     <div
-      className="relative overflow-hidden py-2 px-4"
-      style={{ background: "linear-gradient(90deg, #EDFEB9, #B2FF73, #EDFEB9)" }}
+      className="relative overflow-hidden py-2 px-4 shadow-sm"
+      style={{ background: "linear-gradient(90deg, #c9deff, #e7ff96, #c9deff)" }}
     >
       <div className="flex items-center">
         {/* Marquee - scrolling horizontally */}
