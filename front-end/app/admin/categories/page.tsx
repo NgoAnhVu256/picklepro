@@ -8,7 +8,7 @@ export default function AdminCategoriesPage() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<any>(null)
-  const [form, setForm] = useState({ name: '', description: '', image_url: '' })
+  const [form, setForm] = useState({ name: '', slug: '', description: '', sort_order: '0', image_url: '' })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<any>(null)
@@ -26,13 +26,13 @@ export default function AdminCategoriesPage() {
 
   const openAdd = () => {
     setEditing(null)
-    setForm({ name: '', description: '', image_url: '' })
+    setForm({ name: '', slug: '', description: '', sort_order: String(categories.length + 1), image_url: '' })
     setShowModal(true)
   }
 
   const openEdit = (c: any) => {
     setEditing(c)
-    setForm({ name: c.name, description: c.description ?? '', image_url: c.image_url ?? '' })
+    setForm({ name: c.name, slug: c.slug ?? '', description: c.description ?? '', sort_order: String(c.sort_order ?? 0), image_url: c.image_url ?? '' })
     setShowModal(true)
   }
 
@@ -54,7 +54,8 @@ export default function AdminCategoriesPage() {
 
   const handleSave = async () => {
     setSaving(true)
-    const payload: any = { name: form.name, description: form.description }
+    const payload: any = { name: form.name, description: form.description, sort_order: Number(form.sort_order) }
+    if (form.slug) payload.slug = form.slug
     if (form.image_url) payload.image_url = form.image_url
     const url = editing ? `/api/admin/categories/${editing.id}` : '/api/admin/categories'
     const method = editing ? 'PUT' : 'POST'
@@ -89,8 +90,8 @@ export default function AdminCategoriesPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-800">
-              {['Hình ảnh', 'Tên danh mục', 'Slug', 'Mã danh mục', 'Số SP', ''].map(h => (
-                <th key={h} className="text-left text-gray-500 font-medium px-5 py-3">{h}</th>
+              {['Mã danh mục', 'Hình ảnh', 'Tên danh mục', 'Slug', 'Thứ tự', 'Số SP', ''].map(h => (
+                <th key={h} className="text-left text-gray-500 font-medium px-5 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
@@ -98,18 +99,21 @@ export default function AdminCategoriesPage() {
             {loading ? (
               [...Array(4)].map((_, i) => (
                 <tr key={i} className="border-b border-gray-800/50">
-                  {[...Array(6)].map((_, j) => (
+                  {[...Array(7)].map((_, j) => (
                     <td key={j} className="px-5 py-4"><div className="h-4 bg-gray-800 rounded animate-pulse" /></td>
                   ))}
                 </tr>
               ))
             ) : categories.length === 0 ? (
-              <tr><td colSpan={6} className="text-center text-gray-500 py-12">
+              <tr><td colSpan={7} className="text-center text-gray-500 py-12">
                 <FolderOpen className="h-10 w-10 mx-auto mb-2 text-gray-700" />
                 <p>Chưa có danh mục nào</p>
               </td></tr>
             ) : categories.map(c => (
               <tr key={c.id} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
+                <td className="px-5 py-3 text-gray-300 font-mono text-xs w-48 break-all">
+                  {c.id}
+                </td>
                 <td className="px-5 py-3">
                   <div className="w-12 h-12 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center overflow-hidden shrink-0">
                     {c.image_url ? (
@@ -124,9 +128,7 @@ export default function AdminCategoriesPage() {
                   {c.description && <p className="text-gray-500 text-xs">{c.description}</p>}
                 </td>
                 <td className="px-5 py-3 text-gray-400 font-mono text-xs">{c.slug}</td>
-                <td className="px-5 py-3 text-gray-400 font-mono text-xs">
-                  {c.id.split('-')[0]}...
-                </td>
+                <td className="px-5 py-3 text-gray-300">{c.sort_order}</td>
                 <td className="px-5 py-3 text-gray-300">{c.products?.[0]?.count ?? 0}</td>
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2">
@@ -159,8 +161,18 @@ export default function AdminCategoriesPage() {
                   className="w-full px-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-lime text-sm" />
               </div>
               <div>
+                <label className="text-gray-400 text-xs font-medium mb-1.5 block">Đường dẫn tĩnh (Slug) - Tự động nếu để trống</label>
+                <input value={form.slug} onChange={e => setForm(f => ({...f, slug: e.target.value}))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-lime text-sm" />
+              </div>
+              <div>
                 <label className="text-gray-400 text-xs font-medium mb-1.5 block">Mô tả</label>
                 <input value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-lime text-sm" />
+              </div>
+              <div>
+                <label className="text-gray-400 text-xs font-medium mb-1.5 block">Thứ tự hiển thị</label>
+                <input type="number" value={form.sort_order} onChange={e => setForm(f => ({...f, sort_order: e.target.value}))}
                   className="w-full px-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-lime text-sm" />
               </div>
               {/* Image Upload */}
