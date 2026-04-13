@@ -67,22 +67,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-lime to-lime-dark flex items-center justify-center mx-auto mb-4 animate-pulse">
             <span className="text-3xl">🏓</span>
           </div>
-          <p className="text-gray-400 text-sm">Đang xác thực quyền admin...</p>
+          <p className="text-muted-foreground text-sm">Đang xác thực quyền admin...</p>
         </div>
       </div>
     )
   }
 
   const Sidebar = ({ mobile = false }) => (
-    <aside className={`${mobile ? 'w-full' : 'w-64'} h-full flex flex-col bg-gray-900 border-r border-gray-800`}>
+    <aside className={`${mobile ? 'w-full' : 'w-64'} h-full flex flex-col bg-card text-card-foreground shadow-sm border-r border-border`}>
       {/* Logo */}
-      <div className="p-5 border-b border-gray-800">
+      <div className="p-5 border-b border-border">
         <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-lime to-lime-dark flex items-center justify-center">
             <span className="text-lg">🏓</span>
           </div>
           <div>
-            <p className="font-bold text-white text-sm">PicklePro</p>
+            <p className="font-bold text-foreground text-sm">PicklePro</p>
             <p className="text-xs text-lime font-medium">Admin Dashboard</p>
           </div>
         </Link>
@@ -100,10 +100,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
                 active
                   ? 'bg-lime/20 text-lime border border-lime/30'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
             >
-              <item.icon className={`h-5 w-5 shrink-0 ${active ? 'text-lime' : 'text-gray-500 group-hover:text-gray-300'}`} />
+              <item.icon className={`h-5 w-5 shrink-0 ${active ? 'text-lime' : 'text-muted-foreground group-hover:text-secondary-foreground'}`} />
               <span className="flex-1">{item.label}</span>
               {active && <ChevronRight className="h-3.5 w-3.5 text-lime" />}
             </Link>
@@ -112,12 +112,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-gray-800 space-y-1">
+      <div className="p-3 border-t border-border space-y-1">
         <Link
           href="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
         >
-          <Store className="h-5 w-5 text-gray-500" />
+          <Store className="h-5 w-5 text-muted-foreground" />
           <span>Xem cửa hàng</span>
         </Link>
         <button
@@ -147,7 +147,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="absolute top-4 right-4 z-20 text-white"
+            className="absolute top-4 right-4 z-20 text-foreground"
           >
             <X className="h-6 w-6" />
           </button>
@@ -157,10 +157,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content */}
       <div className="lg:ml-64 flex-1 flex flex-col min-h-screen">
         {/* Top Bar */}
-        <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center gap-3 transition-colors">
+        <header className="sticky top-0 z-40 bg-white/80 dark:bg-card text-card-foreground shadow-sm/80 backdrop-blur-xl border-b border-gray-200 dark:border-border px-4 py-3 flex items-center gap-3 transition-colors">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
+            className="lg:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -169,15 +169,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {mounted && (
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-lime-dark hover:bg-gray-200 dark:hover:bg-gray-800 transition-all"
+              className="p-2 rounded-lg text-muted-foreground dark:text-muted-foreground hover:text-lime-dark hover:bg-gray-200 dark:hover:bg-muted transition-all"
               title="Chuyển chế độ giao diện"
             >
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
           )}
 
-          <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-400 ml-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime to-lime-dark flex items-center justify-center text-white text-xs font-bold">
+          <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-muted-foreground ml-2">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime to-lime-dark flex items-center justify-center text-foreground text-xs font-bold">
               {user?.email?.charAt(0)?.toUpperCase() ?? 'A'}
             </div>
             <span className="hidden sm:block max-w-[120px] truncate">{user?.email}</span>

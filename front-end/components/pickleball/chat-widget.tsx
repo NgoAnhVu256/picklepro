@@ -44,7 +44,7 @@ export function ChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: 'Xin chào! 👋 Tôi là trợ lý AI của PicklePro. Tôi có thể giúp bạn:\n\n• Tư vấn chọn vợt Pickleball\n• Gợi ý phụ kiện phù hợp\n• So sánh sản phẩm\n\nBạn cần tôi hỗ trợ gì?',
+      content: 'Xin chào! \nBạn cần tôi hỗ trợ gì?',
     },
   ])
   const [input, setInput] = useState('')

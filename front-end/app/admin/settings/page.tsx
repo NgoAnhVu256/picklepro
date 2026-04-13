@@ -34,10 +34,10 @@ const DEFAULT_SETTINGS: Settings = {
 }
 
 const Section = ({ title, icon: Icon, iconColor, children }: { title: string; icon: any; iconColor: string; children: React.ReactNode }) => (
-  <div className="rounded-2xl bg-gray-900 border border-gray-800 overflow-hidden">
-    <div className="px-6 py-4 border-b border-gray-800 flex items-center gap-2">
+  <div className="rounded-2xl bg-card text-card-foreground shadow-sm border border-border overflow-hidden">
+    <div className="px-6 py-4 border-b border-border flex items-center gap-2">
       <Icon className={`h-5 w-5 ${iconColor}`} />
-      <h2 className="text-white font-bold">{title}</h2>
+      <h2 className="text-foreground font-bold">{title}</h2>
     </div>
     <div className="p-6 space-y-4">{children}</div>
   </div>
@@ -45,23 +45,23 @@ const Section = ({ title, icon: Icon, iconColor, children }: { title: string; ic
 
 const Field = ({ label, value, onChange, placeholder, type = 'text', disabled = false, icon: Icon }: any) => (
   <div>
-    <label className="text-gray-400 text-xs font-medium mb-1.5 block">{label}</label>
+    <label className="text-muted-foreground text-xs font-medium mb-1.5 block">{label}</label>
     <div className="relative">
-      {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />}
+      {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />}
       <input
         type={type} value={value} onChange={e => onChange(e.target.value)}
         placeholder={placeholder} disabled={disabled}
-        className={`w-full ${Icon ? 'pl-10' : 'px-3'} pr-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-lime text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
+        className={`w-full ${Icon ? 'pl-10' : 'px-3'} pr-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
       />
     </div>
   </div>
 )
 
 const Toggle = ({ label, description, checked, onChange }: { label: string; description?: string; checked: boolean; onChange: (v: boolean) => void }) => (
-  <label className="flex items-center gap-4 cursor-pointer p-3 rounded-xl hover:bg-gray-800/50 transition-all -mx-3">
+  <label className="flex items-center gap-4 cursor-pointer p-3 rounded-xl hover:bg-muted transition-all -mx-3">
     <div className="flex-1">
-      <p className="text-white text-sm font-medium">{label}</p>
-      {description && <p className="text-gray-500 text-xs mt-0.5">{description}</p>}
+      <p className="text-foreground text-sm font-medium">{label}</p>
+      {description && <p className="text-muted-foreground text-xs mt-0.5">{description}</p>}
     </div>
     <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-lime' : 'bg-gray-700'}`}>
       <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -114,8 +114,8 @@ export default function AdminSettingsPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 w-48 bg-gray-800 rounded animate-pulse" />
-        {[...Array(3)].map((_, i) => <div key={i} className="h-48 bg-gray-800/50 rounded-2xl animate-pulse" />)}
+        <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+        {[...Array(3)].map((_, i) => <div key={i} className="h-48 bg-muted rounded-2xl animate-pulse" />)}
       </div>
     )
   }
@@ -126,11 +126,11 @@ export default function AdminSettingsPage() {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Cài đặt hệ thống</h1>
-          <p className="text-gray-400 text-sm mt-1">Cấu hình cửa hàng và thanh toán</p>
+          <h1 className="text-2xl font-bold text-foreground">Cài đặt hệ thống</h1>
+          <p className="text-muted-foreground text-sm mt-1">Cấu hình cửa hàng và thanh toán</p>
         </div>
         <button onClick={handleSave} disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-lime text-lime-dark font-bold hover:bg-lime-dark hover:text-white transition-all text-sm disabled:opacity-50 shadow-lg shadow-lime/20">
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-lime text-lime-dark font-bold hover:bg-lime-dark hover:text-foreground transition-all text-sm disabled:opacity-50 shadow-lg shadow-lime/20">
           <Save className="h-4 w-4" /> {saving ? 'Đang lưu...' : 'Lưu cài đặt'}
         </button>
       </div>
@@ -161,7 +161,7 @@ export default function AdminSettingsPage() {
           <Field label="Phí vận chuyển (VND)" value={settings.shipping_fee} onChange={(v: string) => update('shipping_fee', v)} placeholder="30000" type="number" />
           <Field label="Miễn phí ship từ (VND)" value={settings.free_shipping_threshold} onChange={(v: string) => update('free_shipping_threshold', v)} placeholder="500000" type="number" />
         </div>
-        <p className="text-gray-500 text-xs">Đơn hàng từ {Number(settings.free_shipping_threshold).toLocaleString('vi-VN')}đ sẽ được miễn phí vận chuyển.</p>
+        <p className="text-muted-foreground text-xs">Đơn hàng từ {Number(settings.free_shipping_threshold).toLocaleString('vi-VN')}đ sẽ được miễn phí vận chuyển.</p>
       </Section>
 
       {/* Bank Transfer */}

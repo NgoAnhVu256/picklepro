@@ -93,7 +93,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className="font-sans antialiased" style={{ fontFamily: "'Product Sans', 'Google Sans', Inter, system-ui, sans-serif" }}>
+      <body className="font-sans antialiased" style={{ fontFamily: "'Google Sans', Inter, system-ui, sans-serif" }}>
         <Providers>
           {children}
           <ChatWidgetWrapper />

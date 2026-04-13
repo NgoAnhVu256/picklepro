@@ -56,8 +56,8 @@ export default function AdminOrdersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Đơn hàng</h1>
-          <p className="text-gray-400 text-sm mt-1">{total} đơn hàng</p>
+          <h1 className="text-2xl font-bold text-foreground">Đơn hàng</h1>
+          <p className="text-muted-foreground text-sm mt-1">{total} đơn hàng</p>
         </div>
         {/* Filter by status */}
         <div className="flex flex-wrap gap-2">
@@ -70,7 +70,7 @@ export default function AdminOrdersPage() {
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                   status === s
                     ? 'bg-lime/20 text-lime border-lime/40'
-                    : 'text-gray-400 border-gray-700 hover:border-gray-600 hover:text-gray-300'
+                    : 'text-muted-foreground border-border hover:border-gray-600 hover:text-secondary-foreground'
                 }`}
               >
                 {s ? cfg?.label : 'Tất cả'}
@@ -80,44 +80,44 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-gray-900 border border-gray-800 overflow-hidden">
+      <div className="rounded-2xl bg-card text-card-foreground shadow-sm border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800">
+              <tr className="border-b border-border">
                 {['Mã đơn', 'Khách hàng', 'SĐT', 'Tổng tiền', 'Ngày tạo', 'Trạng thái', 'Đổi trạng thái'].map(h => (
-                  <th key={h} className="text-left text-gray-500 font-medium px-5 py-3 whitespace-nowrap">{h}</th>
+                  <th key={h} className="text-left text-muted-foreground font-medium px-5 py-3 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 [...Array(5)].map((_, i) => (
-                  <tr key={i} className="border-b border-gray-800/50">
+                  <tr key={i} className="border-b border-border">
                     {[...Array(7)].map((_, j) => (
-                      <td key={j} className="px-5 py-4"><div className="h-4 bg-gray-800 rounded animate-pulse" /></td>
+                      <td key={j} className="px-5 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td>
                     ))}
                   </tr>
                 ))
               ) : orders.length === 0 ? (
-                <tr><td colSpan={7} className="text-center text-gray-500 py-12">
+                <tr><td colSpan={7} className="text-center text-muted-foreground py-12">
                   <ShoppingBag className="h-10 w-10 mx-auto mb-2 text-gray-700" />
                   <p>Không có đơn hàng nào</p>
                 </td></tr>
               ) : orders.map(order => {
                 const s = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending
                 return (
-                  <tr key={order.id} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
+                  <tr key={order.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                     <td className="px-5 py-3">
                       <Link href={`/admin/orders/${order.id}`}
                         className="text-lime hover:underline font-mono text-xs">
                         #{order.id.slice(0, 8)}
                       </Link>
                     </td>
-                    <td className="px-5 py-3 text-white">{order.shipping_name}</td>
-                    <td className="px-5 py-3 text-gray-400">{order.shipping_phone}</td>
+                    <td className="px-5 py-3 text-foreground">{order.shipping_name}</td>
+                    <td className="px-5 py-3 text-muted-foreground">{order.shipping_phone}</td>
                     <td className="px-5 py-3 text-lime font-semibold">{formatVND(order.total_amount)}</td>
-                    <td className="px-5 py-3 text-gray-400 whitespace-nowrap">
+                    <td className="px-5 py-3 text-muted-foreground whitespace-nowrap">
                       {new Date(order.created_at).toLocaleDateString('vi-VN')}
                     </td>
                     <td className="px-5 py-3">
@@ -132,13 +132,13 @@ export default function AdminOrdersPage() {
                           value={order.status}
                           disabled={updating === order.id}
                           onChange={e => updateStatus(order.id, e.target.value)}
-                          className="appearance-none pl-2 pr-6 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 text-xs focus:outline-none focus:border-lime disabled:opacity-50 cursor-pointer"
+                          className="appearance-none pl-2 pr-6 py-1.5 rounded-lg bg-muted border border-border text-secondary-foreground text-xs focus:outline-none focus:border-lime disabled:opacity-50 cursor-pointer"
                         >
                           {Object.entries(STATUS_CONFIG).map(([val, cfg]) => (
                             <option key={val} value={val}>{cfg.label}</option>
                           ))}
                         </select>
-                        <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-500 pointer-events-none" />
+                        <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground pointer-events-none" />
                       </div>
                     </td>
                   </tr>
@@ -149,13 +149,13 @@ export default function AdminOrdersPage() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-gray-800">
-            <p className="text-gray-500 text-sm">{total} đơn · Trang {page}/{totalPages}</p>
+          <div className="flex items-center justify-between px-5 py-3 border-t border-border">
+            <p className="text-muted-foreground text-sm">{total} đơn · Trang {page}/{totalPages}</p>
             <div className="flex gap-2">
               <button disabled={page === 1} onClick={() => setPage(p => p - 1)}
-                className="px-3 py-1 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 disabled:opacity-30 transition-all">← Trước</button>
+                className="px-3 py-1 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 transition-all">← Trước</button>
               <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)}
-                className="px-3 py-1 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-800 disabled:opacity-30 transition-all">Sau →</button>
+                className="px-3 py-1 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-30 transition-all">Sau →</button>
             </div>
           </div>
         )}
