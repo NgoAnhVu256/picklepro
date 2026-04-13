@@ -10,7 +10,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   if (!isAdmin) {
     return (
-      <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark" disableTransitionOnChange>
+      <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light" disableTransitionOnChange>
         {children}
       </ThemeProvider>
     )

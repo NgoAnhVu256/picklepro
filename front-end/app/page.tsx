@@ -9,7 +9,7 @@ import { Footer } from "@/components/pickleball/footer"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] text-gray-900">
       <AnnouncementBar />
       <Header />
       <main>

@@ -7,7 +7,7 @@ export function ZaloWidget() {
   return (
     <div className="fixed bottom-24 right-5 z-50 animate-bounce">
       <Link
-        href="https://zalo.me/0123456789" // Replace with actual Zalo link
+        href="https://zalo.me/0373164472" // Replace with actual Zalo link
         target="_blank"
         rel="noopener noreferrer"
         className="block relative w-12 h-12 rounded-full overflow-hidden shadow-lg shadow-blue-500/30 hover:scale-110 transition-transform"

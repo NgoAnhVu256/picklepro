@@ -19,13 +19,13 @@ export function PromoBanner() {
             </div>
             
             <div className="max-w-2xl mx-auto">
-              <h2 className="text-2xl md:text-4xl font-black text-white mb-4 tracking-tight">
+              <h2 className="text-2xl md:text-4xl font-black text-gray-900 mb-4 tracking-tight">
                 PICKLEPRO CHÚC BẠN MỖI NGÀY
                 <br />
                 <span className="text-lime">CHƠI VUI VẺ VÀ CHIẾN THẮNG</span>
               </h2>
               
-              <p className="text-white/90 mb-6 text-sm md:text-base">
+              <p className="text-gray-800 mb-6 text-sm md:text-base">
                 Mong bạn sẽ tìm được chiếc vợt ưng ý, chốt deal nhẹ tênh,
                 <br className="hidden md:block" />
                 và được &ldquo;ace&rdquo; cùng đồng đội ngay từ game đầu tiên

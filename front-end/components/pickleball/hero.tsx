@@ -78,9 +78,9 @@ export function Hero() {
               style={{ background: 'linear-gradient(135deg, #FFECD2, #FCB69F)' }}>
               <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
                 <span className="text-5xl mb-3">🏓</span>
-                <h3 className="text-base font-bold text-gray-800 mb-1">PicklePro Shop</h3>
-                <p className="text-xs text-gray-600 mb-3">Vợt & phụ kiện cao cấp</p>
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-white shadow-lg"
+                <h3 className="text-base font-bold text-gray-900 mb-1">PicklePro Shop</h3>
+                <p className="text-xs text-gray-800 mb-3">Vợt & phụ kiện cao cấp</p>
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-gray-900 shadow-lg"
                   style={{ background: 'linear-gradient(135deg, #FF6B6B, #FF8E53)' }}>
                   Xem chi tiết
                 </span>
@@ -106,19 +106,19 @@ export function Hero() {
 
                 {/* Title */}
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-3">
-                  <span className="text-foreground">{slide.title}</span>
+                  <span className="text-gray-900">{slide.title}</span>
                   <br />
                   <span className="bg-clip-text text-transparent" style={{ backgroundImage: slide.buttonGradient }}>
                     {slide.titleHighlight}
                   </span>
                 </h1>
 
-                <p className="text-base text-muted-foreground max-w-lg mb-6">{slide.description}</p>
+                <p className="text-base text-gray-700 max-w-lg mb-6">{slide.description}</p>
 
                 {/* Button */}
                 <div>
                   <Link href={slide.href}>
-                    <Button size="lg" className="text-white font-bold rounded-lg px-8 py-5 text-base shadow-xl transition-all hover:scale-105"
+                    <Button size="lg" className="text-gray-900 font-bold rounded-lg px-8 py-5 text-base shadow-xl transition-all hover:scale-105"
                       style={{ background: slide.buttonGradient }}>
                       {slide.buttonText} <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
@@ -127,10 +127,10 @@ export function Hero() {
 
                 {/* Trust Badges */}
                 <div className="flex flex-wrap items-center gap-5 pt-5">
-                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5 text-xs text-gray-700">
                     <Shield className="h-4 w-4 text-lime-dark" /> Bảo hành 12 tháng
                   </span>
-                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5 text-xs text-gray-700">
                     <Star className="h-4 w-4 text-lime-dark fill-lime" /> 4.9/5 từ 2000+ đánh giá
                   </span>
                 </div>
@@ -160,16 +160,16 @@ export function Hero() {
               <div className="h-full rounded-2xl overflow-hidden p-5 flex flex-col justify-center items-center text-center"
                 style={{ background: 'linear-gradient(135deg, #A18CD1, #FBC2EB)' }}>
                 <span className="text-4xl mb-2">🏆</span>
-                <h4 className="font-bold text-white text-sm mb-0.5">Member VIP</h4>
-                <p className="text-white/80 text-xs">Ưu đãi độc quyền</p>
+                <h4 className="font-bold text-gray-900 text-sm mb-0.5">Member VIP</h4>
+                <p className="text-gray-800 text-xs">Ưu đãi độc quyền</p>
               </div>
             </Link>
             <Link href="/products" className="flex-1 relative group cursor-pointer">
               <div className="h-full rounded-2xl overflow-hidden p-5 flex flex-col justify-center items-center text-center"
                 style={{ background: 'linear-gradient(135deg, #FF9A9E, #FECFEF)' }}>
                 <span className="text-4xl mb-2">🎁</span>
-                <h4 className="font-bold text-white text-sm mb-0.5">Flash Sale</h4>
-                <p className="text-white/80 text-xs">Giảm 50% hôm nay</p>
+                <h4 className="font-bold text-gray-900 text-sm mb-0.5">Flash Sale</h4>
+                <p className="text-gray-800 text-xs">Giảm 50% hôm nay</p>
               </div>
             </Link>
           </div>
