@@ -87,14 +87,14 @@ export function Header() {
             <Link href="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
               <Image
                 src="/logo.png"
-                alt="New Sport Logo"
+                alt="PicklePro Logo"
                 width={44}
                 height={44}
                 className="rounded-xl"
                 priority
               />
               <span className="text-2xl font-bold bg-gradient-to-r from-lime-dark to-lime bg-clip-text text-transparent">
-                New Sport
+                PicklePro
               </span>
             </Link>
 

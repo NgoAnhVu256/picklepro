@@ -9,7 +9,7 @@ const footerLinks = [
   { label: "CHÍNH SÁCH BẢO HÀNH", href: "/warranty" },
   { label: "CHÍNH SÁCH BẢO MẬT", href: "/privacy" },
   { label: "ĐIỀU KHOẢN SỬ DỤNG", href: "/terms" },
-  { label: "NEW SPORT SHOP", href: "/products" },
+  { label: "PicklePro SHOP", href: "/products" },
 ]
 
 const socialLinks = [
@@ -26,9 +26,9 @@ export function Footer() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Image src="/logo.png" alt="New Sport Logo" width={40} height={40} className="rounded-xl" />
+            <Image src="/logo.png" alt="PicklePro Logo" width={40} height={40} className="rounded-xl" />
             <span className="text-2xl font-bold bg-gradient-to-r from-lime-dark to-lime bg-clip-text text-transparent">
-              New Sport
+              PicklePro
             </span>
           </Link>
 
@@ -65,8 +65,8 @@ export function Footer() {
         {/* Copyright */}
         <div className="mt-8 pt-6 border-t border-lime/10 text-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} New Sport. Tất cả quyền được bảo lưu. 
-            <span className="text-lime-dark font-medium"> Copyright © by New Sport. All rights reserved.</span>
+            © {new Date().getFullYear()} PicklePro. Tất cả quyền được bảo lưu. 
+            <span className="text-lime-dark font-medium"> Copyright © by PicklePro. All rights reserved.</span>
           </p>
         </div>
       </div>
