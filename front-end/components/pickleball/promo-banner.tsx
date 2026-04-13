@@ -32,7 +32,7 @@ export function PromoBanner() {
               </p>
 
               <Link href="/contact">
-                <Button className="bg-lime hover:bg-lime-dark text-lime-dark hover:text-white font-bold rounded-full px-8 py-3 shadow-lg shadow-lime/50 transition-all hover:scale-105">
+                <Button className="bg-lime-dark hover:bg-lime-dark/80 text-white font-bold rounded-full px-8 py-3 shadow-lg shadow-lime/50 transition-all hover:scale-105">
                   GÓP Ý VỚI PICKLEPRO
                 </Button>
               </Link>

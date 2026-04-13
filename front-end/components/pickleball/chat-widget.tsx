@@ -242,7 +242,7 @@ export function ChatWidget() {
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="w-10 h-10 rounded-xl bg-lime hover:bg-lime-dark text-lime-dark hover:text-white flex items-center justify-center transition-all disabled:opacity-40 shrink-0"
+              className="w-10 h-10 rounded-xl bg-lime-dark hover:bg-lime-dark/80 text-white flex items-center justify-center transition-all disabled:opacity-40 shrink-0"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </button>

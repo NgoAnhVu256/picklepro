@@ -271,7 +271,7 @@ function RegisterContent() {
                 )}
               </div>
 
-              <Button type="submit" disabled={loading || !!success} className="w-full rounded-xl h-12 text-base font-bold bg-lime hover:bg-lime-dark text-lime-dark hover:text-white transition-all shadow-lg shadow-lime/30">
+              <Button type="submit" disabled={loading || !!success} className="w-full rounded-xl h-12 text-base font-bold bg-lime-dark hover:bg-lime-dark/80 text-white transition-all shadow-lg shadow-lime-dark/20">
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <>Tạo tài khoản <ArrowRight className="h-4 w-4 ml-2" /></>}
               </Button>
             </form>

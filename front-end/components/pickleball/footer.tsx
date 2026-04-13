@@ -1,6 +1,6 @@
 "use client"
 
-import { Facebook, Youtube, Send, MessageCircle } from "lucide-react"
+import { Facebook, Music, Send, MessageCircle } from "lucide-react"
 import Link from "next/link"
 
 const footerLinks = [
@@ -12,11 +12,11 @@ const footerLinks = [
 ]
 
 const socialLinks = [
-  { icon: MessageCircle, href: "https://zalo.me/picklepro", label: "Zalo" },
-  { icon: Facebook, href: "https://facebook.com/picklepro", label: "Facebook" },
-  { icon: Youtube, href: "https://youtube.com/@picklepro", label: "Youtube" },
-  { icon: Send, href: "https://t.me/picklepro", label: "Telegram" },
-]
+  { icon: MessageCircle, href: "https://zalo.me/picklepro", label: "Zalo OA" },
+  { icon: Facebook, href: "https://www.facebook.com/profile.php?id=61575468045037", label: "Facebook" },
+  { icon: Music, href: "https://www.tiktok.com/@newsportpb.com", label: "TikTok" },
+  { icon: Send, href: "https://zalo.me/0846915120", label: "Zalo Hotline" },
+];
 
 export function Footer() {
   return (

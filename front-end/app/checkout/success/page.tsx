@@ -69,7 +69,7 @@ export default function CheckoutSuccessPage() {
                 </Button>
               </Link>
               <Link href="/" className="flex-1">
-                <Button className="w-full rounded-xl h-12 bg-lime hover:bg-lime-dark text-lime-dark hover:text-white font-bold shadow-lg shadow-lime/30">
+                <Button className="w-full rounded-xl h-12 bg-lime-dark hover:bg-lime-dark/80 text-white font-bold shadow-lg shadow-lime-dark/20">
                   <Home className="h-4 w-4 mr-2" /> Về trang chủ
                 </Button>
               </Link>

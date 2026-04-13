@@ -186,7 +186,7 @@ export default function CheckoutPage() {
 
               <div className="flex gap-3">
                 <Link href="/account/orders" className="flex-1">
-                  <Button className="w-full rounded-xl bg-lime hover:bg-lime-dark text-lime-dark hover:text-white font-bold">
+                  <Button className="w-full rounded-xl bg-lime-dark hover:bg-lime-dark/80 text-white font-bold">
                     Xem đơn hàng
                   </Button>
                 </Link>
@@ -212,7 +212,7 @@ export default function CheckoutPage() {
           <span className="text-6xl block mb-4">🛒</span>
           <h2 className="text-2xl font-bold mb-2">Giỏ hàng trống</h2>
           <p className="text-muted-foreground mb-6">Vui lòng thêm sản phẩm trước khi thanh toán</p>
-          <Link href="/products"><Button className="rounded-full bg-lime hover:bg-lime-dark text-lime-dark hover:text-white">Xem sản phẩm</Button></Link>
+          <Link href="/products"><Button className="rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white">Xem sản phẩm</Button></Link>
         </div>
         <Footer />
       </div>
@@ -346,7 +346,7 @@ export default function CheckoutPage() {
               </RadioGroup>
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full rounded-xl h-14 text-lg font-bold bg-lime hover:bg-lime-dark text-lime-dark hover:text-white shadow-lg shadow-lime/30 active:scale-95 transition-all">
+            <Button type="submit" disabled={loading} className="w-full rounded-xl h-14 text-lg font-bold bg-lime-dark hover:bg-lime-dark/80 text-white shadow-lg shadow-lime-dark/20 active:scale-95 transition-all">
               {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : (
                 <>
                   {form.paymentMethod === 'vnpay' && 'Thanh toán qua VNPay'}

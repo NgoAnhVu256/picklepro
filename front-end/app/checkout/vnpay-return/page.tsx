@@ -61,7 +61,7 @@ function VNPayReturnContent() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/account/orders">
-                <Button className="rounded-full bg-lime hover:bg-lime-dark text-lime-dark hover:text-white font-bold px-6">
+                <Button className="rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white font-bold px-6">
                   <ShoppingBag className="h-4 w-4 mr-2" /> Xem đơn hàng
                 </Button>
               </Link>
@@ -85,7 +85,7 @@ function VNPayReturnContent() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/cart">
-                <Button className="rounded-full bg-lime hover:bg-lime-dark text-lime-dark hover:text-white font-bold px-6">
+                <Button className="rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white font-bold px-6">
                   Quay lại giỏ hàng
                 </Button>
               </Link>

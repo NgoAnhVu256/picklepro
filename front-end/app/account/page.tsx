@@ -242,7 +242,7 @@ export default function AccountPage() {
                 </div>
               </div>
 
-              <Button onClick={handleSave} disabled={saving} className="mt-8 rounded-xl h-12 px-8 bg-lime hover:bg-lime-dark text-lime-dark hover:text-white font-bold shadow-lg shadow-lime/30 active:scale-95 transition-all">
+              <Button onClick={handleSave} disabled={saving} className="mt-8 rounded-xl h-12 px-8 bg-lime-dark hover:bg-lime-dark/80 text-white font-bold shadow-lg shadow-lime-dark/20 active:scale-95 transition-all">
                 {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Save className="h-4 w-4 mr-2" /> Lưu thay đổi</>}
               </Button>
             </div>

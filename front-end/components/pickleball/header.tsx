@@ -105,7 +105,7 @@ export function Header() {
                 <Button
                   type="submit"
                   size="icon"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-lime hover:bg-lime-dark text-lime-dark hover:text-white h-8 w-8"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white h-8 w-8"
                 >
                   <Search className="h-4 w-4" />
                 </Button>
@@ -166,11 +166,11 @@ export function Header() {
               {/* Cart Button */}
               <Link href="/cart">
                 <Button
-                  className="flex items-center gap-2 backdrop-blur-md bg-lime/90 border border-lime rounded-full px-4 py-2 hover:bg-lime text-lime-dark font-semibold shadow-lg shadow-lime/30 transition-all"
+                  className="flex items-center gap-2 backdrop-blur-md bg-lime-dark border border-lime-dark rounded-full px-4 py-2 hover:bg-lime-dark/90 text-white font-semibold shadow-lg shadow-lime-dark/20 transition-all"
                 >
                   <ShoppingCart className="h-4 w-4" />
                   <span className="text-sm hidden sm:inline">Giỏ hàng</span>
-                  <span className="bg-white/90 text-lime-dark text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="bg-white text-lime-dark text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                     {totalItems}
                   </span>
                 </Button>
@@ -201,7 +201,7 @@ export function Header() {
               <Button
                 type="submit"
                 size="icon"
-                className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-lime hover:bg-lime-dark text-lime-dark hover:text-white h-7 w-7"
+                className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white h-7 w-7"
               >
                 <Search className="h-3.5 w-3.5" />
               </Button>

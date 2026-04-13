@@ -19,7 +19,7 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-lime hover:bg-lime-dark text-lime-dark hover:text-white font-bold transition-all shadow-lg shadow-lime/30"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white font-bold transition-all shadow-lg shadow-lime-dark/20"
           >
             🏠 Trang chủ
           </Link>

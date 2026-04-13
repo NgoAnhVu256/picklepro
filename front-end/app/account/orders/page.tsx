@@ -115,7 +115,7 @@ export default function OrdersPage() {
                 <h3 className="text-xl font-bold mb-2">Chưa có đơn hàng nào</h3>
                 <p className="text-muted-foreground mb-6">Hãy khám phá cửa hàng và đặt đơn hàng đầu tiên!</p>
                 <Link href="/products">
-                  <Button className="rounded-full bg-lime hover:bg-lime-dark text-lime-dark hover:text-white font-bold">
+                  <Button className="rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white font-bold">
                     Khám phá sản phẩm
                   </Button>
                 </Link>

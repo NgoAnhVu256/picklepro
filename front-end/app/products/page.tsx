@@ -156,7 +156,7 @@ function ProductsContent() {
                 className="pl-10 rounded-full border-lime/30 focus:border-lime"
               />
             </div>
-            <Button type="submit" className="rounded-full bg-lime hover:bg-lime-dark text-lime-dark hover:text-white">
+            <Button type="submit" className="rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white">
               Tìm
             </Button>
           </form>

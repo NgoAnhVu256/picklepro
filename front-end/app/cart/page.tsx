@@ -35,7 +35,7 @@ export default function CartPage() {
           <h2 className="text-2xl font-extrabold text-foreground mb-2">Giỏ hàng trống</h2>
           <p className="text-muted-foreground mb-6">Hãy khám phá các sản phẩm Pickleball tuyệt vời!</p>
           <Link href="/products">
-            <Button className="rounded-full bg-lime hover:bg-lime-dark text-lime-dark hover:text-white px-8 h-12 text-base font-bold shadow-lg shadow-lime/30">
+            <Button className="rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white px-8 h-12 text-base font-bold shadow-lg shadow-lime-dark/20">
               Khám phá ngay <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </Link>
@@ -134,7 +134,7 @@ export default function CartPage() {
                 </div>
 
                 <Link href="/checkout" className="block">
-                  <Button className="w-full rounded-xl h-14 text-base font-bold bg-lime hover:bg-lime-dark text-lime-dark hover:text-white transition-all shadow-lg shadow-lime/30 active:scale-95">
+                  <Button className="w-full rounded-xl h-14 text-base font-bold bg-lime-dark hover:bg-lime-dark/80 text-white transition-all shadow-lg shadow-lime-dark/20 active:scale-95">
                     Thanh toán <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
                 </Link>
