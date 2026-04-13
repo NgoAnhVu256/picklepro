@@ -59,6 +59,13 @@ export default function ProductDetailPage() {
     if (slug) fetchProduct()
   }, [slug])
 
+  // Dynamic title cho SEO
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.name} | PicklePro`
+    }
+  }, [product])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -113,13 +120,6 @@ export default function ProductDetailPage() {
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
   }
-
-  // Dynamic title cho SEO
-  useEffect(() => {
-    if (product) {
-      document.title = `${product.name} | PicklePro`
-    }
-  }, [product])
 
   // JSON-LD Product Schema cho Google Rich Snippets
   const productJsonLd = {
