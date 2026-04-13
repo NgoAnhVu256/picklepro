@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
-import { Inter, Geist_Mono } from 'next/font/google'
+import { Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ChatWidgetWrapper } from '@/components/pickleball/chat-widget-wrapper'
 import './globals.css'
 
-const _inter = Inter({ subsets: ["latin", "vietnamese"], variable: "--font-inter" });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
@@ -73,9 +72,11 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <head>
+        <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Product+Sans:wght@400;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
-      <body className={`${_inter.variable} font-sans antialiased`}>
+      <body className="font-sans antialiased" style={{ fontFamily: "'Product Sans', 'Google Sans', Inter, system-ui, sans-serif" }}>
         {children}
         <ChatWidgetWrapper />
         {process.env.NODE_ENV === 'production' && <Analytics />}
