@@ -55,7 +55,7 @@ export interface Category {
   id: string
   name: string
   slug: string
-  icon: string | null
+  image_url: string | null
   description: string | null
   sort_order: number
   created_at: string
