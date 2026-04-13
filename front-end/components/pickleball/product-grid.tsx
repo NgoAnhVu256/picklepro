@@ -162,8 +162,9 @@ export function ProductGrid() {
                         className={`rounded-full transition-all ${
                           isAdded
                             ? 'bg-green-500 hover:bg-green-600 text-white'
-                            : 'bg-lime-dark hover:bg-lime-dark/80 text-white'
+                            : 'text-white hover:opacity-90'
                         }`}
+                        style={!isAdded ? { background: 'linear-gradient(135deg, #5054FE, #9B56FF)' } : undefined}
                       >
                         {isAdded ? <Check className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
                       </Button>
@@ -178,7 +179,7 @@ export function ProductGrid() {
         {/* Mobile CTA */}
         <div className="md:hidden text-center mt-8">
           <Link href="/products">
-            <Button className="rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white font-bold px-8">
+            <Button className="rounded-full text-white font-bold px-8 hover:opacity-90" style={{ background: 'linear-gradient(135deg, #5054FE, #9B56FF)' }}>
               Xem tất cả sản phẩm <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </Link>

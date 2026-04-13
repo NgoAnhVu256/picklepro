@@ -1,136 +1,165 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Calendar, ChevronLeft, ChevronRight } from "lucide-react"
-import { useState } from "react"
+import { Calendar, ArrowRight, ExternalLink } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
 
-const articles = [
+const blogCategories = [
   {
-    id: 1,
-    title: "Top 10 kỹ thuật Dink cơ bản mà người chơi Pickleball cần biết",
-    excerpt: "Hướng dẫn chi tiết các kỹ thuật dink từ cơ bản đến nâng cao...",
-    author: "PicklePro",
-    date: "28 tháng 3, 2026",
-    image: "🏓",
-    category: "Kỹ thuật"
+    name: "Kỹ thuật",
+    articles: [
+      {
+        id: 1,
+        title: "Top 10 kỹ thuật Dink cơ bản mà người chơi Pickleball cần biết",
+        thumbnail: "🏓",
+        date: "28/03/2026",
+      },
+      {
+        id: 2,
+        title: "Cách cầm vợt đúng kỹ thuật cho người mới bắt đầu",
+        thumbnail: "✋",
+        date: "25/03/2026",
+      },
+      {
+        id: 3,
+        title: "Bí quyết đánh serve mạnh và chính xác trong Pickleball",
+        thumbnail: "💪",
+        date: "20/03/2026",
+      },
+    ],
   },
   {
-    id: 2,
-    title: "So sánh chi tiết: JOOLA vs Selkirk - Vợt nào phù hợp với bạn?",
-    excerpt: "Đánh giá toàn diện 2 thương hiệu vợt Pickleball hàng đầu...",
-    author: "PicklePro",
-    date: "25 tháng 3, 2026",
-    image: "⚖️",
-    category: "Review"
+    name: "Review sản phẩm",
+    articles: [
+      {
+        id: 4,
+        title: "So sánh chi tiết: JOOLA vs Selkirk — Vợt nào phù hợp?",
+        thumbnail: "⚖️",
+        date: "26/03/2026",
+      },
+      {
+        id: 5,
+        title: "Review vợt JOOLA Ben Johns Hyperion CAS 16mm",
+        thumbnail: "🔥",
+        date: "22/03/2026",
+      },
+      {
+        id: 6,
+        title: "Top 5 giày chơi Pickleball tốt nhất 2026",
+        thumbnail: "👟",
+        date: "18/03/2026",
+      },
+    ],
   },
   {
-    id: 3,
-    title: "Giải Pickleball Việt Nam 2026 - Điểm nổi bật và kết quả",
-    excerpt: "Tổng hợp những khoảnh khắc đáng nhớ từ giải đấu quốc gia...",
-    author: "PicklePro",
-    date: "20 tháng 3, 2026",
-    image: "🏆",
-    category: "Tin tức"
+    name: "Tin tức",
+    articles: [
+      {
+        id: 7,
+        title: "Giải Pickleball Việt Nam 2026 — Kết quả và điểm nổi bật",
+        thumbnail: "🏆",
+        date: "24/03/2026",
+      },
+      {
+        id: 8,
+        title: "Pickleball chính thức vào SEA Games 2027",
+        thumbnail: "🎉",
+        date: "15/03/2026",
+      },
+      {
+        id: 9,
+        title: "Cộng đồng Pickleball Việt Nam phát triển mạnh mẽ",
+        thumbnail: "🌏",
+        date: "10/03/2026",
+      },
+    ],
   },
   {
-    id: 4,
-    title: "Cách chọn grip phù hợp: Overgrip vs Replacement grip",
-    excerpt: "Hướng dẫn lựa chọn loại grip phù hợp với lối chơi của bạn...",
-    author: "PicklePro",
-    date: "18 tháng 3, 2026",
-    image: "🧤",
-    category: "Hướng dẫn"
+    name: "Hướng dẫn",
+    articles: [
+      {
+        id: 10,
+        title: "Cách chọn grip phù hợp: Overgrip vs Replacement grip",
+        thumbnail: "🧤",
+        date: "22/03/2026",
+      },
+      {
+        id: 11,
+        title: "Hướng dẫn bảo quản vợt Pickleball đúng cách",
+        thumbnail: "🛡️",
+        date: "16/03/2026",
+      },
+      {
+        id: 12,
+        title: "Chọn bóng Pickleball: Indoor vs Outdoor khác gì?",
+        thumbnail: "⚾",
+        date: "12/03/2026",
+      },
+    ],
   },
 ]
 
 export function BlogSection() {
-  const [currentIndex, setCurrentIndex] = useState(0)
-
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % articles.length)
-  }
-
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + articles.length) % articles.length)
-  }
-
   return (
-    <section className="py-10 sm:py-16 bg-background">
+    <section
+      className="py-12 sm:py-20"
+      style={{ background: "linear-gradient(180deg, #04002A, #362012, #462915)" }}
+    >
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="text-center mb-8 sm:mb-12">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 sm:mb-3">
-            Dòng Chảy <span className="text-lime-dark">Sáng Tạo</span>
+        <div className="text-center mb-10 sm:mb-14">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3">
+            Bài Viết <span className="text-transparent bg-clip-text" style={{ backgroundImage: "linear-gradient(135deg, #B2FF73, #EDFEB9)" }}>Nổi Bật</span>
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-            Cập nhật cảm hứng, xu hướng và chia sẻ từ cộng đồng Pickleball
+          <p className="text-sm sm:text-base text-gray-400 max-w-2xl mx-auto">
+            Cập nhật kiến thức, xu hướng và chia sẻ từ cộng đồng Pickleball
           </p>
         </div>
 
-        {/* Blog Cards with Navigation */}
-        <div className="relative">
-          {/* Navigation Buttons */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-10 h-10 rounded-full bg-white shadow-lg border border-lime/20 flex items-center justify-center hover:bg-lime/10 transition-colors hidden md:flex"
-          >
-            <ChevronLeft className="h-5 w-5 text-foreground" />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-10 h-10 rounded-full bg-white shadow-lg border border-lime/20 flex items-center justify-center hover:bg-lime/10 transition-colors hidden md:flex"
-          >
-            <ChevronRight className="h-5 w-5 text-foreground" />
-          </button>
+        {/* 4-Column Blog Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          {blogCategories.map((category) => (
+            <div key={category.name}>
+              {/* Category Header */}
+              <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b border-white/10 italic">
+                {category.name}
+              </h3>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-            {articles.map((article) => (
-              <article
-                key={article.id}
-                className="group cursor-pointer"
-              >
-                {/* Image */}
-                <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden mb-2 sm:mb-4 bg-gradient-to-br from-lime-light/30 to-white border border-lime/10">
-                  <div className="absolute inset-0 flex items-center justify-center text-4xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">
-                    {article.image}
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
-                  {/* Category Badge */}
-                  <span className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 sm:px-3 py-0.5 sm:py-1 bg-lime/90 text-lime-dark text-[10px] sm:text-xs font-bold rounded-full">
-                    {article.category}
-                  </span>
-                </div>
+              {/* Articles */}
+              <div className="space-y-4">
+                {category.articles.map((article) => (
+                  <Link
+                    key={article.id}
+                    href="#"
+                    className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-all duration-200"
+                  >
+                    {/* Thumbnail */}
+                    <div className="w-16 h-16 shrink-0 rounded-lg bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center text-2xl shadow-md shadow-black/20 group-hover:shadow-lg group-hover:shadow-purple-500/10 transition-shadow">
+                      {article.thumbnail}
+                    </div>
 
-                {/* Content */}
-                <div className="space-y-1 sm:space-y-2">
-                  <h3 className="text-xs sm:text-base font-bold text-foreground line-clamp-2 group-hover:text-lime-dark transition-colors">
-                    {article.title}
-                  </h3>
-                  
-                  <div className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-sm text-muted-foreground">
-                    <span className="hidden sm:inline">{article.author}</span>
-                    <span className="hidden sm:inline">•</span>
-                    <span className="flex items-center gap-0.5 sm:gap-1">
-                      <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                      {article.date}
-                    </span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-medium text-gray-200 line-clamp-2 group-hover:text-white transition-colors leading-snug">
+                        {article.title}
+                      </h4>
+                      <span className="text-xs text-gray-500 mt-1 block">
+                        {article.date}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
 
-        {/* View All Button */}
-        <div className="text-center mt-10">
-          <Button 
-            variant="outline" 
-            className="border-2 border-foreground text-foreground hover:bg-foreground hover:text-background font-semibold rounded-full px-8"
-          >
-            Xem tất cả bài viết
-          </Button>
+                {/* Xem thêm */}
+                <Link
+                  href="#"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-white transition-colors pt-1 pl-2"
+                >
+                  Xem thêm <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

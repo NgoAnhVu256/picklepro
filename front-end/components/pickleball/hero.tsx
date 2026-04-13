@@ -39,7 +39,8 @@ export function Hero() {
               <Link href="/products">
                 <Button 
                   size="lg" 
-                  className="bg-lime-dark hover:bg-lime-dark/90 text-white font-bold rounded-full px-8 py-6 text-lg shadow-xl shadow-lime-dark/30 transition-all hover:scale-105"
+                  className="text-white font-bold rounded-full px-8 py-6 text-lg shadow-xl shadow-purple-500/30 transition-all hover:scale-105 hover:shadow-purple-500/50"
+                  style={{ background: 'linear-gradient(135deg, #5054FE, #9B56FF)' }}
                 >
                   Khám phá ngay
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -49,7 +50,7 @@ export function Hero() {
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="border-2 border-lime-dark/30 text-lime-dark hover:bg-lime-dark/10 font-semibold rounded-full px-8 py-6 text-lg"
+                  className="border-2 border-[#5054FE]/30 text-[#5054FE] hover:bg-[#5054FE]/10 font-semibold rounded-full px-8 py-6 text-lg"
                 >
                   Xem khuyến mãi
                 </Button>
