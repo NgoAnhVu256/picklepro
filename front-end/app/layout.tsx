@@ -7,6 +7,7 @@ import './globals.css'
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
@@ -75,6 +76,20 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Product+Sans:wght@400;700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        {/* Google Analytics 4 */}
+        {GA_MEASUREMENT_ID && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} />
+            <script dangerouslySetInnerHTML={{ __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_MEASUREMENT_ID}', {
+                page_path: window.location.pathname,
+              });
+            `}} />
+          </>
+        )}
       </head>
       <body className="font-sans antialiased" style={{ fontFamily: "'Product Sans', 'Google Sans', Inter, system-ui, sans-serif" }}>
         {children}

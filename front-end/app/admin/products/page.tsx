@@ -424,11 +424,33 @@ export default function AdminProductsPage() {
                     const reader = new FileReader()
                     reader.onload = (ev) => {
                       const text = ev.target?.result as string
-                      const lines = text.split('\n').filter(l => l.trim())
+                      
+                      // Smart CSV parser that handles quoted fields
+                      const parseCSVLine = (line: string): string[] => {
+                        const result: string[] = []
+                        let current = ''
+                        let inQuotes = false
+                        for (let i = 0; i < line.length; i++) {
+                          const ch = line[i]
+                          if (ch === '"') {
+                            if (inQuotes && line[i + 1] === '"') { current += '"'; i++ }
+                            else { inQuotes = !inQuotes }
+                          } else if (ch === ',' && !inQuotes) {
+                            result.push(current.trim())
+                            current = ''
+                          } else {
+                            current += ch
+                          }
+                        }
+                        result.push(current.trim())
+                        return result
+                      }
+                      
+                      const lines = text.split(/\r?\n/).filter(l => l.trim())
                       if (lines.length < 2) { alert('File trống hoặc chỉ có header'); return }
-                      const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+                      const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase().replace(/^\uFEFF/, ''))
                       const rows = lines.slice(1).map(line => {
-                        const values = line.split(',').map(v => v.trim())
+                        const values = parseCSVLine(line)
                         const obj: any = {}
                         headers.forEach((h, i) => { obj[h] = values[i] || '' })
                         return obj
@@ -436,7 +458,7 @@ export default function AdminProductsPage() {
                       setImportData(rows)
                       setImportResult(null)
                     }
-                    reader.readAsText(file)
+                    reader.readAsText(file, 'UTF-8')
                   }}
                 />
                 <button

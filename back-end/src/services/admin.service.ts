@@ -190,7 +190,7 @@ export class AdminService {
   async getAdminOrders(page = 1, limit = 20, status = '') {
     let query = supabaseAdmin
       .from('orders')
-      .select('*, profiles(full_name)', { count: 'exact' })
+      .select('*', { count: 'exact' })
 
     if (status) query = query.eq('status', status)
 
@@ -206,7 +206,7 @@ export class AdminService {
   async getAdminOrderDetail(orderId: string) {
     const { data, error } = await supabaseAdmin
       .from('orders')
-      .select('*, profiles(full_name, phone, address), order_items(*, products(name, brand, slug))')
+      .select('*, order_items(*, products(name, brand, slug))')
       .eq('id', orderId)
       .single()
 
