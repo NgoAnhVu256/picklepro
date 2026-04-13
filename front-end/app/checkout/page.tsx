@@ -118,7 +118,7 @@ export default function CheckoutPage() {
         }
 
         clearCart()
-        setBankInfo(data.bankInfo)
+        setBankInfo({ ...data.bankInfo, finalAmount: data.totalAmount })
         setLoading(false)
 
       } else {
@@ -213,7 +213,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="flex items-center justify-between py-1.5 pt-2 border-t border-dashed border-gray-200 mt-1">
-                  <span className="text-emerald-700 mt-1">Số tiền: <b className="text-[#d9534f] text-[15px]">{formatPrice(grandTotal)}</b></span>
+                  <span className="text-emerald-700 mt-1">Số tiền: <b className="text-[#d9534f] text-[15px]">{formatPrice(bankInfo.finalAmount)}</b></span>
                 </div>
              </div>
 

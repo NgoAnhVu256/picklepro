@@ -65,6 +65,9 @@ export class OrderService {
       })
     }
 
+    const shippingFee = totalAmount >= 500000 ? 0 : 30000
+    totalAmount += shippingFee
+
     // Tạo order
     const orderInsert: OrderInsert = {
       user_id: userId,

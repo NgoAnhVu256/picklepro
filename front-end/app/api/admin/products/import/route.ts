@@ -65,18 +65,19 @@ export async function POST(req: NextRequest) {
           tags: typeof row.tags === 'string' ? row.tags.split(';').map((t: string) => t.trim()).filter(Boolean) : (row.tags || []),
           rating: Number(row.rating) || 4.5,
           review_count: Number(row.review_count) || 0,
-          images: [],
         }
+
+        let imagesToInsert: string[] = []
 
         // Handle images: image_url (single) or images (semicolon-separated URLs)
         if (row.image_url) {
-          productData.images = [row.image_url.trim()]
+          imagesToInsert.push(row.image_url.trim())
         }
         if (row.images) {
           const imgs = typeof row.images === 'string'
             ? row.images.split(';').map((u: string) => u.trim()).filter(Boolean)
             : row.images
-          productData.images = [...productData.images, ...imgs]
+          imagesToInsert = [...imagesToInsert, ...imgs]
         }
 
         if (!productData.name || !productData.price) {
@@ -85,14 +86,28 @@ export async function POST(req: NextRequest) {
           continue
         }
 
-        const { error } = await supabaseAdmin
+        const { data: newProduct, error } = await supabaseAdmin
           .from('products')
           .insert(productData)
+          .select()
+          .single()
 
         if (error) {
           results.errors.push(`Dòng ${i + 1} (${row.name}): ${error.message}`)
           results.failed++
         } else {
+          // Xử lý chèn hình ảnh nếu có
+          if (imagesToInsert.length > 0 && newProduct) {
+            const imageObjects = imagesToInsert.map((url, idx) => ({
+              product_id: newProduct.id,
+              url,
+              sort_order: idx,
+              is_primary: idx === 0,
+            }))
+            
+            await supabaseAdmin.from('product_images').insert(imageObjects)
+          }
+
           results.success++
         }
       } catch (err: any) {
