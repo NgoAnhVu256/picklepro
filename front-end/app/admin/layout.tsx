@@ -7,8 +7,9 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Package, FolderOpen, ShoppingBag,
   Users, Settings, LogOut, Menu, X, ChevronRight, Store,
-  Percent, UserCog
+  Percent, UserCog, Sun, Moon
 } from 'lucide-react'
+import { useTheme } from 'next-themes'
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -27,8 +28,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     async function verify() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
@@ -128,7 +132,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   )
 
   return (
-    <div className="min-h-screen bg-gray-950 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex transition-colors">
       {/* Sidebar Desktop */}
       <div className="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:w-64">
         <Sidebar />
@@ -153,7 +157,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content */}
       <div className="lg:ml-64 flex-1 flex flex-col min-h-screen">
         {/* Top Bar */}
-        <header className="sticky top-0 z-40 bg-gray-900/80 backdrop-blur-xl border-b border-gray-800 px-4 py-3 flex items-center gap-3">
+        <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center gap-3 transition-colors">
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
@@ -161,7 +165,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex-1" />
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          
+          {mounted && (
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-lime-dark hover:bg-gray-200 dark:hover:bg-gray-800 transition-all"
+              title="Chuyển chế độ giao diện"
+            >
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+          )}
+
+          <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-400 ml-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime to-lime-dark flex items-center justify-center text-white text-xs font-bold">
               {user?.email?.charAt(0)?.toUpperCase() ?? 'A'}
             </div>

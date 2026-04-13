@@ -33,6 +33,43 @@ const DEFAULT_SETTINGS: Settings = {
   maintenance_mode: false,
 }
 
+const Section = ({ title, icon: Icon, iconColor, children }: { title: string; icon: any; iconColor: string; children: React.ReactNode }) => (
+  <div className="rounded-2xl bg-gray-900 border border-gray-800 overflow-hidden">
+    <div className="px-6 py-4 border-b border-gray-800 flex items-center gap-2">
+      <Icon className={`h-5 w-5 ${iconColor}`} />
+      <h2 className="text-white font-bold">{title}</h2>
+    </div>
+    <div className="p-6 space-y-4">{children}</div>
+  </div>
+)
+
+const Field = ({ label, value, onChange, placeholder, type = 'text', disabled = false, icon: Icon }: any) => (
+  <div>
+    <label className="text-gray-400 text-xs font-medium mb-1.5 block">{label}</label>
+    <div className="relative">
+      {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />}
+      <input
+        type={type} value={value} onChange={e => onChange(e.target.value)}
+        placeholder={placeholder} disabled={disabled}
+        className={`w-full ${Icon ? 'pl-10' : 'px-3'} pr-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-lime text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
+      />
+    </div>
+  </div>
+)
+
+const Toggle = ({ label, description, checked, onChange }: { label: string; description?: string; checked: boolean; onChange: (v: boolean) => void }) => (
+  <label className="flex items-center gap-4 cursor-pointer p-3 rounded-xl hover:bg-gray-800/50 transition-all -mx-3">
+    <div className="flex-1">
+      <p className="text-white text-sm font-medium">{label}</p>
+      {description && <p className="text-gray-500 text-xs mt-0.5">{description}</p>}
+    </div>
+    <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-lime' : 'bg-gray-700'}`}>
+      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
+      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="sr-only" />
+    </div>
+  </label>
+)
+
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Settings>({ ...DEFAULT_SETTINGS })
   const [loading, setLoading] = useState(true)
@@ -83,42 +120,7 @@ export default function AdminSettingsPage() {
     )
   }
 
-  const Section = ({ title, icon: Icon, iconColor, children }: { title: string; icon: any; iconColor: string; children: React.ReactNode }) => (
-    <div className="rounded-2xl bg-gray-900 border border-gray-800 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-800 flex items-center gap-2">
-        <Icon className={`h-5 w-5 ${iconColor}`} />
-        <h2 className="text-white font-bold">{title}</h2>
-      </div>
-      <div className="p-6 space-y-4">{children}</div>
-    </div>
-  )
 
-  const Field = ({ label, value, onChange, placeholder, type = 'text', disabled = false, icon: Icon }: any) => (
-    <div>
-      <label className="text-gray-400 text-xs font-medium mb-1.5 block">{label}</label>
-      <div className="relative">
-        {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />}
-        <input
-          type={type} value={value} onChange={e => onChange(e.target.value)}
-          placeholder={placeholder} disabled={disabled}
-          className={`w-full ${Icon ? 'pl-10' : 'px-3'} pr-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-lime text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
-        />
-      </div>
-    </div>
-  )
-
-  const Toggle = ({ label, description, checked, onChange }: { label: string; description?: string; checked: boolean; onChange: (v: boolean) => void }) => (
-    <label className="flex items-center gap-4 cursor-pointer p-3 rounded-xl hover:bg-gray-800/50 transition-all -mx-3">
-      <div className="flex-1">
-        <p className="text-white text-sm font-medium">{label}</p>
-        {description && <p className="text-gray-500 text-xs mt-0.5">{description}</p>}
-      </div>
-      <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-lime' : 'bg-gray-700'}`}>
-        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
-        <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="sr-only" />
-      </div>
-    </label>
-  )
 
   return (
     <div className="space-y-6 max-w-2xl">

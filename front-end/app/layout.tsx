@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ChatWidgetWrapper } from '@/components/pickleball/chat-widget-wrapper'
+import { Providers } from '@/components/providers'
 import './globals.css'
 
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -92,9 +93,11 @@ export default function RootLayout({
         )}
       </head>
       <body className="font-sans antialiased" style={{ fontFamily: "'Product Sans', 'Google Sans', Inter, system-ui, sans-serif" }}>
-        {children}
-        <ChatWidgetWrapper />
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Providers>
+          {children}
+          <ChatWidgetWrapper />
+          {process.env.NODE_ENV === 'production' && <Analytics />}
+        </Providers>
       </body>
     </html>
   )
