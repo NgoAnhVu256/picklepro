@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { Plus, Pencil, Trash2, Search, Star, Package, ToggleLeft, ToggleRight, AlertTriangle, Upload, ImageIcon, X, FileSpreadsheet, Download, CheckCircle2, XCircle } from 'lucide-react'
+import { toast } from 'sonner'
 
 function formatVND(n: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n)
@@ -28,10 +29,12 @@ export default function AdminProductsPage() {
   const [form, setForm] = useState({ ...EMPTY_FORM })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [formError, setFormError] = useState('')
 
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<any>(null)
   const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
 
   // Import CSV
   const [showImport, setShowImport] = useState(false)
@@ -58,7 +61,7 @@ export default function AdminProductsPage() {
       .then(d => setCategories(Array.isArray(d) ? d : []))
   }, [])
 
-  const openAdd = () => { setEditing(null); setForm({ ...EMPTY_FORM }); setShowModal(true) }
+  const openAdd = () => { setEditing(null); setForm({ ...EMPTY_FORM }); setFormError(''); setShowModal(true) }
   const openEdit = (p: any) => {
     setEditing(p)
     setForm({
@@ -70,6 +73,7 @@ export default function AdminProductsPage() {
       specs: p.specs ? JSON.stringify(p.specs, null, 2) : '',
       image_url: p.product_images?.[0]?.url || p.image_url || ''
     })
+    setFormError('')
     setShowModal(true)
   }
 
@@ -83,13 +87,28 @@ export default function AdminProductsPage() {
     try {
       const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
       const data = await res.json()
-      if (data.url) setForm(f => ({ ...f, image_url: data.url }))
-      else alert(data.error || 'Upload thất bại')
-    } catch { alert('Lỗi upload') }
+      if (data.url) {
+        setForm(f => ({ ...f, image_url: data.url }))
+        toast.success('Tải ảnh thành công!')
+      } else {
+        toast.error(data.error || 'Upload thất bại')
+      }
+    } catch { 
+      toast.error('Lỗi kết nối khi upload') 
+    }
     setUploading(false)
   }
 
   const handleSave = async () => {
+    if (!form.name.trim()) {
+      setFormError('Tên sản phẩm không được để trống')
+      return
+    }
+    if (!form.price || isNaN(Number(form.price))) {
+      setFormError('Giá sản phẩm không hợp lệ')
+      return
+    }
+    setFormError('')
     setSaving(true)
     const payload: any = {
       name: form.name, brand: form.brand,
@@ -105,19 +124,35 @@ export default function AdminProductsPage() {
     }
     const url = editing ? `/api/admin/products/${editing.id}` : '/api/admin/products'
     const method = editing ? 'PUT' : 'POST'
-    await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    try {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Lỗi lưu sản phẩm')
+      }
+      toast.success(editing ? 'Cập nhật sản phẩm thành công' : 'Thêm sản phẩm thành công')
+      setShowModal(false)
+      fetchProducts()
+    } catch(e: any) {
+      toast.error(e.message || 'Thao tác thất bại')
+    }
     setSaving(false)
-    setShowModal(false)
-    fetchProducts()
   }
 
   const handleDelete = async () => {
     if (!deleteTarget) return
     setDeleting(true)
-    await fetch(`/api/admin/products/${deleteTarget.id}`, { method: 'DELETE' })
+    setDeleteError('')
+    try {
+      const res = await fetch(`/api/admin/products/${deleteTarget.id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Không thể xoá sản phẩm này')
+      toast.success('Xoá sản phẩm thành công')
+      setDeleteTarget(null)
+      fetchProducts()
+    } catch(e: any) {
+      setDeleteError(e.message)
+    }
     setDeleting(false)
-    setDeleteTarget(null)
-    fetchProducts()
   }
 
   const totalPages = Math.ceil(total / LIMIT)
@@ -236,6 +271,11 @@ export default function AdminProductsPage() {
               <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground text-2xl leading-none">×</button>
             </div>
             <div className="p-6 space-y-4">
+              {formError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-xl animate-in fade-in">
+                  ⚠️ {formError}
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
                   <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Tên sản phẩm *</label>
@@ -355,13 +395,17 @@ export default function AdminProductsPage() {
                 <AlertTriangle className="h-6 w-6 text-red-400" />
               </div>
               <div>
-                <h3 className="text-foreground font-bold">Xác nhận xóa</h3>
+                <h3 className="text-foreground font-bold">Xác nhận xóa sản phẩm</h3>
                 <p className="text-muted-foreground text-xs mt-0.5">Thao tác này không thể hoàn tác</p>
               </div>
             </div>
+            {deleteError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm animate-in zoom-in-95">
+                ❌ {deleteError}
+              </div>
+            )}
             <p className="text-secondary-foreground text-sm mb-6">
-              Bạn có chắc muốn ẩn sản phẩm <strong className="text-foreground">"{deleteTarget.name}"</strong>?
-              Sản phẩm sẽ không hiển thị trên cửa hàng.
+              Bạn có chắc muốn xóa sản phẩm <strong className="text-foreground">"{deleteTarget.name}"</strong>?
             </p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteTarget(null)}

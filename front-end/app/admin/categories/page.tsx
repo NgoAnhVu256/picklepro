@@ -16,6 +16,20 @@ export default function AdminCategoriesPage() {
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [formError, setFormError] = useState('')
+  const [slugError, setSlugError] = useState('')
+  const [slugEdited, setSlugEdited] = useState(false)
+
+  const generateSlug = (text: string) => {
+    return text.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+  }
+
+  const checkDuplicateSlug = (newSlug: string, currentId?: string) => {
+    if (!newSlug) return false
+    return categories.some(c => c.slug === newSlug && c.id !== currentId)
+  }
 
   const fetchCategories = async () => {
     setLoading(true)
@@ -31,6 +45,8 @@ export default function AdminCategoriesPage() {
     setEditing(null)
     setForm({ name: '', slug: '', description: '', image_url: '' })
     setFormError('')
+    setSlugError('')
+    setSlugEdited(false)
     setShowModal(true)
   }
 
@@ -38,6 +54,8 @@ export default function AdminCategoriesPage() {
     setEditing(c)
     setForm({ name: c.name, slug: c.slug ?? '', description: c.description ?? '', image_url: c.image_url ?? '' })
     setFormError('')
+    setSlugError('')
+    setSlugEdited(true)
     setShowModal(true)
   }
 
@@ -68,10 +86,17 @@ export default function AdminCategoriesPage() {
       setFormError('Tên danh mục không được để trống')
       return
     }
+    const finalSlug = form.slug || generateSlug(form.name)
+    if (checkDuplicateSlug(finalSlug, editing?.id)) {
+      setSlugError('Đường dẫn tĩnh (Slug) này đã tồn tại, vui lòng chọn tên khác!')
+      return
+    }
+    
     setFormError('')
+    setSlugError('')
     setSaving(true)
     const payload: any = { name: form.name, description: form.description }
-    if (form.slug) payload.slug = form.slug
+    payload.slug = finalSlug
     if (form.image_url) payload.image_url = form.image_url
     const url = editing ? `/api/admin/categories/${editing.id}` : '/api/admin/categories'
     const method = editing ? 'PUT' : 'POST'
@@ -193,7 +218,20 @@ export default function AdminCategoriesPage() {
             <div className="p-6 space-y-4">
               <div>
                 <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Tên danh mục *</label>
-                <input value={form.name} onChange={e => { setForm(f => ({...f, name: e.target.value})); setFormError(''); }}
+                <input value={form.name} onChange={e => { 
+                  const val = e.target.value
+                  setFormError('')
+                  setSlugError('')
+                  if (!slugEdited) {
+                    const newSlug = generateSlug(val)
+                    setForm(f => ({...f, name: val, slug: newSlug}))
+                    if (checkDuplicateSlug(newSlug, editing?.id)) {
+                      setSlugError('Slug tạo tự động bị trùng, vui lòng sửa lại thủ công!')
+                    }
+                  } else {
+                    setForm(f => ({...f, name: val}))
+                  }
+                }}
                   className={`w-full px-3 py-2.5 rounded-xl bg-muted border text-foreground focus:outline-none text-sm transition-all ${
                     formError ? 'border-red-500 focus:border-red-500 ring-1 ring-red-500/20' : 'border-border focus:border-lime'
                   }`} />
@@ -201,8 +239,20 @@ export default function AdminCategoriesPage() {
               </div>
               <div>
                 <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Đường dẫn tĩnh (Slug) - Tự động nếu để trống</label>
-                <input value={form.slug} onChange={e => setForm(f => ({...f, slug: e.target.value}))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm" />
+                <input value={form.slug} onChange={e => {
+                  setSlugEdited(true)
+                  const val = generateSlug(e.target.value) // Cố tình force chuẩn format slug
+                  setForm(f => ({...f, slug: val}))
+                  if (checkDuplicateSlug(val, editing?.id)) {
+                    setSlugError('Đường dẫn tĩnh này đã tồn tại!')
+                  } else {
+                    setSlugError('')
+                  }
+                }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-muted border text-foreground focus:outline-none text-sm transition-all ${
+                    slugError ? 'border-red-500 focus:border-red-500 ring-1 ring-red-500/20' : 'border-border focus:border-lime'
+                  }`} />
+                {slugError && <p className="text-red-500 text-xs mt-1.5 animate-in slide-in-from-top-1 px-1">⚠️ {slugError}</p>}
               </div>
               <div>
                 <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Mô tả</label>
