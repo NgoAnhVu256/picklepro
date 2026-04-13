@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/hooks/use-cart"
 import { createClient } from "@/lib/supabase/client"
@@ -84,11 +85,16 @@ export function Header() {
           <div className="flex items-center justify-between gap-4">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lime to-lime-dark flex items-center justify-center">
-                <span className="text-xl">🏓</span>
-              </div>
+              <Image
+                src="/logo.png"
+                alt="New Sport Logo"
+                width={44}
+                height={44}
+                className="rounded-xl"
+                priority
+              />
               <span className="text-2xl font-bold bg-gradient-to-r from-lime-dark to-lime bg-clip-text text-transparent">
-                PicklePro
+                New Sport
               </span>
             </Link>
 

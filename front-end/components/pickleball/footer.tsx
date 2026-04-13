@@ -2,13 +2,14 @@
 
 import { Facebook, Music, Send, MessageCircle } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 const footerLinks = [
   { label: "LIÊN HỆ", href: "/contact" },
   { label: "CHÍNH SÁCH BẢO HÀNH", href: "/warranty" },
   { label: "CHÍNH SÁCH BẢO MẬT", href: "/privacy" },
   { label: "ĐIỀU KHOẢN SỬ DỤNG", href: "/terms" },
-  { label: "PICKLEPRO SHOP", href: "/products" },
+  { label: "NEW SPORT SHOP", href: "/products" },
 ]
 
 const socialLinks = [
@@ -25,11 +26,9 @@ export function Footer() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lime to-lime-dark flex items-center justify-center">
-              <span className="text-xl">🏓</span>
-            </div>
+            <Image src="/logo.png" alt="New Sport Logo" width={40} height={40} className="rounded-xl" />
             <span className="text-2xl font-bold bg-gradient-to-r from-lime-dark to-lime bg-clip-text text-transparent">
-              PicklePro
+              New Sport
             </span>
           </Link>
 
@@ -66,8 +65,8 @@ export function Footer() {
         {/* Copyright */}
         <div className="mt-8 pt-6 border-t border-lime/10 text-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} PicklePro. Tất cả quyền được bảo lưu. 
-            <span className="text-lime-dark font-medium"> Copyright © by PicklePro. All rights reserved.</span>
+            © {new Date().getFullYear()} New Sport. Tất cả quyền được bảo lưu. 
+            <span className="text-lime-dark font-medium"> Copyright © by New Sport. All rights reserved.</span>
           </p>
         </div>
       </div>
