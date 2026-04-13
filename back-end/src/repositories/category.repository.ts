@@ -10,7 +10,7 @@ export class CategoryRepository {
     const { data, error } = await supabaseAdmin
       .from('categories')
       .select('*')
-      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false })
 
     if (error) throw error
     return data ?? []

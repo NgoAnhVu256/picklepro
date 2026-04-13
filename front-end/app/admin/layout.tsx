@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -76,8 +77,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Logo */}
       <div className="p-5 border-b border-border">
         <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-lime to-lime-dark flex items-center justify-center">
-            <span className="text-lg">🏓</span>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-white shrink-0 shadow-sm border border-border">
+            <Image src="/logo.png" alt="PicklePro" width={40} height={40} className="object-cover" />
           </div>
           <div>
             <p className="font-bold text-foreground text-sm">PicklePro</p>

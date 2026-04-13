@@ -100,7 +100,6 @@ export async function POST(req: NextRequest) {
             const imageObjects = imagesToInsert.map((url, idx) => ({
               product_id: newProduct.id,
               url,
-              sort_order: idx,
               is_primary: idx === 0,
             }))
             

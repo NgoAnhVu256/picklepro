@@ -57,7 +57,7 @@ export async function Categories() {
   const { data: categoriesData } = await supabaseAdmin
     .from('categories')
     .select('*')
-    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false })
 
   const categories = categoriesData ?? []
 

@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { ChatWidgetWrapper } from '@/components/pickleball/chat-widget-wrapper'
 import { ZaloWidgetWrapper } from '@/components/pickleball/zalo-widget-wrapper'
 import { Providers } from '@/components/providers'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -22,9 +23,6 @@ export const metadata: Metadata = {
   authors: [{ name: 'PicklePro', url: APP_URL }],
   creator: 'PicklePro',
   publisher: 'PicklePro',
-  icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏓</text></svg>",
-  },
   robots: {
     index: true,
     follow: true,
@@ -101,6 +99,7 @@ export default function RootLayout({
           {children}
           <ChatWidgetWrapper />
           <ZaloWidgetWrapper />
+          <Toaster position="bottom-right" richColors />
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </Providers>
       </body>

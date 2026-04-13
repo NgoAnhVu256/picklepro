@@ -57,7 +57,6 @@ export interface Category {
   slug: string
   image_url: string | null
   description: string | null
-  sort_order: number
   created_at: string
 }
 

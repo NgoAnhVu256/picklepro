@@ -51,6 +51,12 @@ export async function POST(request: NextRequest) {
     const ext = file.name.split('.').pop() || 'jpg'
     const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
+    // Create bucket if not exists recursively
+    const { data: buckets } = await supabaseAdmin.storage.listBuckets()
+    if (!buckets?.some(b => b.name === BUCKET)) {
+      await supabaseAdmin.storage.createBucket(BUCKET, { public: true })
+    }
+
     // Upload lên Supabase Storage
     const arrayBuffer = await file.arrayBuffer()
     const { data, error } = await supabaseAdmin.storage
@@ -63,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('[Upload] Error:', error)
-      return NextResponse.json({ error: 'Upload thất bại: ' + error.message }, { status: 500 })
+      return NextResponse.json({ error: 'Lỗi từ Supabase: ' + error.message }, { status: 400 })
     }
 
     // Lấy public URL

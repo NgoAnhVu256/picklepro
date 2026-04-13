@@ -2,17 +2,20 @@
 
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, FolderOpen, AlertTriangle, Upload, ImageIcon, X } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<any>(null)
-  const [form, setForm] = useState({ name: '', slug: '', description: '', sort_order: '0', image_url: '' })
+  const [form, setForm] = useState({ name: '', slug: '', description: '', image_url: '' })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<any>(null)
   const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const [formError, setFormError] = useState('')
 
   const fetchCategories = async () => {
     setLoading(true)
@@ -26,13 +29,15 @@ export default function AdminCategoriesPage() {
 
   const openAdd = () => {
     setEditing(null)
-    setForm({ name: '', slug: '', description: '', sort_order: String(categories.length + 1), image_url: '' })
+    setForm({ name: '', slug: '', description: '', image_url: '' })
+    setFormError('')
     setShowModal(true)
   }
 
   const openEdit = (c: any) => {
     setEditing(c)
-    setForm({ name: c.name, slug: c.slug ?? '', description: c.description ?? '', sort_order: String(c.sort_order ?? 0), image_url: c.image_url ?? '' })
+    setForm({ name: c.name, slug: c.slug ?? '', description: c.description ?? '', image_url: c.image_url ?? '' })
+    setFormError('')
     setShowModal(true)
   }
 
@@ -46,32 +51,62 @@ export default function AdminCategoriesPage() {
     try {
       const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
       const data = await res.json()
-      if (data.url) setForm(f => ({ ...f, image_url: data.url }))
-      else alert(data.error || 'Upload thất bại')
-    } catch { alert('Lỗi upload') }
+      if (data.url) {
+        setForm(f => ({ ...f, image_url: data.url }))
+        toast.success('Tải ảnh thành công!')
+      } else {
+        toast.error(data.error || 'Upload thất bại')
+      }
+    } catch { 
+      toast.error('Lỗi kết nối khi upload') 
+    }
     setUploading(false)
   }
 
   const handleSave = async () => {
+    if (!form.name.trim()) {
+      setFormError('Tên danh mục không được để trống')
+      return
+    }
+    setFormError('')
     setSaving(true)
-    const payload: any = { name: form.name, description: form.description, sort_order: Number(form.sort_order) }
+    const payload: any = { name: form.name, description: form.description }
     if (form.slug) payload.slug = form.slug
     if (form.image_url) payload.image_url = form.image_url
     const url = editing ? `/api/admin/categories/${editing.id}` : '/api/admin/categories'
     const method = editing ? 'PUT' : 'POST'
-    await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    try {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Lỗi server')
+      }
+      toast.success(editing ? 'Cập nhật danh mục thành công' : 'Thêm mới danh mục thành công')
+      setShowModal(false)
+      fetchCategories()
+    } catch (error: any) {
+      toast.error(error.message || 'Lỗi khi lưu danh mục')
+    }
     setSaving(false)
-    setShowModal(false)
-    fetchCategories()
   }
 
   const handleDelete = async () => {
     if (!deleteTarget) return
     setDeleting(true)
-    await fetch(`/api/admin/categories/${deleteTarget.id}`, { method: 'DELETE' })
+    setDeleteError('')
+    try {
+      const res = await fetch(`/api/admin/categories/${deleteTarget.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Không thể xóa danh mục')
+      }
+      toast.success('Xóa danh mục thành công')
+      setDeleteTarget(null)
+      fetchCategories()
+    } catch (error: any) {
+      setDeleteError(error.message)
+    }
     setDeleting(false)
-    setDeleteTarget(null)
-    fetchCategories()
   }
 
   return (
@@ -90,7 +125,7 @@ export default function AdminCategoriesPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
-              {['Mã danh mục', 'Hình ảnh', 'Tên danh mục', 'Slug', 'Thứ tự', 'Số SP', ''].map(h => (
+              {['Mã danh mục', 'Hình ảnh', 'Tên danh mục', 'Slug', 'Số SP', ''].map(h => (
                 <th key={h} className="text-left text-muted-foreground font-medium px-5 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -128,8 +163,9 @@ export default function AdminCategoriesPage() {
                   {c.description && <p className="text-muted-foreground text-xs">{c.description}</p>}
                 </td>
                 <td className="px-5 py-3 text-muted-foreground font-mono text-xs">{c.slug}</td>
-                <td className="px-5 py-3 text-secondary-foreground">{c.sort_order}</td>
-                <td className="px-5 py-3 text-secondary-foreground">{c.products?.[0]?.count ?? 0}</td>
+                <td className="px-5 py-3 text-secondary-foreground text-center">
+                  <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-muted text-xs font-bold text-foreground">{c.products?.[0]?.count ?? 0}</span>
+                </td>
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2">
                     <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg text-muted-foreground hover:text-blue-400 hover:bg-blue-400/10 transition-all">
@@ -157,8 +193,11 @@ export default function AdminCategoriesPage() {
             <div className="p-6 space-y-4">
               <div>
                 <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Tên danh mục *</label>
-                <input value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm" />
+                <input value={form.name} onChange={e => { setForm(f => ({...f, name: e.target.value})); setFormError(''); }}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-muted border text-foreground focus:outline-none text-sm transition-all ${
+                    formError ? 'border-red-500 focus:border-red-500 ring-1 ring-red-500/20' : 'border-border focus:border-lime'
+                  }`} />
+                {formError && <p className="text-red-500 text-xs mt-1.5 animate-in slide-in-from-top-1 px-1">⚠️ {formError}</p>}
               </div>
               <div>
                 <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Đường dẫn tĩnh (Slug) - Tự động nếu để trống</label>
@@ -168,11 +207,6 @@ export default function AdminCategoriesPage() {
               <div>
                 <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Mô tả</label>
                 <input value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))}
-                  className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm" />
-              </div>
-              <div>
-                <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Thứ tự hiển thị</label>
-                <input type="number" value={form.sort_order} onChange={e => setForm(f => ({...f, sort_order: e.target.value}))}
                   className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm" />
               </div>
               {/* Image Upload */}
@@ -228,6 +262,13 @@ export default function AdminCategoriesPage() {
                 <p className="text-muted-foreground text-xs mt-0.5">Thao tác này không thể hoàn tác</p>
               </div>
             </div>
+            
+            {deleteError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm animate-in zoom-in-95">
+                ❌ {deleteError}
+              </div>
+            )}
+            
             <p className="text-secondary-foreground text-sm mb-6">Xóa danh mục <strong className="text-foreground">"{deleteTarget.name}"</strong>? Nếu có sản phẩm trong danh mục này, thao tác sẽ thất bại.</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteTarget(null)}
