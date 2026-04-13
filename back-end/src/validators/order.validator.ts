@@ -18,7 +18,7 @@ export const createOrderSchema = z.object({
       /^(0|\+84)(3[2-9]|5[2689]|7[06-9]|8[0-9]|9[0-9])[0-9]{7}$/,
       'Số điện thoại không hợp lệ. Vui lòng nhập đúng định dạng Việt Nam (VD: 0912 345 678)'
     ),
-  paymentMethod: z.enum(['stripe', 'cod'], {
+  paymentMethod: z.enum(['stripe', 'cod', 'vnpay', 'bank_transfer'], {
     errorMap: () => ({ message: 'Phương thức thanh toán không hợp lệ' }),
   }),
 })

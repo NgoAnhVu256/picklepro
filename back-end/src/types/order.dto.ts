@@ -17,7 +17,7 @@ export interface CreateOrderDTO {
   shippingName: string
   shippingAddress: string
   shippingPhone: string
-  paymentMethod: 'stripe' | 'cod'
+  paymentMethod: 'stripe' | 'cod' | 'vnpay' | 'bank_transfer'
 }
 
 export interface UpdateOrderStatusDTO {
