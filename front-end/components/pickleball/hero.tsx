@@ -14,7 +14,7 @@ const slides = [
     description: "Khám phá bộ sưu tập vợt & phụ kiện Pickleball cao cấp từ các thương hiệu hàng đầu thế giới.",
     buttonText: "Khám phá ngay",
     buttonGradient: "linear-gradient(135deg, #5054FE, #9B56FF)",
-    bgGradient: "from-purple-100/40 via-blue-100/20 to-pink-100/30",
+    bgGradient: "from-purple-100 via-blue-50 to-pink-100",
     href: "/products",
   },
   {
@@ -25,7 +25,7 @@ const slides = [
     description: "Vợt #1 thế giới — Sử dụng bởi tay vợt số 1 Ben Johns. Carbon fiber, spin tối đa.",
     buttonText: "Xem ngay",
     buttonGradient: "linear-gradient(135deg, #FF6B6B, #FF8E53)",
-    bgGradient: "from-orange-100/40 via-red-100/20 to-yellow-100/30",
+    bgGradient: "from-orange-100 via-red-50 to-yellow-100",
     href: "/products?brand=JOOLA",
   },
   {
@@ -36,7 +36,7 @@ const slides = [
     description: "Mua vợt + túi + grip — tiết kiệm ngay 50%. Số lượng có hạn, nhanh tay lên!",
     buttonText: "Mua combo",
     buttonGradient: "linear-gradient(135deg, #11998E, #38EF7D)",
-    bgGradient: "from-green-100/40 via-teal-100/20 to-lime-100/30",
+    bgGradient: "from-green-100 via-teal-50 to-lime-100",
     href: "/products",
   },
   {
@@ -47,7 +47,7 @@ const slides = [
     description: "Giảm thêm 10% mọi đơn hàng, tích điểm đổi quà, giao hàng miễn phí.",
     buttonText: "Đăng ký ngay",
     buttonGradient: "linear-gradient(135deg, #667EEA, #764BA2)",
-    bgGradient: "from-violet-100/40 via-purple-100/20 to-pink-100/30",
+    bgGradient: "from-violet-100 via-purple-50 to-pink-100",
     href: "/auth/register",
   },
 ]
