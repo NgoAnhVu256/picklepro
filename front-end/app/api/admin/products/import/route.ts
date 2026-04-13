@@ -65,6 +65,18 @@ export async function POST(req: NextRequest) {
           tags: typeof row.tags === 'string' ? row.tags.split(';').map((t: string) => t.trim()).filter(Boolean) : (row.tags || []),
           rating: Number(row.rating) || 4.5,
           review_count: Number(row.review_count) || 0,
+          images: [],
+        }
+
+        // Handle images: image_url (single) or images (semicolon-separated URLs)
+        if (row.image_url) {
+          productData.images = [row.image_url.trim()]
+        }
+        if (row.images) {
+          const imgs = typeof row.images === 'string'
+            ? row.images.split(';').map((u: string) => u.trim()).filter(Boolean)
+            : row.images
+          productData.images = [...productData.images, ...imgs]
         }
 
         if (!productData.name || !productData.price) {

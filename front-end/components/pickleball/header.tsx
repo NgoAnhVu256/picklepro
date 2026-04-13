@@ -12,12 +12,11 @@ import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
 const navItems = [
-  { label: "VỢT PICKLEBALL", href: "/products?category=vot-pickleball", icon: "🏓", gradient: "linear-gradient(135deg, #FF6B6B, #FF8E53)" },
-  { label: "PHỤ KIỆN", href: "/products?category=phu-kien", icon: "🎒", gradient: "linear-gradient(135deg, #5054FE, #9B56FF)" },
-  { label: "BỘ SƯU TẬP", href: "/products", icon: "⭐", gradient: "linear-gradient(135deg, #F7971E, #FFD200)" },
-  { label: "KHUYẾN MÃI", href: "/products", icon: "🔥", gradient: "linear-gradient(135deg, #FC5C7D, #6A82FB)" },
-  { label: "TIN TỨC", href: "#", icon: "📰", gradient: "linear-gradient(135deg, #11998E, #38EF7D)" },
-  { label: "CỘNG ĐỒNG", href: "#", icon: "👥", gradient: "linear-gradient(135deg, #667EEA, #764BA2)" },
+  { label: "VỢT PICKLEBALL", href: "/products?category=vot-pickleball", gradient: "linear-gradient(135deg, #FF6B6B, #FF8E53)" },
+  { label: "PHỤ KIỆN", href: "/products?category=phu-kien", gradient: "linear-gradient(135deg, #5054FE, #9B56FF)" },
+  { label: "BỘ SƯU TẬP", href: "/products", gradient: "linear-gradient(135deg, #F7971E, #FFD200)" },
+  { label: "TIN TỨC", href: "#",  gradient: "linear-gradient(135deg, #11998E, #38EF7D)" },
+  { label: "CỘNG ĐỒNG", href: "#",  gradient: "linear-gradient(135deg, #667EEA, #764BA2)" },
 ]
 
 export function Header() {
@@ -165,26 +164,28 @@ export function Header() {
           </form>
         </div>
 
-        {/* Navigation — Active Tab with unique Gradient colors */}
-        <nav className={`border-t border-lime/10 ${isMenuOpen ? 'block' : 'hidden md:block'}`}>
+        {/* Navigation — Underline active/hover style */}
+        <nav className={`border-t border-lime/10 bg-white ${isMenuOpen ? 'block' : 'hidden md:block'}`}>
           <div className="container mx-auto px-4">
-            <ul className="flex flex-col md:flex-row md:items-center md:justify-center gap-1 md:gap-1 py-2 md:py-0">
+            <ul className="flex flex-col md:flex-row md:items-center md:justify-center gap-0 py-0">
               {navItems.map((item, index) => {
                 const isActive = activeTab === index
                 return (
                   <li key={item.label}>
                     <Link
                       href={item.href}
-                      className={`flex items-center gap-2 px-4 py-2.5 md:py-3 text-sm font-semibold rounded-full md:rounded-xl transition-all duration-200 ${
+                      className={`relative flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-all duration-200 ${
                         isActive
-                          ? 'text-white shadow-lg scale-[1.02]'
-                          : 'text-foreground/70 hover:text-foreground hover:bg-gray-100/80'
+                          ? 'text-[#5054FE]'
+                          : 'text-gray-600 hover:text-[#5054FE]'
                       }`}
-                      style={isActive ? { background: item.gradient } : undefined}
                       onClick={() => { setActiveTab(index); setIsMenuOpen(false) }}
                     >
-                      <span className="text-base">{item.icon}</span>
                       <span>{item.label}</span>
+                      {/* Underline */}
+                      <span className={`absolute bottom-0 left-2 right-2 h-[3px] rounded-full transition-all duration-300 ${
+                        isActive ? 'bg-[#5054FE] opacity-100' : 'bg-[#5054FE] opacity-0 group-hover:opacity-100'
+                      }`} style={isActive ? { background: item.gradient } : undefined} />
                     </Link>
                   </li>
                 )

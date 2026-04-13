@@ -1,49 +1,43 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { X } from "lucide-react"
 
 const announcements = [
-  "🔥 FLASH SALE - Giảm đến 50% tất cả vợt JOOLA — Chỉ hôm nay!",
-  "🚚 Miễn phí vận chuyển cho đơn hàng từ 500.000đ trở lên",
-  "🏆 PicklePro — Cửa hàng Pickleball uy tín số 1 Việt Nam",
-  "🎁 Tặng Grip cao cấp khi mua vợt trên 3.000.000đ",
-  "⭐ Đăng ký thành viên VIP — Giảm thêm 10% mọi đơn hàng",
+  "🔥 FLASH SALE — Giảm đến 50% tất cả vợt JOOLA!",
+  "🚚 Miễn phí vận chuyển cho đơn hàng từ 500K",
+  "🏆 PicklePro — Cửa hàng Pickleball uy tín #1 Việt Nam",
+  "🎁 Tặng Grip cao cấp khi mua vợt trên 3 triệu",
+  "⭐ Đăng ký VIP — Giảm thêm 10% mọi đơn hàng",
 ]
 
-export function AnnouncementBar() {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isVisible, setIsVisible] = useState(true)
+// Repeat text for seamless loop
+const marqueeText = announcements.join("     ●     ")
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % announcements.length)
-    }, 4000)
-    return () => clearInterval(interval)
-  }, [])
+export function AnnouncementBar() {
+  const [isVisible, setIsVisible] = useState(true)
 
   if (!isVisible) return null
 
   return (
     <div
-      className="relative overflow-hidden py-2.5 px-4"
+      className="relative overflow-hidden py-2 px-4"
       style={{ background: "linear-gradient(90deg, #EDFEB9, #B2FF73, #EDFEB9)" }}
     >
-      <div className="container mx-auto flex items-center justify-center gap-3">
-        <div className="overflow-hidden flex-1 text-center">
-          <div
-            className="transition-all duration-500 ease-in-out"
-            key={currentIndex}
-            style={{ animation: "slideUp 0.5s ease-out" }}
-          >
-            <p className="text-sm font-semibold text-black tracking-wide whitespace-nowrap">
-              {announcements[currentIndex]}
-            </p>
+      <div className="flex items-center">
+        {/* Marquee - scrolling horizontally */}
+        <div className="flex-1 overflow-hidden">
+          <div className="marquee-track">
+            <span className="marquee-content text-sm font-semibold text-black whitespace-nowrap">
+              {marqueeText}     ●     {marqueeText}
+            </span>
           </div>
         </div>
+
+        {/* Close */}
         <button
           onClick={() => setIsVisible(false)}
-          className="shrink-0 p-1 rounded-full hover:bg-black/10 transition-colors"
+          className="shrink-0 ml-3 p-1 rounded-full hover:bg-black/10 transition-colors"
           aria-label="Đóng thông báo"
         >
           <X className="h-4 w-4 text-black/60" />
@@ -51,15 +45,21 @@ export function AnnouncementBar() {
       </div>
 
       <style jsx>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(100%);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        .marquee-track {
+          display: flex;
+          width: max-content;
+          animation: marquee 40s linear infinite;
+        }
+        .marquee-content {
+          display: inline-block;
+          padding-right: 60px;
+        }
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .marquee-track:hover {
+          animation-play-state: paused;
         }
       `}</style>
     </div>
