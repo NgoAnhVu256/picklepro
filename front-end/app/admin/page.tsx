@@ -37,12 +37,12 @@ export default function AdminDashboard() {
       <div className="space-y-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 rounded-2xl bg-gray-800/50 animate-pulse" />
+            <div key={i} className="h-32 rounded-2xl bg-gray-200 dark:bg-gray-800/50 animate-pulse" />
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-64 rounded-2xl bg-gray-800/50 animate-pulse" />
-          <div className="h-64 rounded-2xl bg-gray-800/50 animate-pulse" />
+          <div className="h-64 rounded-2xl bg-gray-200 dark:bg-gray-800/50 animate-pulse" />
+          <div className="h-64 rounded-2xl bg-gray-200 dark:bg-gray-800/50 animate-pulse" />
         </div>
       </div>
     )
@@ -67,8 +67,8 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       {/* Page Title */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-gray-400 text-sm mt-1">Tổng quan hoạt động cửa hàng PicklePro</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Tổng quan hoạt động cửa hàng PicklePro</p>
       </div>
 
       {/* Stat Cards */}
@@ -86,8 +86,8 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Revenue Chart */}
-        <div className="xl:col-span-2 rounded-2xl bg-gray-900 border border-gray-800 p-6">
-          <h2 className="text-white font-bold mb-6">Doanh thu 6 tháng gần nhất</h2>
+        <div className="xl:col-span-2 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+          <h2 className="text-gray-900 dark:text-white font-bold mb-6">Doanh thu 6 tháng gần nhất</h2>
           {monthlyRevenue.length === 0 ? (
             <div className="flex items-center justify-center h-40 text-gray-500 text-sm">Chưa có dữ liệu</div>
           ) : (
@@ -111,20 +111,20 @@ export default function AdminDashboard() {
         </div>
 
         {/* Top Products */}
-        <div className="rounded-2xl bg-gray-900 border border-gray-800 p-6">
-          <h2 className="text-white font-bold mb-4">Top sản phẩm bán chạy</h2>
+        <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+          <h2 className="text-gray-900 dark:text-white font-bold mb-4">Top sản phẩm bán chạy</h2>
           <div className="space-y-3">
             {topProducts.length === 0 ? (
               <p className="text-gray-500 text-sm text-center py-8">Chưa có dữ liệu</p>
             ) : topProducts.map((p: any, i: number) => (
               <div key={p.slug} className="flex items-center gap-3">
                 <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
-                  i === 0 ? 'bg-yellow-500/20 text-yellow-400' :
-                  i === 1 ? 'bg-gray-500/20 text-gray-400' :
-                  i === 2 ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-800 text-gray-500'
+                  i === 0 ? 'bg-yellow-500/20 text-yellow-500 dark:text-yellow-400' :
+                  i === 1 ? 'bg-gray-500/20 text-gray-500 dark:text-gray-400' :
+                  i === 2 ? 'bg-orange-500/20 text-orange-500 dark:text-orange-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
                 }`}>{i + 1}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium truncate">{p.name}</p>
+                  <p className="text-gray-900 dark:text-white text-sm font-medium truncate">{p.name}</p>
                   <p className="text-gray-500 text-xs">{p.qty} đã bán · {formatVND(p.revenue)}</p>
                 </div>
               </div>
@@ -134,17 +134,17 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Orders */}
-      <div className="rounded-2xl bg-gray-900 border border-gray-800 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-          <h2 className="text-white font-bold">Đơn hàng gần đây</h2>
-          <Link href="/admin/orders" className="text-lime text-sm hover:underline flex items-center gap-1">
+      <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+          <h2 className="text-gray-900 dark:text-white font-bold">Đơn hàng gần đây</h2>
+          <Link href="/admin/orders" className="text-lime-dark dark:text-lime text-sm hover:underline flex items-center gap-1">
             Xem tất cả <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-800">
+              <tr className="border-b border-gray-200 dark:border-gray-800">
                 <th className="text-left text-gray-500 font-medium px-6 py-3">Mã đơn</th>
                 <th className="text-left text-gray-500 font-medium px-6 py-3">Khách hàng</th>
                 <th className="text-left text-gray-500 font-medium px-6 py-3 hidden sm:table-cell">Tổng tiền</th>
@@ -157,14 +157,14 @@ export default function AdminDashboard() {
               ) : recentOrders.map((order: any) => {
                 const s = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending
                 return (
-                  <tr key={order.id} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
+                  <tr key={order.id} className="border-b border-gray-100 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                     <td className="px-6 py-3">
-                      <Link href={`/admin/orders/${order.id}`} className="text-lime hover:underline font-mono text-xs">
+                      <Link href={`/admin/orders/${order.id}`} className="text-lime-dark dark:text-lime hover:underline font-mono text-xs">
                         #{order.id.slice(0, 8)}
                       </Link>
                     </td>
-                    <td className="px-6 py-3 text-white">{order.shipping_name}</td>
-                    <td className="px-6 py-3 text-white hidden sm:table-cell font-medium">{formatVND(order.total_amount)}</td>
+                    <td className="px-6 py-3 text-gray-900 dark:text-white">{order.shipping_name}</td>
+                    <td className="px-6 py-3 text-gray-900 dark:text-white hidden sm:table-cell font-medium">{formatVND(order.total_amount)}</td>
                     <td className="px-6 py-3">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${s.color}`}>
                         <s.icon className="h-3 w-3" />
