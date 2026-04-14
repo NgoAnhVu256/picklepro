@@ -39,7 +39,7 @@ export async function Categories() {
               >
                 {/* App Icon Area */}
                 <div className="w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-[1.25rem] bg-white border border-gray-100 shadow-sm flex items-center justify-center transform group-hover:scale-105 transition-all duration-300 overflow-hidden">
-                   <img src={imgSrc} alt={category.name} className="w-[85%] h-[85%] object-contain" />
+                   <img src={imgSrc} alt={category.name} className="w-full h-full object-cover" />
                 </div>
                 {/* Text Label */}
                 <span className="text-[12px] md:text-sm font-semibold text-black text-center leading-tight">
