@@ -19,8 +19,8 @@ export default function Home() {
         <Hero />
         <Categories />
         <ProductGrid />
-        <BlogSection />
         <PromoBanner />
+        <BlogSection />
       </main>
       <Footer />
     </div>

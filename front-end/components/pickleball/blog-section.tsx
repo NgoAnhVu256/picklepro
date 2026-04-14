@@ -48,68 +48,67 @@ export function BlogSection() {
   return (
     <section
       id="home-blog-section"
-      className="py-12 sm:py-20"
-      style={{ background: "linear-gradient(180deg, #04002A, #362012, #462915)" }}
+      className="py-12"
+      style={{ background: "linear-gradient(180deg, #100a16 0%, #150a0a 50%, #2f1b0d 100%)" }}
     >
-      <div className="container mx-auto px-4">
-        {/* Section Header */}
-        <div className="text-center mb-10 sm:mb-14">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3">
-            Bài Viết <span className="text-transparent bg-clip-text" style={{ backgroundImage: "linear-gradient(135deg, #B2FF73, #EDFEB9)" }}>Nổi Bật</span>
-          </h2>
-          <p className="text-sm sm:text-base text-gray-400 max-w-2xl mx-auto">
-            Cập nhật kiến thức, xu hướng và chia sẻ từ cộng đồng Pickleball
-          </p>
-        </div>
-
+      <div className="container mx-auto px-4 lg:px-8">
+        
         {/* Blog Grid - Dynamic layout based on categories size */}
-        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${Math.min(4, Math.max(1, displayCategories.length))} gap-6 sm:gap-8`}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${Math.min(4, Math.max(1, displayCategories.length))} gap-x-8 gap-y-12`}>
           {displayCategories.map((category) => (
-            <div key={category.name}>
+            <div key={category.name} className="flex flex-col">
               {/* Category Header */}
-              <h3 className="text-lg font-bold text-white mb-4 pb-2 border-b border-white/10 italic">
+              <h3 className="text-lg font-semibold text-[#CFA9FD] mb-6 pb-3 border-b border-[#CFA9FD]/20">
                 {category.name}
               </h3>
 
               {/* Articles */}
-              <div className="space-y-4">
+              <div className="space-y-5 flex-1">
                 {category.articles.slice(0, 4).map((article) => (
                   <Link
                     key={article.id}
                     href={`/blogs/${article.slug}`}
-                    className="group flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-all duration-200"
+                    className="group flex items-center gap-4 transition-all duration-200"
                   >
-                    {/* Thumbnail */}
-                    <div className="w-16 h-16 shrink-0 rounded-lg bg-gradient-to-br from-white/10 to-white/5 border border-white/10 overflow-hidden relative flex items-center justify-center text-2xl shadow-md shadow-black/20 group-hover:shadow-lg group-hover:shadow-purple-500/10 transition-shadow">
+                    {/* Thumbnail - 16:9 Aspect Ratio like the image */}
+                    <div className="w-[120px] shrink-0 aspect-[16/9] rounded-lg bg-[#2a2a2a] overflow-hidden relative shadow-md">
                       {article.thumbnail?.startsWith('http') ? (
-                        <Image src={article.thumbnail} alt="" fill className="object-cover" />
+                        <Image src={article.thumbnail} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
-                        article.thumbnail || '📰'
+                        <div className="w-full h-full flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-500">📰</div>
                       )}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium text-gray-200 line-clamp-2 group-hover:text-white transition-colors leading-snug">
+                      <h4 className="text-[13px] md:text-sm font-medium text-gray-100 line-clamp-3 group-hover:text-white transition-colors leading-snug">
                         {article.title}
                       </h4>
-                      <span className="text-xs text-gray-500 mt-1 block">
-                        {format(new Date(article.created_at), 'dd/MM/yyyy', { locale: vi })}
-                      </span>
                     </div>
                   </Link>
                 ))}
-
-                {/* Xem thêm */}
-                {category.articles.length > 4 && (
-                  <Link
-                    href="#"
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-white transition-colors pt-1 pl-2"
-                  >
-                    Xem thêm <ArrowRight className="h-3 w-3" />
-                  </Link>
-                )}
               </div>
+
+              {/* Xem thêm button at the bottom of the column */}
+              {category.articles.length > 4 ? (
+                <div className="mt-6">
+                  <Link
+                    href={`/products?category=${category.name}`}
+                    className="inline-flex items-center text-xs font-medium text-gray-300 bg-white/10 hover:bg-white/20 transition-colors px-4 py-1.5 rounded-full"
+                  >
+                    Xem thêm
+                  </Link>
+                </div>
+              ) : (
+                <div className="mt-6">
+                  <Link
+                    href={`/blogs`}
+                    className="inline-flex items-center text-xs font-medium text-gray-300 bg-white/10 hover:bg-white/20 transition-colors px-4 py-1.5 rounded-full"
+                  >
+                    Xem thêm
+                  </Link>
+                </div>
+              )}
             </div>
           ))}
         </div>
