@@ -2,101 +2,84 @@
 
 import { useState, useEffect } from 'react'
 import { X, Megaphone } from 'lucide-react'
+import Link from 'next/link'
 
-interface Announcement {
+interface Slide {
   id: string
-  text: string
-  link: string | null
+  bg_gradient: string
+  href: string
   is_active: boolean
+  badge: string
+  title?: string
 }
-
-const FALLBACK = [
-  'FLASH SALE — Giảm đến 50% tất cả vợt JOOLA! 🏓',
-  'Miễn phí vận chuyển cho đơn hàng từ 500K 🚚',
-  'PicklePro — Cửa hàng Pickleball uy tín #1 Việt Nam 🏆',
-  'Tặng Grip cao cấp khi mua vợt trên 3 triệu 🎁',
-  'Đăng ký VIP — Giảm thêm 10% mọi đơn hàng ✨',
-]
-
-const GRADIENTS = [
-  'linear-gradient(90deg, #7C3AED, #EC4899)', // Purple -> Pink
-  'linear-gradient(90deg, #F97316, #EAB308)', // Orange -> Yellow
-  'linear-gradient(90deg, #10B981, #3B82F6)', // Green -> Blue
-  'linear-gradient(90deg, #EC4899, #F97316)', // Pink -> Orange
-  'linear-gradient(90deg, #3B82F6, #7C3AED)'  // Blue -> Purple
-]
 
 export function AnnouncementBar() {
   const [isVisible, setIsVisible] = useState(true)
-  const [announcements, setAnnouncements] = useState<string[]>([])
+  const [slides, setSlides] = useState<Slide[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [fade, setFade] = useState(true) // For animation
+  const [fade, setFade] = useState(true)
 
   useEffect(() => {
-    fetch('/api/admin/announcements')
+    fetch('/api/admin/slides')
       .then(r => r.json())
       .then(data => {
-        const active = (data.announcements ?? [])
-          .filter((a: Announcement) => a.is_active)
-          .map((a: Announcement) => a.text)
-        setAnnouncements(active.length > 0 ? active : FALLBACK)
+        const active = (data.slides ?? [])
+          .filter((s: Slide) => s.is_active && s.badge === 'announcement')
+          // Sort by order or just leave as is since API returns ordered
+        setSlides(active)
       })
-      .catch(() => setAnnouncements(FALLBACK))
+      .catch(() => {})
   }, [])
 
-  const items = announcements.length > 0 ? announcements : FALLBACK
-
   useEffect(() => {
-    if (items.length <= 1) return
+    if (slides.length <= 1) return
 
     const timer = setInterval(() => {
-      setFade(false) // Start fade out
-      
+      setFade(false)
       setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % items.length)
-        setFade(true) // Fade back in
-      }, 300) // 300ms for text transition
-    }, 3000) // Change every 3s
+        setCurrentIndex((prev) => (prev + 1) % slides.length)
+        setFade(true)
+      }, 300)
+    }, 4000)
 
     return () => clearInterval(timer)
-  }, [items.length])
+  }, [slides.length])
 
   if (!isVisible) return null
 
-  // Mượt mà đổi gradient theo index
-  const currentGradient = GRADIENTS[currentIndex % GRADIENTS.length]
-  const currentItem = items[currentIndex]
-  const isImage = currentItem?.startsWith('http') || currentItem?.startsWith('/')
+  const currentSlide = slides.length > 0 ? slides[currentIndex] : null
+  const imageSrc = currentSlide?.bg_gradient
+
+  const content = slides.length > 0 ? (
+    <div className={`relative w-full max-h-[80px] sm:max-h-[100px] overflow-hidden bg-black transition-opacity duration-300 flex items-center justify-center ${fade ? 'opacity-100' : 'opacity-0'}`}>
+       {imageSrc ? (
+         <img src={imageSrc} alt={currentSlide?.title || "Announcement Banner"} className="w-full h-full object-cover max-h-[80px] sm:max-h-[100px]" />
+       ) : (
+         <div className="py-3 px-4 w-full flex justify-center items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-sm">
+            <Megaphone className="w-4 h-4" /> {currentSlide?.title || 'Thông báo mới nhất từ PicklePro'}
+         </div>
+       )}
+    </div>
+  ) : (
+    <div className="py-2.5 px-4 w-full flex justify-center items-center gap-2 text-white font-bold text-sm transition-opacity duration-300" style={{ background: 'linear-gradient(90deg, #F97316, #EAB308)' }}>
+      <Megaphone className="w-4 h-4" /> CHÀO MỪNG BẠN ĐẾN VỚI PICKLEPRO SHOP
+    </div>
+  )
 
   return (
-    <div
-      className={`relative overflow-hidden transition-all duration-700 ease-in-out ${!isImage && 'py-2.5 px-4 shadow-sm'}`}
-      style={!isImage ? { background: currentGradient } : { background: '#000' }}
-    >
-      {isImage ? (
-         <img src={currentItem} alt="Announcement Banner" className={`w-full max-h-[80px] object-cover transition-opacity duration-300 ${fade ? 'opacity-100' : 'opacity-0'}`} />
+    <div className="sticky top-0 z-[60] w-full shadow-md transition-all duration-700 ease-in-out">
+      {currentSlide?.href ? (
+        <Link href={currentSlide.href} className="block w-full">
+          {content}
+        </Link>
       ) : (
-        <div className="container mx-auto">
-          <div className="flex items-center justify-between gap-3 max-w-[1200px] mx-auto">
-            {/* Icon */}
-            <Megaphone className="h-4 w-4 text-white shrink-0 hidden sm:block" />
-
-            {/* Central Message */}
-            <div className="flex-1 flex justify-center overflow-hidden">
-              <span 
-                className={`text-sm font-semibold text-white whitespace-nowrap text-center transition-opacity duration-300 ${fade ? 'opacity-100' : 'opacity-0'}`}
-              >
-                {currentItem}
-              </span>
-            </div>
-          </div>
-        </div>
+        content
       )}
       
       {/* Close button */}
       <button
-        onClick={() => setIsVisible(false)}
-        className={`absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full text-white/90 hover:text-white transition-colors z-10 ${isImage ? 'bg-black/30 hover:bg-black/50' : 'hover:bg-white/20'}`}
+        onClick={(e) => { e.preventDefault(); setIsVisible(false) }}
+        className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors z-[70]"
         aria-label="Đóng thông báo"
       >
         <X className="h-4 w-4" />

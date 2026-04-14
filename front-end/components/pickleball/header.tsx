@@ -74,8 +74,8 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full">
-      <div className="backdrop-blur-xl bg-white/70 border-b border-lime/20 shadow-lg shadow-lime/5">
+    <header className="relative z-50 w-full">
+      <div className="bg-white border-b border-lime/20 shadow-lg shadow-lime/5">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             {/* Logo — BIGGER */}

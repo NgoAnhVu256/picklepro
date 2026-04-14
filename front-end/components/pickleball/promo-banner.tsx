@@ -1,7 +1,60 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
+interface Slide {
+  id: string
+  bg_gradient: string
+  href: string
+  is_active: boolean
+  badge: string
+}
+
 export function PromoBanner() {
+  const [slides, setSlides] = useState<Slide[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/admin/slides')
+      .then(r => r.json())
+      .then(data => {
+        const active = (data.slides ?? [])
+          .filter((s: Slide) => s.is_active && s.badge === 'promo')
+        setSlides(active)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  if (loading) return null
+
+  if (slides.length > 0) {
+    const slide = slides[0] // just show the first active promo banner
+    
+    const imageElement = (
+      <img src={slide.bg_gradient} alt="Promo Banner" className="w-full object-cover rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" />
+    )
+    
+    return (
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          {slide.href ? (
+            <Link href={slide.href} className="block relative">
+              {imageElement}
+            </Link>
+          ) : (
+            <div className="block relative">
+              {imageElement}
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  // Fallback if no promo banner is uploaded
   return (
     <section className="py-12">
       <div className="container mx-auto px-4">

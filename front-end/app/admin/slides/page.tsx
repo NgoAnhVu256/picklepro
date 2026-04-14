@@ -25,6 +25,8 @@ const POSITIONS = [
   { value: 'right1', label: 'Banner Phải (Trên)' },
   { value: 'right2', label: 'Banner Phải (Dưới)' },
   { value: 'marketing', label: 'Marketing Banner (Cuộn dọc)' },
+  { value: 'announcement', label: 'Thông báo chạy (Header)' },
+  { value: 'promo', label: 'Banner Khuyến Mãi / Góp Ý (Footer)' },
 ]
 
 const EMPTY_FORM = {
