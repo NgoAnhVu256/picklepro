@@ -179,161 +179,260 @@ export default function ProductDetailPage() {
       {/* Product Detail */}
       <div className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Left — Image */}
-          <div className="relative">
-            <div className="sticky top-24 space-y-3">
-              <div className="aspect-square rounded-3xl bg-gradient-to-br from-lime/10 via-lime-light/20 to-lime/5 border border-lime/20 flex items-center justify-center relative overflow-hidden">
-                {/* Badges */}
-                <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex flex-col gap-2 z-10">
-                  {product.is_featured && <Badge className="bg-lime text-lime-dark text-xs sm:text-sm font-bold px-2 sm:px-3 py-1">⭐ Nổi bật</Badge>}
-                  {discount && <Badge className="bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1">-{discount}%</Badge>}
-                </div>
-
-                {/* Actions */}
-                <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex flex-col gap-2 z-10">
-                  <button className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all shadow-md ${liked ? 'bg-red-500 text-white' : 'bg-white/80 backdrop-blur-sm text-muted-foreground hover:text-red-500 hover:bg-white'}`} onClick={() => setLiked(!liked)}>
-                    <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${liked ? 'fill-white' : ''}`} />
+          {/* Left — Image Gallery */}
+          <div className="relative flex flex-col-reverse md:flex-row gap-4 h-max sticky top-24">
+            {/* Thumbnail Gallery (Left on Desktop, Bottom on Mobile) */}
+            {product.product_images && product.product_images.length > 1 && (
+              <div className="flex md:flex-col gap-3 overflow-auto scrollbar-hide md:w-20 lg:w-24 shrink-0 pb-2 md:pb-0">
+                {product.product_images.map((img) => (
+                  <button key={img.id} onClick={() => setSelectedImage(img.url)}
+                    className={`shrink-0 w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-2xl overflow-hidden border-2 transition-all p-1 bg-white ${
+                      (selectedImage || product.product_images?.find(i => i.is_primary)?.url || product.product_images?.[0]?.url) === img.url 
+                        ? 'border-lime-dark shadow-md ring-1 ring-lime-dark/50' : 'border-border hover:border-lime/50 opacity-70 hover:opacity-100'
+                    }`}>
+                    <img src={img.url} alt="" className="w-full h-full object-contain mix-blend-multiply" />
                   </button>
-                  <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-lime-dark hover:bg-white transition-all shadow-md">
-                    <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </button>
-                </div>
-
-                {/* Main Image */}
-                {(() => {
-                  const images = product.product_images || []
-                  const primaryImg = images.find(i => i.is_primary) || images[0]
-                  return primaryImg?.url ? (
-                    <img src={selectedImage || primaryImg.url} alt={product.name} className="w-full h-full object-contain p-4" />
-                  ) : (
-                    <>
-                      <div className="absolute w-64 h-64 bg-lime/20 rounded-full blur-3xl" />
-                      <span className="text-[120px] sm:text-[160px] relative z-10 drop-shadow-xl">{emoji}</span>
-                    </>
-                  )
-                })()}
-              </div>
-              
-              {/* Thumbnail Gallery */}
-              {product.product_images && product.product_images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                  {product.product_images.map((img) => (
-                    <button key={img.id} onClick={() => setSelectedImage(img.url)}
-                      className={`shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                        (selectedImage || product.product_images?.find(i => i.is_primary)?.url || product.product_images?.[0]?.url) === img.url 
-                          ? 'border-lime-dark shadow-lg' : 'border-border hover:border-lime/50'
-                      }`}>
-                      <img src={img.url} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right — Info */}
-          <div className="flex flex-col gap-5">
-            {/* Brand */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-lime-dark uppercase tracking-wider bg-lime/10 px-3 py-1 rounded-full">{product.brand}</span>
-              {product.categories && <span className="text-sm text-muted-foreground">{product.categories.name}</span>}
-            </div>
-
-            {/* Name */}
-            <h1 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">{product.name}</h1>
-
-
-
-            {/* Price */}
-            <div className="flex items-end gap-3 bg-gradient-to-r from-lime/10 via-transparent to-transparent p-4 rounded-2xl">
-              <span className="text-4xl font-extrabold text-lime-dark">{formatPrice(product.price)}</span>
-              {product.original_price && (
-                <div className="flex flex-col">
-                  <span className="text-lg text-muted-foreground line-through">{formatPrice(product.original_price)}</span>
-                  <span className="text-sm font-bold text-red-500">Tiết kiệm {formatPrice(product.original_price - product.price)}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Stock */}
-            <div className={`flex items-center gap-2 text-sm ${inStock ? 'text-lime-dark' : 'text-red-500'}`}>
-              <div className={`w-2.5 h-2.5 rounded-full ${inStock ? 'bg-lime-dark animate-pulse' : 'bg-red-500'}`} />
-              {inStock ? `Còn ${product.stock} sản phẩm` : 'Hết hàng'}
-            </div>
-
-            {/* Tags */}
-            {product.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {product.tags.map((tag) => (
-                  <span key={tag} className="px-3 py-1 rounded-full text-xs font-medium bg-lime/10 text-lime-dark border border-lime/20">
-                    #{tag}
-                  </span>
                 ))}
               </div>
             )}
 
-            {/* Quantity + Add to Cart */}
-            <div className="flex items-center gap-4 pt-2">
-              <div className="flex items-center rounded-full border border-lime/30 overflow-hidden">
-                <button className="px-4 py-3 hover:bg-lime/10 transition-colors" onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={!inStock}>
-                  <Minus className="h-4 w-4" />
-                </button>
-                <span className="px-4 py-3 font-bold text-lg min-w-[48px] text-center">{quantity}</span>
-                <button className="px-4 py-3 hover:bg-lime/10 transition-colors" onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} disabled={!inStock}>
-                  <Plus className="h-4 w-4" />
+            {/* Main Image */}
+            <div className="flex-1 aspect-[4/5] sm:aspect-square rounded-3xl bg-gradient-to-br from-lime/5 via-lime-light/10 to-lime/10 border border-lime/20 flex flex-col items-center justify-center relative overflow-hidden group">
+              {/* Badges */}
+              <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+                {product.is_featured && <Badge className="bg-lime text-lime-dark text-xs sm:text-sm font-bold px-3 py-1 border-none shadow-sm">⭐ Nổi bật</Badge>}
+                {discount && <Badge className="bg-red-500 text-white text-xs sm:text-sm font-bold px-3 py-1 border-none shadow-sm">-{discount}%</Badge>}
+              </div>
+
+              {/* Actions (Share) */}
+              <div className="absolute top-4 right-4 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-lime-dark hover:bg-white transition-all shadow-md border border-border/50">
+                  <Share2 className="h-5 w-5" />
                 </button>
               </div>
 
-              <Button className={`flex-1 rounded-full h-14 text-lg font-bold transition-all active:scale-95 shadow-lg ${addedToCart ? 'bg-lime-dark text-white shadow-lime-dark/30' : 'bg-lime hover:bg-lime-dark text-lime-dark hover:text-white shadow-lime/30'}`} disabled={!inStock} onClick={handleAddToCart}>
-                {addedToCart ? (
-                  <><Check className="h-5 w-5 mr-2" /> Đã thêm!</>
+              {/* Main Image Display */}
+              {(() => {
+                const images = product.product_images || []
+                const primaryImg = images.find(i => i.is_primary) || images[0]
+                return primaryImg?.url ? (
+                  <img src={selectedImage || primaryImg.url} alt={product.name} className="w-full h-full object-contain mix-blend-multiply p-8 transition-transform duration-500 group-hover:scale-105" />
                 ) : (
-                  <><ShoppingCart className="h-5 w-5 mr-2" /> Thêm vào giỏ</>
+                  <>
+                    <div className="absolute w-64 h-64 bg-lime/20 rounded-full blur-3xl" />
+                    <span className="text-[120px] sm:text-[160px] relative z-10 drop-shadow-xl">{emoji}</span>
+                  </>
+                )
+              })()}
+              
+              {/* Pagination Dots Simulator for design */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                {(product.product_images?.length || 1) > 1 && product.product_images?.map((img, idx) => (
+                  <span 
+                    key={idx}
+                    className={`h-2 rounded-full transition-all ${
+                      (selectedImage || product.product_images?.find(i => i.is_primary)?.url || product.product_images?.[0]?.url) === img.url
+                        ? 'w-6 bg-lime-dark' : 'w-2 bg-border hover:bg-lime/50 cursor-pointer'
+                    }`}
+                    onClick={() => setSelectedImage(img.url)}
+                  ></span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right — Info */}
+          <div className="flex flex-col gap-6">
+            {/* Header: Name & Status */}
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">{product.name}</h1>
+              </div>
+              <Badge className={`${inStock ? 'bg-lime text-lime-dark' : 'bg-red-100 text-red-500'} font-bold px-3 py-1 mb-4 rounded-full border-0`}>
+                {inStock ? 'Còn hàng' : 'Hết hàng'}
+              </Badge>
+              
+              {/* Price */}
+              <div className="flex items-end gap-3 rounded-2xl">
+                {product.original_price && product.original_price > product.price && (
+                  <span className="text-lg text-muted-foreground line-through decoration-muted-foreground/50">{formatPrice(product.original_price)}</span>
                 )}
-              </Button>
+                <span className="text-3xl font-extrabold text-foreground">{formatPrice(product.price)}</span>
+              </div>
             </div>
 
-            {/* Benefits */}
-            <div className="grid grid-cols-3 gap-3 pt-2">
-              {[
-                { icon: Truck, label: 'Miễn phí vận chuyển', sub: 'Đơn từ 500K' },
-                { icon: Shield, label: 'Bảo hành 12 tháng', sub: 'Chính hãng' },
-                { icon: RotateCcw, label: 'Đổi trả 30 ngày', sub: 'Miễn phí' },
-              ].map(({ icon: Icon, label, sub }) => (
-                <div key={label} className="text-center p-3 rounded-xl bg-gradient-to-b from-lime/5 to-transparent border border-lime/10">
-                  <Icon className="h-5 w-5 mx-auto mb-1.5 text-lime-dark" />
-                  <p className="text-xs font-semibold text-foreground">{label}</p>
-                  <p className="text-xs text-muted-foreground">{sub}</p>
+            {/* Description & Features Snippet */}
+            <div className="space-y-3">
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {product.description?.substring(0, 150) || 'Dòng sản phẩm cao cấp với công nghệ tiên tiến nhất, mang đến trải nghiệm tuyệt vời cho mọi trận đấu.'}...
+              </p>
+              
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-400 mt-0.5">👉</span>
+                  <span>Độ đàn hồi và trợ lực mạnh mẽ khi bóng tiếp xúc mặt vợt, tối đa hóa sức mạnh</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-400 mt-0.5">👉</span>
+                  <span>Mặt nhám vật lý tự nhiên, tạo xoáy sâu và kiểm soát bóng tốt hơn</span>
+                </li>
+              </ul>
+              
+              <p className="text-sm font-semibold pt-2 text-foreground flex items-center gap-2">
+                <span className="w-4 h-[2px] bg-foreground/40 inline-block"></span>
+                Freeship đơn hàng trên 1 triệu
+              </p>
+            </div>
+
+            {/* Variations */}
+            <div className="space-y-5 pt-4 border-t border-border/50">
+              {/* Version (Mock) */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Phiên bản:</label>
+                <div className="flex items-center gap-3">
+                  <button className="px-5 py-2 border-2 border-lime-dark text-lime-dark font-semibold rounded-xl bg-lime/10">14mm</button>
+                  <button className="px-5 py-2 border-2 border-border text-muted-foreground font-semibold rounded-xl hover:border-lime/50 transition-colors">16mm</button>
                 </div>
-              ))}
+              </div>
+
+              {/* Colors mapper to images */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-foreground">Màu sắc:</label>
+                <div className="flex items-center gap-3">
+                  {(() => {
+                    const fallbackColors = ['bg-[#FDE047]', 'bg-[#93C5FD]', 'bg-[#F472B6]', 'bg-[#D6D3D1]', 'bg-[#15803D]', 'bg-[#EF4444]', 'bg-[#A855F7]']
+                    const images = product.product_images || []
+                    if (images.length === 0) return <span className="text-xs text-muted-foreground">Mặc định</span>
+                    return images.map((img, idx) => {
+                      const colorClass = fallbackColors[idx % fallbackColors.length]
+                      const isSelected = selectedImage === img.url || (!selectedImage && idx === 0)
+                      return (
+                        <button 
+                          key={img.id} 
+                          onClick={() => setSelectedImage(img.url)}
+                          className={`w-9 h-9 rounded-lg border-2 transition-all shadow-sm ${isSelected ? 'border-lime-dark scale-110' : 'border-border hover:border-lime/50'} p-0.5`}
+                          title={`Color ${idx+1}`}
+                        >
+                          <div className={`w-full h-full rounded flex items-center justify-center ${colorClass}`}>
+                            {isSelected && <Check className="w-4 h-4 text-white/90 drop-shadow-sm" />}
+                          </div>
+                        </button>
+                      )
+                    })
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            {/* Gift Box */}
+            <div className="space-y-3 pt-4">
+              <label className="text-sm font-medium text-foreground">Quà tặng</label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-lime/20 bg-lime/5 p-4 relative flex flex-col items-center justify-center gap-2 group hover:border-lime/50 transition-all">
+                  <div className="absolute top-2 left-2 text-lime-dark bg-lime border border-lime-dark/20 rounded-md w-5 h-5 flex items-center justify-center shadow-sm">
+                    <Check className="w-3.5 h-3.5 font-bold" />
+                  </div>
+                  <span className="text-4xl group-hover:scale-110 transition-transform">⚾</span>
+                  <p className="text-xs font-semibold text-foreground text-center">Box 3 bóng thi đấu</p>
+                </div>
+                <div className="rounded-2xl border border-lime/20 bg-lime/5 p-4 relative flex flex-col items-center justify-center gap-2 group hover:border-lime/50 transition-all">
+                  <div className="absolute top-2 left-2 text-lime-dark bg-lime border border-lime-dark/20 rounded-md w-5 h-5 flex items-center justify-center shadow-sm">
+                    <Check className="w-3.5 h-3.5 font-bold" />
+                  </div>
+                  <span className="text-4xl group-hover:scale-110 transition-transform">🏸</span>
+                  <p className="text-xs font-semibold text-foreground text-center">Dán viền vợt</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions (Quantity + Buttons) */}
+            <div className="space-y-4 pt-4 border-t border-border/50">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Số lượng:</label>
+                <div className="flex items-center w-max rounded-xl border border-border bg-white shadow-sm overflow-hidden">
+                  <button className="w-12 h-12 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground" onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={!inStock}>
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="w-12 h-12 flex items-center justify-center font-bold text-base border-x border-border/50">{quantity}</span>
+                  <button className="w-12 h-12 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground" onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} disabled={!inStock}>
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 w-full">
+                {/* Mua ngay - Main Call to Action */}
+                <button 
+                  className="flex-1 h-14 rounded-2xl text-lg font-bold transition-all active:scale-95 shadow-lg shadow-lime/30 bg-gradient-to-r from-lime-dark to-lime hover:opacity-90 text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none" 
+                  disabled={!inStock} 
+                  onClick={() => {
+                    handleAddToCart();
+                    window.location.href = '/checkout';
+                  }}
+                >
+                  Mua ngay
+                </button>
+
+                {/* Add to cart icon */}
+                <button 
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all border-2 active:scale-95 shadow-sm ${addedToCart ? 'bg-lime text-lime-dark border-lime' : 'bg-white border-border hover:border-lime-dark text-foreground'}`}
+                  disabled={!inStock} 
+                  onClick={handleAddToCart}
+                  title="Thêm vào giỏ hàng"
+                >
+                  {addedToCart ? <Check className="h-6 w-6" /> : <ShoppingCart className="h-6 w-6" />}
+                </button>
+
+                {/* Wishlist icon */}
+                <button 
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all border-2 active:scale-95 shadow-sm bg-white ${liked ? 'border-red-500 text-red-500' : 'border-border hover:border-red-400 text-foreground'}`}
+                  disabled={!inStock} 
+                  onClick={() => setLiked(!liked)}
+                  title="Yêu thích"
+                >
+                  <Heart className={`h-6 w-6 ${liked ? 'fill-current' : ''}`} />
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-3 pt-2 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1">Danh mục: <Link href={`/products?category=${product.categories?.slug || ''}`} className="text-lime-dark font-medium hover:underline">{product.categories?.name || 'Vợt Pickleball'}</Link></span>
+                <span className="text-border">|</span>
+                <span className="flex items-center gap-1">Thương hiệu: <span className="text-lime-dark font-medium">{product.brand}</span></span>
+              </div>
             </div>
 
             {/* Tabs: Mô tả & Thông số */}
-            <Tabs defaultValue="specs" className="mt-3">
-              <TabsList className="rounded-full bg-lime/10 p-1">
-                <TabsTrigger value="specs" className="rounded-full data-[state=active]:bg-lime data-[state=active]:text-lime-dark text-sm">Thông số kỹ thuật</TabsTrigger>
-                <TabsTrigger value="description" className="rounded-full data-[state=active]:bg-lime data-[state=active]:text-lime-dark text-sm">Mô tả sản phẩm</TabsTrigger>
-              </TabsList>
+            <div className="mt-8">
+              <Tabs defaultValue="specs">
+                <TabsList className="rounded-xl bg-muted p-1 inline-flex w-full overflow-x-auto">
+                  <TabsTrigger value="specs" className="rounded-lg flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm text-sm font-medium">Thông số kỹ thuật</TabsTrigger>
+                  <TabsTrigger value="description" className="rounded-lg flex-1 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm text-sm font-medium">Mô tả chi tiết</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="specs" className="mt-4">
-                {product.specs ? (
-                  <div className="rounded-2xl border border-lime/20 overflow-hidden">
-                    {Object.entries(product.specs).map(([key, value], i) => (
-                      <div key={key} className={`flex ${i % 2 === 0 ? 'bg-lime/5' : 'bg-transparent'}`}>
-                        <span className="w-1/3 px-4 py-3 text-sm font-medium text-muted-foreground border-r border-lime/10">{key}</span>
-                        <span className="flex-1 px-4 py-3 text-sm font-medium text-foreground">{value}</span>
-                      </div>
-                    ))}
+                <TabsContent value="specs" className="mt-6">
+                  {product.specs ? (
+                    <div className="rounded-2xl border border-border overflow-hidden bg-white">
+                      {Object.entries(product.specs).map(([key, value], i) => (
+                        <div key={key} className={`flex ${i % 2 === 0 ? 'bg-muted/30' : 'bg-transparent'}`}>
+                          <span className="w-[40%] px-5 py-4 text-sm font-medium text-muted-foreground border-r border-border">{key}</span>
+                          <span className="flex-1 px-5 py-4 text-sm font-medium text-foreground">{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center border rounded-2xl border-dashed">
+                      <p className="text-muted-foreground">Chưa có thông số kỹ thuật.</p>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="description" className="mt-6">
+                  <div className="p-6 rounded-2xl bg-white border border-border shadow-sm">
+                    <p className="text-foreground leading-relaxed whitespace-pre-wrap">{product.description || 'Chưa có mô tả cho sản phẩm này.'}</p>
                   </div>
-                ) : (
-                  <p className="text-muted-foreground">Chưa có thông số kỹ thuật.</p>
-                )}
-              </TabsContent>
-
-              <TabsContent value="description" className="mt-4">
-                <p className="text-foreground leading-relaxed">{product.description || 'Chưa có mô tả cho sản phẩm này.'}</p>
-              </TabsContent>
-            </Tabs>
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </div>
 
