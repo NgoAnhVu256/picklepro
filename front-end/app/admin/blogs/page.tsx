@@ -97,7 +97,7 @@ export default function AdminBlogsPage() {
                   <tr key={blog.id} className="hover:bg-muted/30">
                     <td className="p-4">
                       {blog.thumbnail?.startsWith('http') ? (
-                        <Image src={blog.thumbnail} alt="" width={48} height={48} className="rounded-lg object-cover w-12 h-12" />
+                        <img src={blog.thumbnail} alt="" className="rounded-lg object-cover w-12 h-12" loading="lazy" />
                       ) : (
                         <div className="w-12 h-12 rounded-lg bg-lime/10 flex items-center justify-center text-xl">{blog.thumbnail || '📰'}</div>
                       )}

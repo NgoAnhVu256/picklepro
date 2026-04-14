@@ -173,7 +173,7 @@ export default function AdminSlidesPage() {
             <div key={slide.id} className={`relative rounded-2xl overflow-hidden border transition-all bg-card shadow-sm ${slide.is_active ? 'border-border' : 'border-border opacity-60'}`}>
               <div className="aspect-[16/9] relative bg-gray-100 flex items-center justify-center overflow-hidden">
                 {slide.bg_gradient && (slide.bg_gradient.startsWith('http') || slide.bg_gradient.startsWith('/')) ? (
-                  <Image src={slide.bg_gradient} alt={slide.title || 'Banner'} fill className="object-cover" />
+                  <img src={slide.bg_gradient} alt={slide.title || 'Banner'} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                 ) : (
                    <span className="text-xs text-gray-400">Không có ảnh</span>
                 )}
