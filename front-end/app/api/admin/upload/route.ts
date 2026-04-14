@@ -8,6 +8,9 @@ import { createClient } from '@/lib/supabase/server'
 
 const BUCKET = 'product-images'
 
+// Track bucket init per serverless cold start
+let bucketEnsured = false
+
 // Kiểm tra admin
 async function isAdmin() {
   const supabase = await createClient()
@@ -21,6 +24,28 @@ async function isAdmin() {
     .single()
 
   return profile?.role === 'admin' ? user : null
+}
+
+// Ensure bucket exists — idempotent, only runs once per cold start
+async function ensureBucket() {
+  if (bucketEnsured) return
+
+  try {
+    const { error } = await supabaseAdmin.storage.createBucket(BUCKET, {
+      public: true,
+      fileSizeLimit: 5 * 1024 * 1024,
+      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/avif'],
+    })
+
+    // Ignore "already exists" — that's good!
+    if (error && !error.message?.includes('already exists')) {
+      console.warn('[Upload] Bucket create warning:', error.message)
+    }
+  } catch (e: any) {
+    console.warn('[Upload] ensureBucket exception:', e.message)
+  }
+
+  bucketEnsured = true
 }
 
 export async function POST(request: NextRequest) {
@@ -47,42 +72,58 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File quá lớn (tối đa 5MB)' }, { status: 400 })
     }
 
+    // Ensure bucket exists before upload
+    await ensureBucket()
+
     // Tạo tên file unique
     const ext = file.name.split('.').pop() || 'jpg'
     const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
 
-    // Create bucket if not exists recursively
-    const { data: buckets } = await supabaseAdmin.storage.listBuckets()
-    if (!buckets?.some(b => b.name === BUCKET)) {
-      await supabaseAdmin.storage.createBucket(BUCKET, { public: true })
-    }
+    // Read file buffer
+    const arrayBuffer = await file.arrayBuffer()
 
     // Upload lên Supabase Storage
-    const arrayBuffer = await file.arrayBuffer()
-    const { data, error } = await supabaseAdmin.storage
+    let uploadData = await supabaseAdmin.storage
       .from(BUCKET)
       .upload(fileName, arrayBuffer, {
         contentType: file.type,
-        cacheControl: '31536000', // 1 year cache
+        cacheControl: '31536000',
         upsert: false,
       })
 
-    if (error) {
-      console.error('[Upload] Error:', error)
-      return NextResponse.json({ error: 'Lỗi từ Supabase: ' + error.message }, { status: 400 })
+    // If bucket not found, force re-create and retry once
+    if (uploadData.error?.message?.includes('not found')) {
+      console.warn('[Upload] Bucket not found, retrying creation...')
+      bucketEnsured = false
+      await ensureBucket()
+
+      uploadData = await supabaseAdmin.storage
+        .from(BUCKET)
+        .upload(fileName, arrayBuffer, {
+          contentType: file.type,
+          cacheControl: '31536000',
+          upsert: false,
+        })
+    }
+
+    if (uploadData.error) {
+      console.error('[Upload] Final error:', uploadData.error)
+      return NextResponse.json({
+        error: `Upload thất bại: ${uploadData.error.message}. Nếu lỗi "Bucket not found", hãy vào Supabase Dashboard → Storage → New Bucket → tên "${BUCKET}" → chọn Public → Create.`
+      }, { status: 400 })
     }
 
     // Lấy public URL
     const { data: urlData } = supabaseAdmin.storage
       .from(BUCKET)
-      .getPublicUrl(data.path)
+      .getPublicUrl(uploadData.data.path)
 
     return NextResponse.json({
       url: urlData.publicUrl,
-      path: data.path,
+      path: uploadData.data.path,
     })
   } catch (error: any) {
-    console.error('[Upload] Error:', error)
-    return NextResponse.json({ error: 'Lỗi upload' }, { status: 500 })
+    console.error('[Upload] Unhandled:', error)
+    return NextResponse.json({ error: 'Lỗi server: ' + (error.message || 'Unknown') }, { status: 500 })
   }
 }
