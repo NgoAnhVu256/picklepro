@@ -40,9 +40,10 @@ export function MarketingBanners() {
     )
   }
 
-  if (slides.length === 0) {
-    return null;
-  }
+  const effectiveSlides = slides.length > 0 ? slides : [
+    { id: 'fb1', title: 'PicklePro Pro', bg_gradient: '/images/banner1.png', href: '/products', is_active: true },
+    { id: 'fb2', title: 'Power Series', bg_gradient: '/images/banner2.png', href: '/products', is_active: true }
+  ]
 
   return (
     <section className="pt-4 pb-10 bg-white border-t border-border/10">
