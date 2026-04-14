@@ -21,7 +21,6 @@ const navItems = [
   { href: '/admin/promotions', label: 'Khuyến mãi', icon: BadgePercent },
   { href: '/admin/blogs', label: 'Bài viết', icon: Newspaper },
   { href: '/admin/slides', label: 'Quản lý Banners', icon: SlidersHorizontal },
-  { href: '/admin/announcements', label: 'Thông báo chạy', icon: Megaphone },
   { href: '/admin/settings', label: 'Cài đặt', icon: Settings },
   { href: '/admin/account', label: 'Tài khoản', icon: UserCog },
 ]

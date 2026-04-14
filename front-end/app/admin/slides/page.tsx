@@ -49,7 +49,7 @@ export default function AdminSlidesPage() {
   const [deleteTarget, setDeleteTarget] = useState<Slide | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [filterPos, setFilterPos] = useState('all')
+  const [filterPos, setFilterPos] = useState('hero')
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -67,7 +67,7 @@ export default function AdminSlidesPage() {
 
   const openAdd = () => {
     setEditing(null)
-    setForm({ ...EMPTY_FORM, position: filterPos !== 'all' ? filterPos : 'hero', sort_order: slides.length })
+    setForm({ ...EMPTY_FORM, position: filterPos, sort_order: slides.length })
     setShowModal(true)
   }
 
@@ -136,7 +136,7 @@ export default function AdminSlidesPage() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const filteredSlides = filterPos === 'all' ? slides : slides.filter(s => s.badge === filterPos)
+  const filteredSlides = slides.filter(s => s.badge === filterPos)
 
   return (
     <div className="space-y-6">
@@ -151,7 +151,6 @@ export default function AdminSlidesPage() {
       </div>
 
       <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-        <button onClick={() => setFilterPos('all')} className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${filterPos === 'all' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Tất cả</button>
         {POSITIONS.map(p => (
           <button key={p.value} onClick={() => setFilterPos(p.value)} className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${filterPos === p.value ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{p.label}</button>
         ))}

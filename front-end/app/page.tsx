@@ -21,8 +21,8 @@ export default function Home() {
         <Categories />
         <MarketingBanners />
         <ProductGrid />
-        <PromoBanner />
         <BlogSection />
+        <PromoBanner />
       </main>
       <Footer />
     </div>

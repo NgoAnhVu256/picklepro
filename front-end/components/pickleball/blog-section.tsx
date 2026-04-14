@@ -1,20 +1,22 @@
 "use client"
 
-import { Calendar, ArrowRight, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
+import useEmblaCarousel from "embla-carousel-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export function BlogSection() {
   const [blogs, setBlogs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [emblaRef, emblaApi] = useEmblaCarousel({ dragFree: true, containScroll: 'trimSnaps' })
 
   useEffect(() => {
     async function fetchBlogs() {
       try {
-        const res = await fetch('/api/blogs?limit=20')
+        const res = await fetch('/api/blogs?limit=10')
         const data = await res.json()
         setBlogs(data.blogs || [])
       } catch (error) {
@@ -26,92 +28,91 @@ export function BlogSection() {
     fetchBlogs()
   }, [])
 
-  // Group by category
-  const categoriesMap: Record<string, any[]> = {}
-  blogs.forEach(b => {
-    const cat = b.category_name || 'Khác'
-    if (!categoriesMap[cat]) categoriesMap[cat] = []
-    categoriesMap[cat].push(b)
-  })
+  const scrollPrev = () => emblaApi && emblaApi.scrollPrev()
+  const scrollNext = () => emblaApi && emblaApi.scrollNext()
 
-  // Convert to array format 
-  let displayCategories = Object.keys(categoriesMap).map(name => ({
-    name,
-    articles: categoriesMap[name]
-  }))
+  if (loading) return (
+    <div className="py-12 flex justify-center">
+      <div className="animate-pulse flex gap-4 overflow-hidden w-full max-w-[1200px] px-4">
+        {[1,2,3,4].map(i => (
+          <div key={i} className="flex-[0_0_80%] sm:flex-[0_0_40%] md:flex-[0_0_30%] lg:flex-[0_0_24%] min-w-0">
+            <div className="aspect-[16/10] bg-gray-200 rounded-2xl mb-4" />
+            <div className="h-4 bg-gray-200 rounded mb-2 w-3/4" />
+            <div className="h-4 bg-gray-200 rounded w-1/2" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 
-  if (loading) return <div className="py-20 text-center text-white">Đang tải bài viết...</div>
-
-  // If no real data, maybe skip rendering, but for now we just show empty
   if (blogs.length === 0) return null;
 
   return (
-    <section
-      id="home-blog-section"
-      className="py-12"
-      style={{ background: "linear-gradient(180deg, #100a16 0%, #150a0a 50%, #2f1b0d 100%)" }}
-    >
-      <div className="container mx-auto px-4 lg:px-8">
+    <section id="home-blog-section" className="py-10 md:py-16 bg-white/50 border-t border-black/5">
+      <div className="container mx-auto px-4 max-w-[1200px]">
         
-        {/* Blog Grid - Dynamic layout based on categories size */}
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${Math.min(4, Math.max(1, displayCategories.length))} gap-x-8 gap-y-12`}>
-          {displayCategories.map((category) => (
-            <div key={category.name} className="flex flex-col">
-              {/* Category Header */}
-              <h3 className="text-lg font-semibold text-[#CFA9FD] mb-6 pb-3 border-b border-[#CFA9FD]/20">
-                {category.name}
-              </h3>
-
-              {/* Articles */}
-              <div className="space-y-5 flex-1">
-                {category.articles.slice(0, 4).map((article) => (
-                  <Link
-                    key={article.id}
-                    href={`/blogs/${article.slug}`}
-                    className="group flex items-center gap-4 transition-all duration-200"
-                  >
-                    {/* Thumbnail - 16:9 Aspect Ratio like the image */}
-                    <div className="w-[120px] shrink-0 aspect-[16/9] rounded-lg bg-[#2a2a2a] overflow-hidden relative shadow-md">
-                      {article.thumbnail?.startsWith('http') ? (
-                        <Image src={article.thumbnail} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-500">📰</div>
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-[13px] md:text-sm font-medium text-gray-100 line-clamp-3 group-hover:text-white transition-colors leading-snug">
-                        {article.title}
-                      </h4>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              {/* Xem thêm button at the bottom of the column */}
-              {category.articles.length > 4 ? (
-                <div className="mt-6">
-                  <Link
-                    href={`/products?category=${category.name}`}
-                    className="inline-flex items-center text-xs font-medium text-gray-300 bg-white/10 hover:bg-white/20 transition-colors px-4 py-1.5 rounded-full"
-                  >
-                    Xem thêm
-                  </Link>
-                </div>
-              ) : (
-                <div className="mt-6">
-                  <Link
-                    href={`/blogs`}
-                    className="inline-flex items-center text-xs font-medium text-gray-300 bg-white/10 hover:bg-white/20 transition-colors px-4 py-1.5 rounded-full"
-                  >
-                    Xem thêm
-                  </Link>
-                </div>
-              )}
-            </div>
-          ))}
+        {/* Header */}
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-black text-black mb-3">Tin tức Pickleball</h2>
+          <p className="text-gray-500 text-sm md:text-base max-w-2xl mx-auto">
+            Cập nhật cảm hứng, xu hướng và chia sẻ từ cộng đồng
+          </p>
         </div>
+
+        {/* Carousel */}
+        <div className="relative group/carousel">
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex gap-4 md:gap-6 pb-4 cursor-grab active:cursor-grabbing">
+              {blogs.map((article) => (
+                <Link
+                  key={article.id}
+                  href={`/blogs/${article.slug}`}
+                  className="flex-[0_0_85%] sm:flex-[0_0_45%] md:flex-[0_0_30%] lg:flex-[0_0_24%] min-w-0 group"
+                  draggable={false}
+                >
+                  <div className="relative aspect-[16/10] rounded-2xl overflow-hidden mb-4 bg-gray-100 shadow-sm border border-black/5">
+                    {article.thumbnail?.startsWith('http') ? (
+                      <Image 
+                        src={article.thumbnail} 
+                        alt={article.title} 
+                        fill 
+                        className="object-cover transition-transform duration-500 group-hover:scale-105" 
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-500">📰</div>
+                    )}
+                  </div>
+
+                  <div className="px-1 text-left">
+                    <h3 className="font-bold text-[15px] md:text-[16px] text-gray-900 leading-snug line-clamp-2 mb-2 group-hover:text-lime-dark transition-colors">
+                      {article.title}
+                    </h3>
+                    <div className="text-[12px] text-gray-400 font-medium">
+                       <span>PicklePro</span>
+                       <span className="mx-2">|</span>
+                       <span>{article.created_at ? format(new Date(article.created_at), "dd 'tháng' MM, yyyy", { locale: vi }) : 'Mới nhất'}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Navigation Arrows */}
+          <button 
+             onClick={scrollPrev}
+             className="absolute left-[-1.5rem] top-[40%] -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:text-black hover:scale-110 transition-all opacity-0 md:group-hover/carousel:opacity-100 -translate-x-full group-hover/carousel:translate-x-0 z-10 border border-black/5"
+          >
+             <ChevronLeft className="w-5 h-5 ml-[-0.1rem]" />
+          </button>
+          <button 
+             onClick={scrollNext}
+             className="absolute right-[-1.5rem] top-[40%] -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-700 hover:text-black hover:scale-110 transition-all opacity-0 md:group-hover/carousel:opacity-100 translate-x-full group-hover/carousel:-translate-x-0 z-10 border border-black/5"
+          >
+             <ChevronRight className="w-5 h-5 ml-[0.1rem]" />
+          </button>
+        </div>
+
       </div>
     </section>
   )

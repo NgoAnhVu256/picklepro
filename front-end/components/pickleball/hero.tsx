@@ -72,7 +72,7 @@ export function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={{ minHeight: '360px' }}>
           {/* Left Side Panel */}
           {leftBanner ? (
-             <Link href={leftBanner.href || '#'} className="hidden lg:block lg:col-span-2">
+             <Link href={leftBanner.href || '#'} className="order-2 lg:order-1 lg:col-span-2 block w-full h-[160px] lg:h-full">
                <div className="relative h-full rounded-2xl overflow-hidden group cursor-pointer bg-gray-100">
                  {leftBanner.bg_gradient && leftBanner.bg_gradient.length > 0 ? (
                     <Image src={leftBanner.bg_gradient} alt={leftBanner.title || 'Left Banner'} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -88,15 +88,15 @@ export function Hero() {
                </div>
              </Link>
           ) : (
-             <div className="hidden lg:block lg:col-span-2 rounded-2xl bg-gray-100" />
+             <div className="hidden lg:block order-2 lg:order-1 lg:col-span-2 rounded-2xl bg-gray-100" />
           )}
 
           {/* Center Banner Slider */}
-          <div className="lg:col-span-8 relative">
-            <div className="relative rounded-2xl overflow-hidden bg-gray-100 h-full min-h-[360px] group" ref={emblaRef}>
-              <div className="flex touch-pan-y cursor-grab active:cursor-grabbing w-full h-[360px] lg:h-full">
+          <div className="order-1 lg:order-2 lg:col-span-8 relative">
+            <div className="relative rounded-2xl overflow-hidden bg-gray-100 h-full min-h-[260px] md:min-h-[360px] group" ref={emblaRef}>
+              <div className="flex touch-pan-y cursor-grab active:cursor-grabbing w-full h-full">
                 {effectiveHeroSlides.map((slide, idx) => (
-                  <div key={slide.id || idx} className="relative flex-[0_0_100%] min-w-0 h-full select-none">
+                  <div key={slide.id || idx} className="relative flex-[0_0_100%] min-w-0 h-[260px] md:h-[360px] lg:h-full select-none">
                     {slide?.bg_gradient && slide.bg_gradient.length > 0 && (
                        <Image src={slide.bg_gradient} alt={slide.title || 'Hero Slide'} fill className="object-cover" draggable={false} priority={idx === 0} />
                     )}
@@ -108,7 +108,7 @@ export function Hero() {
 
                     {slide?.title && (
                        <div className="absolute bottom-10 left-10 z-20 pointer-events-none">
-                          <h2 className="text-3xl md:text-5xl font-black text-white drop-shadow-lg">{slide.title}</h2>
+                          <h2 className="text-2xl md:text-3xl lg:text-5xl font-black text-white drop-shadow-lg">{slide.title}</h2>
                        </div>
                     )}
                   </div>
@@ -140,37 +140,37 @@ export function Hero() {
           </div>
 
           {/* Right Side Panels */}
-          <div className="hidden lg:flex lg:col-span-2 flex-col gap-4">
+          <div className="order-3 flex lg:col-span-2 flex-row lg:flex-col gap-4">
              {/* Right 1 */}
              {right1Banner ? (
-                <Link href={right1Banner.href || '#'} className="flex-1 relative group cursor-pointer overflow-hidden rounded-2xl bg-gray-100">
+                <Link href={right1Banner.href || '#'} className="flex-1 relative group cursor-pointer overflow-hidden rounded-2xl bg-gray-100 h-[100px] sm:h-[120px] lg:h-auto">
                    {right1Banner.bg_gradient && right1Banner.bg_gradient.length > 0 && (
                       <Image src={right1Banner.bg_gradient} alt={right1Banner.title || 'Right Banner 1'} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                    )}
                    {right1Banner.title && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center p-3">
-                         <h4 className="font-bold text-white text-sm">{right1Banner.title}</h4>
+                         <h4 className="font-bold text-white text-xs lg:text-sm">{right1Banner.title}</h4>
                       </div>
                    )}
                 </Link>
              ) : (
-                <div className="flex-1 rounded-2xl bg-gray-100" />
+                <div className="flex-1 rounded-2xl bg-gray-100 hidden lg:block" />
              )}
              
              {/* Right 2 */}
              {right2Banner ? (
-                <Link href={right2Banner.href || '#'} className="flex-1 relative group cursor-pointer overflow-hidden rounded-2xl bg-gray-100">
+                <Link href={right2Banner.href || '#'} className="flex-1 relative group cursor-pointer overflow-hidden rounded-2xl bg-gray-100 h-[100px] sm:h-[120px] lg:h-auto">
                    {right2Banner.bg_gradient && right2Banner.bg_gradient.length > 0 && (
                       <Image src={right2Banner.bg_gradient} alt={right2Banner.title || 'Right Banner 2'} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                    )}
                    {right2Banner.title && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center p-3">
-                         <h4 className="font-bold text-white text-sm">{right2Banner.title}</h4>
+                         <h4 className="font-bold text-white text-xs lg:text-sm">{right2Banner.title}</h4>
                       </div>
                    )}
                 </Link>
              ) : (
-                <div className="flex-1 rounded-2xl bg-gray-100" />
+                <div className="flex-1 rounded-2xl bg-gray-100 hidden lg:block" />
              )}
           </div>
         </div>

@@ -69,21 +69,20 @@ export function MarketingBanners() {
                   src={slide.bg_gradient} 
                   alt={slide.title || 'Marketing Banner'} 
                   fill 
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 opacity-90 group-hover:opacity-100" 
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
                 />
               )}
-              
-              {/* Fade Overlay Effect */}
-              <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent opacity-90" />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               {slide.title && (
-                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                  <h3 className="text-lg md:text-xl font-black text-black uppercase tracking-tight drop-shadow-sm line-clamp-2">
-                    {slide.title}
-                  </h3>
-                  <div className="w-8 h-1 bg-lime mt-3 rounded-full group-hover:w-16 transition-all duration-300" />
-                </div>
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                    <h3 className="text-lg md:text-xl font-black text-white uppercase tracking-tight drop-shadow-sm line-clamp-2">
+                      {slide.title}
+                    </h3>
+                    <div className="w-8 h-1 bg-lime mt-3 rounded-full group-hover:w-16 transition-all duration-300" />
+                  </div>
+                </>
               )}
                 </Link>
               </div>
