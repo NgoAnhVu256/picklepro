@@ -134,6 +134,30 @@ export default function AdminCategoriesPage() {
     setDeleting(false)
   }
 
+  const moveItem = async (index: number, direction: 'up' | 'down') => {
+    const newCategories = [...categories]
+    if (direction === 'up' && index > 0) {
+      [newCategories[index - 1], newCategories[index]] = [newCategories[index], newCategories[index - 1]]
+    } else if (direction === 'down' && index < newCategories.length - 1) {
+      [newCategories[index + 1], newCategories[index]] = [newCategories[index], newCategories[index + 1]]
+    } else {
+      return
+    }
+    
+    setCategories(newCategories)
+    const itemIds = newCategories.map(c => c.id)
+    try {
+      await fetch('/api/admin/categories/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: itemIds })
+      })
+      toast.success('Đã cập nhật thứ tự')
+    } catch {
+      toast.error('Lỗi khi sắp xếp')
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -150,7 +174,7 @@ export default function AdminCategoriesPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
-              {['Mã danh mục', 'Hình ảnh', 'Tên danh mục', 'Slug', 'Số SP', ''].map(h => (
+              {['Mã danh mục', 'Hình ảnh', 'Tên danh mục', 'Slug', 'Số SP', 'Thứ tự', 'Thao tác'].map(h => (
                 <th key={h} className="text-left text-muted-foreground font-medium px-5 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
@@ -169,7 +193,7 @@ export default function AdminCategoriesPage() {
                 <FolderOpen className="h-10 w-10 mx-auto mb-2 text-gray-700" />
                 <p>Chưa có danh mục nào</p>
               </td></tr>
-            ) : categories.map(c => (
+            ) : categories.map((c, index) => (
               <tr key={c.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                 <td className="px-5 py-3 text-secondary-foreground font-mono text-xs w-48 break-all">
                   {c.id}
@@ -190,6 +214,16 @@ export default function AdminCategoriesPage() {
                 <td className="px-5 py-3 text-muted-foreground font-mono text-xs">{c.slug}</td>
                 <td className="px-5 py-3 text-secondary-foreground text-center">
                   <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-muted text-xs font-bold text-foreground">{c.products?.[0]?.count ?? 0}</span>
+                </td>
+                <td className="px-5 py-3">
+                   <div className="flex items-center gap-1">
+                      <button disabled={index === 0} onClick={() => moveItem(index, 'up')} className="p-1 rounded bg-muted hover:bg-blue-400/20 hover:text-blue-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                        ▲
+                      </button>
+                      <button disabled={index === categories.length - 1} onClick={() => moveItem(index, 'down')} className="p-1 rounded bg-muted hover:bg-blue-400/20 hover:text-blue-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                        ▼
+                      </button>
+                   </div>
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2">
