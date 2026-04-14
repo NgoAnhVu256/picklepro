@@ -44,6 +44,27 @@ export default function CheckoutPage() {
   const [bankInfo, setBankInfo] = useState<any>(null)
   const [copied, setCopied] = useState('')
 
+  const [discountCode, setDiscountCode] = useState('')
+  const [discountAmount, setDiscountAmount] = useState(0)
+
+  useEffect(() => {
+    // Auto-fill logged in user info
+    fetch('/api/account/profile')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.profile) {
+          setForm(f => ({
+            ...f,
+            name: f.name || data.profile.full_name || '',
+            phone: f.phone || data.profile.phone || '',
+            address: f.address || data.profile.address || ''
+          }))
+          if (data.profile.phone) handlePhoneChange(data.profile.phone)
+        }
+      })
+      .catch(console.error)
+  }, [])
+
   const update = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }))
 
   const handlePhoneChange = (value: string) => {
@@ -58,7 +79,16 @@ export default function CheckoutPage() {
 
   const totalPrice = getTotalPrice()
   const shippingFee = totalPrice >= 500000 ? 0 : 30000
-  const grandTotal = totalPrice + shippingFee
+  const grandTotal = totalPrice + shippingFee - discountAmount
+
+  const applyDiscount = () => {
+    if (discountCode.toUpperCase() === 'PICKLE100K') {
+      setDiscountAmount(100000)
+    } else if (discountCode) {
+      alert('Mã khuyến mãi không hợp lệ')
+      setDiscountAmount(0)
+    }
+  }
 
   const copyText = (text: string, field: string) => {
     navigator.clipboard.writeText(text)
@@ -81,11 +111,11 @@ export default function CheckoutPage() {
       shippingAddress: form.address,
       shippingPhone: form.phone,
       paymentMethod: form.paymentMethod,
+      discountAmount // Pass to backend if API supports it
     }
 
     try {
       if (form.paymentMethod === 'vnpay') {
-        // VNPay → redirect tới cổng thanh toán VNPay
         const response = await fetch('/api/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -103,7 +133,6 @@ export default function CheckoutPage() {
         window.location.href = data.checkoutUrl
 
       } else if (form.paymentMethod === 'bank_transfer') {
-        // Chuyển khoản → hiển thị QR code
         const response = await fetch('/api/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -118,11 +147,10 @@ export default function CheckoutPage() {
         }
 
         clearCart()
-        setBankInfo({ ...data.bankInfo, finalAmount: data.totalAmount })
+        setBankInfo({ ...data.bankInfo, finalAmount: data.totalAmount }) // API should factor in discount
         setLoading(false)
 
       } else {
-        // COD → tạo đơn hàng + redirect success
         const response = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -145,11 +173,9 @@ export default function CheckoutPage() {
     }
   }
 
-  // Nếu có bankInfo → hiển thị QR chuyển khoản
   if (bankInfo) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        {/* Top Warning Banner */}
         <div className="w-full bg-[#fdfaf0] text-[#d9534f] text-xs sm:text-sm font-bold text-center py-2.5 border-b border-[#f3e5c7] shadow-sm z-10 sticky top-0">
           Quý Khách vui lòng không tắt trình duyệt cho đến khi nhận được kết quả giao dịch trên website. Xin cảm ơn!
         </div>
@@ -157,23 +183,18 @@ export default function CheckoutPage() {
         <Header />
         
         <div className="flex-1 w-full mx-auto px-4 py-8 max-w-lg mb-10">
-          
-          {/* Timer */}
           <div className="text-center flex justify-center items-center gap-1.5 text-[#d9534f] font-bold mb-4">
             <Clock className="w-[18px] h-[18px]" />
             <span>Giao dịch hết hạn sau <TimerCountDown initialSeconds={267} /></span>
           </div>
 
           <div className="space-y-4">
-            
-            {/* QR Card */}
             <div className="bg-white rounded-[10px] shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden text-center p-5">
               <p className="text-[#005baa] font-bold text-sm leading-relaxed mb-3 mt-1 mx-auto max-w-[260px]">
                 VUI LÒNG QUÉT MÃ BÊN DƯỚI ĐỂ THANH TOÁN CHUYỂN KHOẢN
               </p>
 
               <div className="flex justify-center p-1 relative mx-auto w-[240px] sm:w-[280px]">
-                {/* VietQR compact2 image directly includes logos and QR */}
                 <img
                   src={bankInfo.qrUrl}
                   alt="VietQR"
@@ -188,7 +209,6 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-             {/* Bank Detail Box */}
              <div className="bg-white rounded-[10px] shadow-[0_2px_12px_rgba(0,0,0,0.06)] border border-gray-100 p-5 text-[13px] sm:text-[14px]">
                 <div className="text-emerald-700 font-bold mb-1">Thông tin chuyển khoản:</div>
                 <div className="text-emerald-700 mb-1">{bankInfo.accountHolder}</div>
@@ -217,7 +237,6 @@ export default function CheckoutPage() {
                 </div>
              </div>
 
-            {/* Buttons Group */}
             <div className="space-y-2 mt-6">
                 <Link href="/account/orders" className="block w-full">
                   <Button className="w-full h-12 bg-[#dc3545] hover:bg-[#c82333] text-white font-bold rounded shadow-sm text-[15px]">
@@ -232,7 +251,6 @@ export default function CheckoutPage() {
                 </Link>
             </div>
 
-            {/* Hotline */}
             <div className="text-center mt-5">
               <span className="text-[#d9534f] text-[13px] font-bold">Hotline hỗ trợ: <a href="tel:18002097" className="underline">1800.2097</a></span>
             </div>
@@ -282,7 +300,6 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Shipping */}
             <div className="rounded-3xl border border-lime/20 bg-gradient-to-b from-lime/5 to-transparent p-6 space-y-4">
               <h3 className="text-lg font-bold flex items-center gap-2"><MapPin className="h-5 w-5 text-lime-dark" /> Thông tin giao hàng</h3>
 
@@ -313,7 +330,6 @@ export default function CheckoutPage() {
                       }`}
                       required
                     />
-                    {/* Icon trạng thái */}
                     {form.phone && (
                       <span className="absolute right-3 top-1/2 -translate-y-1/2">
                         {isPhoneValid(form.phone)
@@ -322,7 +338,6 @@ export default function CheckoutPage() {
                       </span>
                     )}
                   </div>
-                  {/* Thông báo lỗi */}
                   {phoneError && (
                     <p className="text-red-500 text-xs flex items-center gap-1 mt-1">
                       <AlertCircle className="h-3 w-3" /> {phoneError}
@@ -347,12 +362,10 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Payment Methods - Vietnamese */}
             <div className="rounded-3xl border border-lime/20 bg-gradient-to-b from-lime/5 to-transparent p-6 space-y-4">
               <h3 className="text-lg font-bold flex items-center gap-2"><CreditCard className="h-5 w-5 text-lime-dark" /> Phương thức thanh toán</h3>
 
               <RadioGroup value={form.paymentMethod} onValueChange={v => update('paymentMethod', v)} className="space-y-3">
-                {/* COD */}
                 <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${form.paymentMethod === 'cod' ? 'border-lime bg-lime/10' : 'border-border hover:border-lime/40'}`}>
                   <RadioGroupItem value="cod" />
                   <Banknote className="h-6 w-6 text-lime-dark shrink-0" />
@@ -362,7 +375,6 @@ export default function CheckoutPage() {
                   </div>
                 </label>
 
-                {/* VNPay */}
                 <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${form.paymentMethod === 'vnpay' ? 'border-lime bg-lime/10' : 'border-border hover:border-lime/40'}`}>
                   <RadioGroupItem value="vnpay" />
                   <div className="w-6 h-6 shrink-0 flex items-center justify-center">
@@ -377,7 +389,6 @@ export default function CheckoutPage() {
                   </div>
                 </label>
 
-                {/* Bank Transfer */}
                 <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${form.paymentMethod === 'bank_transfer' ? 'border-lime bg-lime/10' : 'border-border hover:border-lime/40'}`}>
                   <RadioGroupItem value="bank_transfer" />
                   <Landmark className="h-6 w-6 text-blue-600 shrink-0" />
@@ -411,7 +422,7 @@ export default function CheckoutPage() {
             <div className="sticky top-24 rounded-3xl border border-lime/20 bg-gradient-to-b from-lime/5 to-transparent p-6 space-y-4">
               <h3 className="text-lg font-bold">Đơn hàng của bạn</h3>
 
-              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+              <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
                 {items.map(item => (
                   <div key={item.productId} className="flex gap-3 py-2">
                     <div className="w-14 h-14 rounded-xl bg-lime/10 flex items-center justify-center shrink-0"><span className="text-2xl">🏓</span></div>
@@ -424,12 +435,34 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
+              {/* Promo Code Input */}
+              <div className="pt-2 border-t border-border">
+                <Label className="text-sm font-medium mb-2 block">Mã khuyến mãi</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder="VD: PICKLE100K" 
+                    value={discountCode} 
+                    onChange={e => setDiscountCode(e.target.value)} 
+                    className="rounded-lg border-lime/30 h-10"
+                  />
+                  <Button onClick={applyDiscount} type="button" variant="outline" className="h-10 border-lime/50 text-lime-dark hover:bg-lime/10">Áp dụng</Button>
+                </div>
+                {discountAmount > 0 && (
+                  <p className="text-lime-dark text-xs font-semibold mt-2 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Đã áp dụng giảm {formatPrice(discountAmount)}
+                  </p>
+                )}
+              </div>
+
               <div className="h-px bg-border" />
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-muted-foreground">Tạm tính</span><span>{formatPrice(totalPrice)}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Vận chuyển</span><span>{shippingFee === 0 ? <span className="text-lime-dark font-medium">Miễn phí</span> : formatPrice(shippingFee)}</span></div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-red-500"><span className="font-medium">Giảm giá</span><span>-{formatPrice(discountAmount)}</span></div>
+                )}
                 <div className="h-px bg-border" />
-                <div className="flex justify-between text-lg font-bold"><span>Tổng cộng</span><span className="text-lime-dark">{formatPrice(grandTotal)}</span></div>
+                <div className="flex justify-between text-lg font-bold mb-1"><span>Tổng cộng</span><span className="text-lime-dark">{formatPrice(grandTotal)}</span></div>
               </div>
             </div>
           </div>

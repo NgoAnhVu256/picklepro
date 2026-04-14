@@ -41,6 +41,11 @@ export default function ProductDetailPage() {
   const [liked, setLiked] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  
+  // States for variants & gifts
+  const [selectedVersion, setSelectedVersion] = useState('14mm')
+  const [selectedGifts, setSelectedGifts] = useState<string[]>(['ball', 'tape'])
+
   const { addItem } = useCart()
 
   useEffect(() => {
@@ -290,8 +295,18 @@ export default function ProductDetailPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Phiên bản:</label>
                 <div className="flex items-center gap-3">
-                  <button className="px-5 py-2 border-2 border-lime-dark text-lime-dark font-semibold rounded-xl bg-lime/10">14mm</button>
-                  <button className="px-5 py-2 border-2 border-border text-muted-foreground font-semibold rounded-xl hover:border-lime/50 transition-colors">16mm</button>
+                  <button 
+                    onClick={() => setSelectedVersion('14mm')}
+                    className={`px-5 py-2 border-2 font-semibold rounded-xl transition-colors ${selectedVersion === '14mm' ? 'border-lime-dark text-lime-dark bg-lime/10' : 'border-border text-muted-foreground hover:border-lime/50'}`}
+                  >
+                    14mm
+                  </button>
+                  <button 
+                    onClick={() => setSelectedVersion('16mm')}
+                    className={`px-5 py-2 border-2 font-semibold rounded-xl transition-colors ${selectedVersion === '16mm' ? 'border-lime-dark text-lime-dark bg-lime/10' : 'border-border text-muted-foreground hover:border-lime/50'}`}
+                  >
+                    16mm
+                  </button>
                 </div>
               </div>
 
@@ -328,20 +343,26 @@ export default function ProductDetailPage() {
             <div className="space-y-3 pt-4">
               <label className="text-sm font-medium text-foreground">Quà tặng</label>
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-2xl border border-lime/20 bg-lime/5 p-4 relative flex flex-col items-center justify-center gap-2 group hover:border-lime/50 transition-all">
-                  <div className="absolute top-2 left-2 text-lime-dark bg-lime border border-lime-dark/20 rounded-md w-5 h-5 flex items-center justify-center shadow-sm">
+                <button 
+                  onClick={() => setSelectedGifts(prev => prev.includes('ball') ? prev.filter(g => g !== 'ball') : [...prev, 'ball'])}
+                  className={`relative flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${selectedGifts.includes('ball') ? 'border-lime-dark bg-lime/10' : 'border-border bg-lime/5 hover:border-lime/50'}`}
+                >
+                  <div className={`absolute top-2 left-2 rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition-colors ${selectedGifts.includes('ball') ? 'bg-lime text-lime-dark border border-lime-dark/20' : 'bg-gray-100 border border-gray-300 text-transparent'}`}>
                     <Check className="w-3.5 h-3.5 font-bold" />
                   </div>
                   <span className="text-4xl group-hover:scale-110 transition-transform">⚾</span>
                   <p className="text-xs font-semibold text-foreground text-center">Box 3 bóng thi đấu</p>
-                </div>
-                <div className="rounded-2xl border border-lime/20 bg-lime/5 p-4 relative flex flex-col items-center justify-center gap-2 group hover:border-lime/50 transition-all">
-                  <div className="absolute top-2 left-2 text-lime-dark bg-lime border border-lime-dark/20 rounded-md w-5 h-5 flex items-center justify-center shadow-sm">
+                </button>
+                <button 
+                  onClick={() => setSelectedGifts(prev => prev.includes('tape') ? prev.filter(g => g !== 'tape') : [...prev, 'tape'])}
+                  className={`relative flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${selectedGifts.includes('tape') ? 'border-lime-dark bg-lime/10' : 'border-border bg-lime/5 hover:border-lime/50'}`}
+                >
+                  <div className={`absolute top-2 left-2 rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition-colors ${selectedGifts.includes('tape') ? 'bg-lime text-lime-dark border border-lime-dark/20' : 'bg-gray-100 border border-gray-300 text-transparent'}`}>
                     <Check className="w-3.5 h-3.5 font-bold" />
                   </div>
                   <span className="text-4xl group-hover:scale-110 transition-transform">🏸</span>
                   <p className="text-xs font-semibold text-foreground text-center">Dán viền vợt</p>
-                </div>
+                </button>
               </div>
             </div>
 
