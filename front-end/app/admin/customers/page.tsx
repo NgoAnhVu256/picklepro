@@ -73,11 +73,11 @@ export default function AdminCustomersPage() {
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-gradient-to-br from-lime/30 to-lime/10 border border-lime/20 flex items-center justify-center text-lime font-bold text-sm shrink-0">
-                        {c.full_name?.charAt(0)?.toUpperCase() ?? '?'}
+                        {(c.full_name || c.email || '?').charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <p className="text-foreground font-medium">{c.full_name || 'Chưa cập nhật'}</p>
-                        <p className="text-muted-foreground text-xs font-mono">{c.id.slice(0, 12)}...</p>
+                        <p className="text-muted-foreground text-xs">{c.email || c.id.slice(0, 12) + '...'}</p>
                       </div>
                     </div>
                   </td>

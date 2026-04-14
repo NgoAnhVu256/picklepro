@@ -287,14 +287,28 @@ export class AdminService {
     if (search) query = query.ilike('full_name', `%${search}%`)
 
     const from = (page - 1) * limit
-    const { data, error, count } = await query
+    const { data: profilesData, error, count } = await query
       .order('updated_at', { ascending: false })
       .range(from, from + limit - 1)
 
     if (error) throw error
 
+    // Fetch emails and auth phone from auth.users
+    const { data: { users: authUsers } } = await supabaseAdmin.auth.admin.listUsers()
+    const authMap = new Map(authUsers.map(u => [u.id, { email: u.email, phone: u.phone }]))
+
+    // Merge auth info into profiles
+    const mergedData = (profilesData ?? []).map(p => {
+      const authInfo = authMap.get(p.id) || {}
+      return {
+        ...p,
+        email: authInfo.email,
+        phone: p.phone || authInfo.phone || null
+      }
+    })
+
     // Lấy thêm số đơn hàng cho mỗi user
-    const userIds = (data ?? []).map((u) => u.id)
+    const userIds = mergedData.map((u) => u.id)
     const orderCounts: Record<string, number> = {}
 
     if (userIds.length > 0) {
@@ -309,7 +323,7 @@ export class AdminService {
     }
 
     return {
-      customers: (data ?? []).map((u) => ({ ...u, orderCount: orderCounts[u.id] ?? 0 })),
+      customers: mergedData.map((u) => ({ ...u, orderCount: orderCounts[u.id] ?? 0 })),
       total: count ?? 0,
       page,
       limit,

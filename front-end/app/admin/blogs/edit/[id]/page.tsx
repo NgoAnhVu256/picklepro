@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, Upload, ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import Image from 'next/image'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 
 export default function EditBlogPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -188,11 +189,9 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
 
           <div className="md:col-span-2 border-t border-border pt-4 mt-2">
             <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Nội dung bài viết *</label>
-            <textarea 
+            <RichTextEditor 
               value={form.content} 
-              onChange={e => setForm(f => ({...f, content: e.target.value}))}
-              rows={15}
-              className="w-full px-4 py-3 rounded-xl bg-muted border border-border focus:border-lime outline-none font-mono text-sm leading-relaxed" 
+              onChange={val => setForm(f => ({...f, content: val}))}
             />
           </div>
         </div>

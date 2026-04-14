@@ -88,10 +88,10 @@ export function Header() {
 
             {/* Search Bar - Desktop */}
             <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-4">
-              <div className="relative w-full">
-                <Input type="text" placeholder="Tìm kiếm vợt, phụ kiện..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-12 py-2.5 rounded-full border-none bg-black text-white focus-visible:ring-0 placeholder:text-gray-400" />
-                <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-transparent hover:bg-white/10 text-white h-8 w-8">
+              <div className="relative w-full drop-shadow-sm">
+                <Input type="text" placeholder="Gõ từ khóa bạn cần tìm kiếm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-6 pr-12 py-6 rounded-full border-0 bg-[#F4F5F7] text-gray-800 focus-visible:ring-1 focus-visible:ring-lime placeholder:text-gray-500 text-[15px]" />
+                <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-[#0B0A11] hover:bg-[#0B0A11]/90 text-white h-9 w-9">
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
@@ -153,11 +153,11 @@ export function Header() {
           </div>
 
           {/* Mobile Search */}
-          <form onSubmit={handleSearch} className="md:hidden mt-3 mx-4">
-            <div className="relative w-full">
-              <Input type="text" placeholder="Tìm kiếm vợt, phụ kiện..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-4 pr-12 py-2.5 rounded-full border-none bg-black text-white focus-visible:ring-0 placeholder:text-gray-400" />
-              <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-transparent hover:bg-white/10 text-white h-8 w-8">
+          <form onSubmit={handleSearch} className="md:hidden mt-3 mx-4 pb-2">
+            <div className="relative w-full drop-shadow-sm">
+              <Input type="text" placeholder="Gõ từ khóa bạn cần tìm kiếm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-5 pr-12 py-5 rounded-full border-0 bg-[#F4F5F7] text-gray-800 focus-visible:ring-1 focus-visible:ring-lime placeholder:text-gray-500 text-[14px]" />
+              <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-[#0B0A11] hover:bg-[#0B0A11]/90 text-white h-8 w-8">
                 <Search className="h-4 w-4" />
               </Button>
             </div>
