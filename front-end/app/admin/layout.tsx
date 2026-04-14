@@ -65,9 +65,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-lime to-lime-dark flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <span className="text-3xl">🏓</span>
+        <div className="text-center flex flex-col items-center">
+          <div className="w-[55vw] max-w-[400px] aspect-square relative mb-6 animate-pulse">
+            <Image src="/logo.png" alt="PicklePro" fill className="object-contain drop-shadow-2xl" priority />
           </div>
           <p className="text-muted-foreground text-sm">Đang xác thực quyền admin...</p>
         </div>
