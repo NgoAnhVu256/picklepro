@@ -91,7 +91,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className="font-sans antialiased" style={{ fontFamily: "'Google Sans', Inter, system-ui, sans-serif" }}>
+      <body className="font-sans antialiased overflow-x-hidden w-full" style={{ fontFamily: "'Google Sans', Inter, system-ui, sans-serif" }}>
         <ToastProvider>
           <Providers>
             {children}

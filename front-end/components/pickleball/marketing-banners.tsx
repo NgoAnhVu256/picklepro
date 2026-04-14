@@ -31,10 +31,12 @@ export function MarketingBanners() {
   if (loading) {
     return (
       <section className="py-6 md:py-10 bg-white border-t border-border/10">
-        <div className="container mx-auto px-4 flex gap-4 overflow-x-hidden">
-          {[1,2,3,4,5].map(i => (
-            <div key={i} className="w-[280px] h-[450px] shrink-0 bg-gray-100 animate-pulse rounded-[2rem]" />
-          ))}
+        <div className="container mx-auto px-4 max-w-[1200px]">
+          <div className="flex flex-nowrap overflow-x-auto hide-scrollbar gap-3 md:gap-4 lg:gap-6 pb-4">
+            {[1,2,3,4,5].map(i => (
+              <div key={i} className="w-[150px] sm:w-[200px] md:w-[240px] lg:w-[calc(20%-1.2rem)] aspect-[9/16] lg:aspect-[10/16] shrink-0 bg-gray-100 animate-pulse rounded-[1.5rem] md:rounded-[2rem]" />
+            ))}
+          </div>
         </div>
       </section>
     )
@@ -49,12 +51,12 @@ export function MarketingBanners() {
     <section className="pt-4 pb-10 bg-white border-t border-border/10">
       <div className="container mx-auto px-4 max-w-[1200px]">
         {/* Horizontal Scroll Carousel */}
-        <div className="flex overflow-x-auto hide-scrollbar gap-4 md:gap-6 snap-x snap-mandatory">
-          {slides.map((slide, index) => (
+        <div className="flex flex-nowrap overflow-x-auto hide-scrollbar gap-3 md:gap-4 lg:gap-6 snap-x snap-mandatory pb-4">
+          {effectiveSlides.map((slide, index) => (
             <Link 
               key={slide.id || index} 
               href={slide.href || '#'} 
-              className="relative w-[280px] md:w-[320px] h-[450px] md:h-[500px] shrink-0 snap-center group overflow-hidden rounded-[2rem] shadow-xl hover:shadow-2xl hover:shadow-lime/10 border border-black/5 bg-white transition-all"
+              className="relative w-[150px] sm:w-[200px] md:w-[240px] lg:w-[calc(20%-1.2rem)] aspect-[9/16] lg:aspect-[10/16] shrink-0 snap-center group overflow-hidden rounded-[1.5rem] md:rounded-[2rem] shadow-md hover:shadow-xl hover:shadow-lime/10 border border-black/5 bg-white hover:-translate-y-1 transition-all duration-300"
             >
               {slide.bg_gradient && slide.bg_gradient.length > 0 && (
                 <Image 
@@ -70,8 +72,8 @@ export function MarketingBanners() {
               <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               {slide.title && (
-                <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                  <h3 className="text-xl md:text-2xl font-black text-black uppercase tracking-tight drop-shadow-sm">
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                  <h3 className="text-lg md:text-xl font-black text-black uppercase tracking-tight drop-shadow-sm line-clamp-2">
                     {slide.title}
                   </h3>
                   <div className="w-8 h-1 bg-lime mt-3 rounded-full group-hover:w-16 transition-all duration-300" />
