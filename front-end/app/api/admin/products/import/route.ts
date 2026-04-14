@@ -32,8 +32,31 @@ export async function POST(req: NextRequest) {
       errors: [],
     }
 
-    for (let i = 0; i < products.length; i++) {
-      const row = products[i]
+    // Tiền xử lý: Gộp các sản phẩm trùng tên (các variant) thành 1 sản phẩm
+    const groupedProducts = new Map<string, any>()
+    for (const row of products) {
+      const rowName = (row.name || '').trim()
+      if (!rowName) continue
+      
+      const key = rowName.toLowerCase()
+      if (groupedProducts.has(key)) {
+        const existing = groupedProducts.get(key)
+        existing.stock = (Number(existing.stock) || 0) + (Number(row.stock) || 0)
+        
+        // Nối thêm ảnh nếu có
+        const newImg = (row.image_url || '').trim()
+        if (newImg) {
+          existing.image_url = existing.image_url ? `${existing.image_url}, ${newImg}` : newImg
+        }
+      } else {
+        groupedProducts.set(key, { ...row })
+      }
+    }
+
+    const mergedProductsList = Array.from(groupedProducts.values())
+
+    for (let i = 0; i < mergedProductsList.length; i++) {
+      const row = mergedProductsList[i]
       try {
         // Match category
         let categoryId = row.category_id || ''
@@ -122,6 +145,9 @@ export async function POST(req: NextRequest) {
             : row.images
           imagesToInsert = [...imagesToInsert, ...imgs]
         }
+        
+        // Loại bỏ đường link ảnh trùng lặp
+        imagesToInsert = Array.from(new Set(imagesToInsert))
 
         if (!productData.name || !productData.price) {
           results.errors.push(`Dòng ${i + 1}: Thiếu tên hoặc giá sản phẩm`)
