@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, ShoppingCart, User, Menu, LogOut, LayoutDashboard } from "lucide-react"
+import { Search, ShoppingCart, User, Menu, LogOut, LayoutDashboard, Target, Package, Layers, Newspaper, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
@@ -12,11 +12,11 @@ import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
 const navItems = [
-  { label: "VỢT PICKLEBALL", href: "/products?category=vot-pickleball", gradient: "linear-gradient(135deg, #FF6B6B, #FF8E53)" },
-  { label: "PHỤ KIỆN", href: "/products?category=phu-kien", gradient: "linear-gradient(135deg, #5054FE, #9B56FF)" },
-  { label: "BỘ SƯU TẬP", href: "/products", gradient: "linear-gradient(135deg, #F7971E, #FFD200)" },
-  { label: "TIN TỨC", href: "/#home-blog-section",  gradient: "linear-gradient(135deg, #11998E, #38EF7D)" },
-  { label: "CỘNG ĐỒNG", href: "https://www.facebook.com/profile.php?id=61575468045037",  gradient: "linear-gradient(135deg, #667EEA, #764BA2)" },
+  { label: "VỢT PICKLEBALL", href: "/products?category=vot-pickleball", icon: Target, gradId: "grad-vot", gradient: "linear-gradient(135deg, #FF6B6B, #FF8E53)", from: "#FF6B6B", to: "#FF8E53" },
+  { label: "PHỤ KIỆN", href: "/products?category=phu-kien", icon: Package, gradId: "grad-pk", gradient: "linear-gradient(135deg, #5054FE, #9B56FF)", from: "#5054FE", to: "#9B56FF" },
+  { label: "BỘ SƯU TẬP", href: "/products", icon: Layers, gradId: "grad-bst", gradient: "linear-gradient(135deg, #F7971E, #FFD200)", from: "#F7971E", to: "#FFD200" },
+  { label: "TIN TỨC", href: "/#home-blog-section", icon: Newspaper, gradId: "grad-news", gradient: "linear-gradient(135deg, #11998E, #38EF7D)", from: "#11998E", to: "#38EF7D" },
+  { label: "CỘNG ĐỒNG", href: "https://www.facebook.com/profile.php?id=61575468045037", icon: Users, gradId: "grad-community", gradient: "linear-gradient(135deg, #667EEA, #764BA2)", from: "#667EEA", to: "#764BA2" },
 ]
 
 export function Header() {
@@ -167,21 +167,45 @@ export function Header() {
         {/* Navigation — Underline active/hover style */}
         <nav className={`border-t border-lime/10 bg-white ${isMenuOpen ? 'block' : 'hidden md:block'}`}>
           <div className="container mx-auto px-4">
+            
+            {/* SVG Gradients for Icons */}
+            <svg width="0" height="0" className="absolute w-0 h-0 pointer-events-none">
+              <defs>
+                {navItems.map(item => (
+                  <linearGradient key={item.gradId} id={item.gradId} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor={item.from} />
+                    <stop offset="100%" stopColor={item.to} />
+                  </linearGradient>
+                ))}
+              </defs>
+            </svg>
+
             <ul className="flex flex-col md:flex-row md:items-center md:justify-center gap-0 py-0">
               {navItems.map((item, index) => {
                 const isActive = activeTab === index
+                const Icon = item.icon
                 return (
                   <li key={item.label}>
                     <Link
                       href={item.href}
-                      className={`relative flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-all duration-200 ${
+                      className={`group relative flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-all duration-200 ${
                         isActive
                           ? 'text-[#5054FE]'
-                          : 'text-gray-600 hover:text-[#5054FE]'
+                          : 'text-gray-600'
                       }`}
                       onClick={() => { setActiveTab(index); setIsMenuOpen(false) }}
                     >
-                      <span>{item.label}</span>
+                      <div className="relative w-4 h-4 transition-transform group-hover:scale-110 group-hover:-translate-y-0.5">
+                        <Icon className={`absolute inset-0 h-4 w-4 transition-opacity ${isActive ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`} />
+                        <Icon className={`absolute inset-0 h-4 w-4 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} style={{ stroke: `url(#${item.gradId})` }} />
+                      </div>
+                      
+                      <span 
+                        className={`transition-colors duration-300 ${isActive ? 'text-transparent' : 'text-gray-600 group-hover:text-transparent'}`} 
+                        style={{ backgroundImage: item.gradient, WebkitBackgroundClip: 'text', backgroundClip: 'text' }}
+                      >
+                        {item.label}
+                      </span>
                       {/* Underline */}
                       <span className={`absolute bottom-0 left-2 right-2 h-[3px] rounded-full transition-all duration-300 ${
                         isActive ? 'bg-[#5054FE] opacity-100' : 'bg-[#5054FE] opacity-0 group-hover:opacity-100'
