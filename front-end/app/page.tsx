@@ -16,8 +16,8 @@ export default function Home() {
       <AnnouncementBar />
       <Header />
       <main>
-        <Hero />
         <Categories />
+        <Hero />
         <ProductGrid />
         <PromoBanner />
         <BlogSection />

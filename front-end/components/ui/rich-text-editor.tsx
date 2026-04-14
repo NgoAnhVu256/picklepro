@@ -12,9 +12,9 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const editorRef = useRef<any>(null)
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden [&_.tox-tinymce]:border-0 border border-border">
+    <div className="bg-white rounded-xl overflow-hidden border border-border [&_.tox-tinymce]:border-0 [&_.tox-notifications-container]:hidden">
       <Editor
-        apiKey="o1q1v6d1y9q5i6j6m4u5d8m8x9y7w5v7z2c4w6z7x1n5n3v2"
+        apiKey="no-api-key"
         onInit={(evt, editor) => editorRef.current = editor}
         value={value}
         onEditorChange={(content) => onChange(content)}
