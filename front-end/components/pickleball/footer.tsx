@@ -28,7 +28,7 @@ export function Footer() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Image src="/logo.png" alt="PicklePro Logo" width={80} height={80} className="rounded-xl" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-lime-dark to-lime bg-clip-text text-transparent">
+            <span className="text-2xl font-bold text-black">
               PicklePro
             </span>
           </Link>
@@ -66,8 +66,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="mt-8 pt-6 border-t border-lime/10 text-center">
           <p className="text-sm text-black font-bold">
-            © {new Date().getFullYear()} PicklePro. Tất cả quyền được bảo lưu. 
-            <span className="text-lime-dark"> Copyright © by PicklePro. All rights reserved.</span>
+            © 2026 PicklePro. Tất cả quyền được bảo lưu. Copyright © by PicklePro. All rights reserved.
           </p>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { Header } from "@/components/pickleball/header"
 import { Hero } from "@/components/pickleball/hero"
 import { Categories } from "@/components/pickleball/categories"
+import { MarketingBanners } from "@/components/pickleball/marketing-banners"
 import { ProductGrid } from "@/components/pickleball/product-grid"
 import { BlogSection } from "@/components/pickleball/blog-section"
 import { PromoBanner } from "@/components/pickleball/promo-banner"
@@ -16,8 +17,9 @@ export default function Home() {
       <AnnouncementBar />
       <Header />
       <main>
-        <Categories />
         <Hero />
+        <Categories />
+        <MarketingBanners />
         <ProductGrid />
         <PromoBanner />
         <BlogSection />

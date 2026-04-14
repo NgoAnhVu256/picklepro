@@ -1,16 +1,6 @@
 import Link from "next/link"
-import { Target, CircleDashed, Briefcase, Wrench, Footprints, Shirt, Package } from "lucide-react"
+import Image from "next/image"
 import { supabaseAdmin } from '@picklepro/back-end'
-
-const getIconForSlug = (slug: string) => {
-  if (slug.includes('vot')) return Target;
-  if (slug.includes('bong')) return CircleDashed;
-  if (slug.includes('tui') || slug.includes('balo')) return Briefcase;
-  if (slug.includes('giay')) return Footprints;
-  if (slug.includes('ao') || slug.includes('quan')) return Shirt;
-  if (slug.includes('phu-kien')) return Wrench;
-  return Package;
-}
 
 export async function Categories() {
   const { data: categoriesData } = await supabaseAdmin
@@ -24,35 +14,35 @@ export async function Categories() {
     return null
   }
 
-  return (
-    <section className="bg-white border-b border-border shadow-sm relative z-10">
-      <div className="container mx-auto px-4 max-w-[1200px]">
-        {/* SVG Gradient Definition */}
-        <svg width="0" height="0" className="absolute w-0 h-0 pointer-events-none">
-          <defs>
-            <linearGradient id="lime-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#22c55e" /> {/* Xanh Lime */}
-              <stop offset="100%" stopColor="#3b82f6" /> {/* Xanh Blue */}
-            </linearGradient>
-          </defs>
-        </svg>
+  // Fallback images based on slug
+  const getFallbackImg = (slug: string) => {
+    if (slug.includes('vot')) return "/categories/vot-pickleball.png";
+    if (slug.includes('bong')) return "/categories/bong-pickleball.png";
+    if (slug.includes('balo') || slug.includes('tui')) return "/categories/tui-balo.png";
+    if (slug.includes('giay')) return "/categories/giay-the-thao.png";
+    if (slug.includes('quan') || slug.includes('ao')) return "/categories/quan-ao.png";
+    return "/categories/phu-kien.png";
+  }
 
+  return (
+    <section className="bg-white border-b border-border shadow-sm relative z-10 pt-4 pb-0">
+      <div className="container mx-auto px-4 max-w-[1200px]">
         {/* Horizontal Scroll Area */}
-        <div className="flex overflow-x-auto hide-scrollbar gap-8 py-6 items-center justify-start md:justify-center">
+        <div className="flex overflow-x-auto hide-scrollbar gap-6 md:gap-8 py-4 items-start justify-start md:justify-center">
           {categories.map((category) => {
-            const Icon = getIconForSlug(category.slug);
+            const imgSrc = category.image_url || getFallbackImg(category.slug)
             return (
               <Link
                 key={category.id}
                 href={`/products?category=${category.slug}`}
-                className="group flex flex-col items-center gap-3 shrink-0"
+                className="group flex flex-col items-center gap-2 max-w-[80px] shrink-0"
               >
-                {/* SVG Icon Area */}
-                <div className="w-16 h-16 rounded-3xl bg-transparent flex items-center justify-center transform group-hover:scale-110 transition-all duration-300">
-                  <Icon className="w-10 h-10 transition-transform group-hover:-translate-y-1" style={{ stroke: 'url(#lime-blue-grad)', strokeWidth: 1.5 }} />
+                {/* App Icon Area */}
+                <div className="w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-[1.25rem] bg-white border border-gray-100 shadow-sm flex items-center justify-center transform group-hover:scale-105 transition-all duration-300 overflow-hidden">
+                   <img src={imgSrc} alt={category.name} className="w-[85%] h-[85%] object-contain" />
                 </div>
                 {/* Text Label */}
-                <span className="text-sm font-bold text-black text-center whitespace-nowrap group-hover:text-lime-dark transition-colors">
+                <span className="text-[12px] md:text-sm font-semibold text-black text-center leading-tight">
                   {category.name}
                 </span>
               </Link>

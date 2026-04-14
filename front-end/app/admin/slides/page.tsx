@@ -19,6 +19,13 @@ interface Slide {
   is_active: boolean
 }
 
+const POSITIONS = [
+  { value: 'hero', label: 'Hero Banner (Chính giữa)' },
+  { value: 'left', label: 'Banner Trái' },
+  { value: 'right1', label: 'Banner Phải (Trên)' },
+  { value: 'right2', label: 'Banner Phải (Dưới)' },
+  { value: 'marketing', label: 'Marketing Banner (Cuộn dọc)' },
+]
 
 const EMPTY_FORM = {
   position: 'hero',
@@ -127,7 +134,7 @@ export default function AdminSlidesPage() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const filteredSlides = slides;
+  const filteredSlides = filterPos === 'all' ? slides : slides.filter(s => s.badge === filterPos)
 
   return (
     <div className="space-y-6">
@@ -141,7 +148,12 @@ export default function AdminSlidesPage() {
         </button>
       </div>
 
-      {/* Filter removed since there is only one layout now */}
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+        <button onClick={() => setFilterPos('all')} className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${filterPos === 'all' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>Tất cả</button>
+        {POSITIONS.map(p => (
+          <button key={p.value} onClick={() => setFilterPos(p.value)} className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${filterPos === p.value ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{p.label}</button>
+        ))}
+      </div>
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -166,7 +178,7 @@ export default function AdminSlidesPage() {
                    <span className="text-xs text-gray-400">Không có ảnh</span>
                 )}
                 <div className="absolute top-2 left-2 px-2 py-1 bg-black/70 text-white rounded text-[10px] font-bold">
-                  Banner Carousel
+                  {POSITIONS.find(p => p.value === slide.badge)?.label || slide.badge || 'Hero'}
                 </div>
               </div>
               
@@ -210,9 +222,15 @@ export default function AdminSlidesPage() {
               </div>
               
               <div className="p-6 space-y-5 overflow-y-auto">
-                <div className="hidden">
+                {/* Vị trí hiển thị */}
+                <div>
                   <label className="text-sm font-semibold text-gray-900 mb-2 block">Vị trí hiển thị</label>
-                  <input value={form.position} readOnly />
+                  <select value={form.position} onChange={e => setForm(f => ({ ...f, position: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-lime/50">
+                    {POSITIONS.map(p => (
+                       <option key={p.value} value={p.value}>{p.label}</option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Image Upload Area */}
