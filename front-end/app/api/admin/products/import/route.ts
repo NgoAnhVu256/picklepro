@@ -37,9 +37,23 @@ export async function POST(req: NextRequest) {
       try {
         // Match category
         let categoryId = row.category_id || ''
-        const categoryField = row.category || row.category_name || ''
+        const categoryField = (row.category || row.category_name || '').toLowerCase().trim()
+        
         if (!categoryId && categoryField) {
-          categoryId = categoryMap.get(categoryField.toLowerCase()) || ''
+          // 1. Exact match
+          categoryId = categoryMap.get(categoryField) || ''
+          
+          // 2. Fuzzy match
+          if (!categoryId) {
+            for (const cat of categories ?? []) {
+              const dbCatName = cat.name.toLowerCase()
+              // If CSV says "vợt" and DB has "vợt pickleball", or vice versa
+              if (dbCatName.includes(categoryField) || categoryField.includes(dbCatName)) {
+                categoryId = cat.id
+                break
+              }
+            }
+          }
         }
 
         // Generate slug
