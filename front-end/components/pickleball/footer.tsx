@@ -39,7 +39,7 @@ export function Footer() {
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-sm text-muted-foreground hover:text-lime-dark transition-colors"
+                className="text-sm text-black font-bold hover:text-lime-dark transition-colors"
               >
                 {link.label}
               </Link>
@@ -65,9 +65,9 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="mt-8 pt-6 border-t border-lime/10 text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-black font-bold">
             © {new Date().getFullYear()} PicklePro. Tất cả quyền được bảo lưu. 
-            <span className="text-lime-dark font-medium"> Copyright © by PicklePro. All rights reserved.</span>
+            <span className="text-lime-dark"> Copyright © by PicklePro. All rights reserved.</span>
           </p>
         </div>
       </div>

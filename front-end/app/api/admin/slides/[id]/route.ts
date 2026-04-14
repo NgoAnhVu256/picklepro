@@ -12,13 +12,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   const { data, error } = await supabase
     .from('hero_slides')
     .update({
-      badge: body.badge,
+      badge: body.position,
       title: body.title,
-      title_highlight: body.title_highlight,
-      description: body.description,
-      button_text: body.button_text,
-      button_gradient: body.button_gradient,
-      bg_gradient: body.bg_gradient,
+      bg_gradient: body.image_url,
       href: body.href,
       sort_order: body.sort_order,
       is_active: body.is_active,

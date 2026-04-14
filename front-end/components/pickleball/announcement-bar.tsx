@@ -18,9 +18,19 @@ const FALLBACK = [
   'Đăng ký VIP — Giảm thêm 10% mọi đơn hàng ✨',
 ]
 
+const GRADIENTS = [
+  'linear-gradient(90deg, #7C3AED, #EC4899)', // Purple -> Pink
+  'linear-gradient(90deg, #F97316, #EAB308)', // Orange -> Yellow
+  'linear-gradient(90deg, #10B981, #3B82F6)', // Green -> Blue
+  'linear-gradient(90deg, #EC4899, #F97316)', // Pink -> Orange
+  'linear-gradient(90deg, #3B82F6, #7C3AED)'  // Blue -> Purple
+]
+
 export function AnnouncementBar() {
   const [isVisible, setIsVisible] = useState(true)
   const [announcements, setAnnouncements] = useState<string[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [fade, setFade] = useState(true) // For animation
 
   useEffect(() => {
     fetch('/api/admin/announcements')
@@ -34,69 +44,63 @@ export function AnnouncementBar() {
       .catch(() => setAnnouncements(FALLBACK))
   }, [])
 
+  const items = announcements.length > 0 ? announcements : FALLBACK
+
+  useEffect(() => {
+    if (items.length <= 1) return
+
+    const timer = setInterval(() => {
+      setFade(false) // Start fade out
+      
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % items.length)
+        setFade(true) // Fade back in
+      }, 300) // 300ms for text transition
+    }, 3000) // Change every 3s
+
+    return () => clearInterval(timer)
+  }, [items.length])
+
   if (!isVisible) return null
 
-  const items = announcements.length > 0 ? announcements : FALLBACK
-  const marqueeText = items.join('     ●     ')
+  // Mượt mà đổi gradient theo index
+  const currentGradient = GRADIENTS[currentIndex % GRADIENTS.length]
+  const currentItem = items[currentIndex]
+  const isImage = currentItem?.startsWith('http') || currentItem?.startsWith('/')
 
   return (
     <div
-      className="relative overflow-hidden py-2.5 px-4 shadow-sm"
-      style={{
-        background: 'linear-gradient(90deg, #7C3AED, #EC4899, #F97316, #EAB308, #10B981, #3B82F6, #7C3AED)',
-        backgroundSize: '400% 100%',
-        animation: 'gradientShift 8s ease infinite',
-      }}
+      className={`relative overflow-hidden transition-all duration-700 ease-in-out ${!isImage && 'py-2.5 px-4 shadow-sm'}`}
+      style={!isImage ? { background: currentGradient } : { background: '#000' }}
     >
-      <style>{`
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .marquee-track {
-          display: flex;
-          width: max-content;
-          animation: marqueeScroll 45s linear infinite;
-        }
-        .marquee-content {
-          display: inline-block;
-          padding-right: 80px;
-        }
-        @keyframes marqueeScroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .marquee-track:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
+      {isImage ? (
+         <img src={currentItem} alt="Announcement Banner" className={`w-full max-h-[80px] object-cover transition-opacity duration-300 ${fade ? 'opacity-100' : 'opacity-0'}`} />
+      ) : (
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between gap-3 max-w-[1200px] mx-auto">
+            {/* Icon */}
+            <Megaphone className="h-4 w-4 text-white shrink-0 hidden sm:block" />
 
-      <div className="flex items-center gap-3">
-        {/* Icon */}
-        <Megaphone className="h-4 w-4 text-white/90 shrink-0 hidden sm:block" />
-
-        {/* Scrolling text */}
-        <div className="flex-1 overflow-hidden">
-          <div className="marquee-track">
-            <span className="marquee-content text-sm font-semibold text-white whitespace-nowrap drop-shadow-sm">
-              {marqueeText}
-            </span>
-            <span className="marquee-content text-sm font-semibold text-white whitespace-nowrap drop-shadow-sm">
-              {marqueeText}
-            </span>
+            {/* Central Message */}
+            <div className="flex-1 flex justify-center overflow-hidden">
+              <span 
+                className={`text-sm font-semibold text-white whitespace-nowrap text-center transition-opacity duration-300 ${fade ? 'opacity-100' : 'opacity-0'}`}
+              >
+                {currentItem}
+              </span>
+            </div>
           </div>
         </div>
-
-        {/* Close button */}
-        <button
-          onClick={() => setIsVisible(false)}
-          className="shrink-0 ml-2 p-1 rounded-full hover:bg-white/20 transition-colors"
-          aria-label="Đóng thông báo"
-        >
-          <X className="h-4 w-4 text-white/80" />
-        </button>
-      </div>
+      )}
+      
+      {/* Close button */}
+      <button
+        onClick={() => setIsVisible(false)}
+        className={`absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full text-white/90 hover:text-white transition-colors z-10 ${isImage ? 'bg-black/30 hover:bg-black/50' : 'hover:bg-white/20'}`}
+        aria-label="Đóng thông báo"
+      >
+        <X className="h-4 w-4" />
+      </button>
     </div>
   )
 }

@@ -123,10 +123,14 @@ export default function AdminAnnouncementsPage() {
                 
                 <div className={`w-2 h-2 rounded-full shrink-0 ${item.is_active ? 'bg-emerald-500' : 'bg-gray-400'}`} />
                 
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium truncate ${item.is_active ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    {item.text}
-                  </p>
+                <div className="flex-1 min-w-0 flex items-center gap-4">
+                  {item.text?.startsWith('http') || item.text?.startsWith('/') ? (
+                     <img src={item.text} alt="Banner" className="w-20 h-8 object-cover rounded shadow-sm bg-muted/50" />
+                  ) : (
+                    <p className={`text-sm font-medium truncate ${item.is_active ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      {item.text}
+                    </p>
+                  )}
                   {item.link && (
                     <p className="text-xs text-blue-400 flex items-center gap-1 mt-0.5">
                       <LinkIcon className="h-3 w-3" /> {item.link}
@@ -161,10 +165,30 @@ export default function AdminAnnouncementsPage() {
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Nội dung thông báo *</label>
-                <input value={form.text} onChange={e => setForm(f => ({ ...f, text: e.target.value }))}
-                  placeholder="VD: FLASH SALE — Giảm đến 50% tất cả vợt JOOLA! 🏓"
-                  className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm" />
+                <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Hình ảnh Banner (Thay cho nội dung) *</label>
+                <div className="flex items-center gap-4">
+                   {form.text?.startsWith('http') || form.text?.startsWith('/') ? (
+                     <div className="relative">
+                        <img src={form.text} alt="Banner" className="h-16 w-auto object-contain rounded border bg-muted" />
+                        <button onClick={() => setForm(f => ({ ...f, text: '' }))} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs">X</button>
+                     </div>
+                   ) : (
+                     <label className="flex items-center gap-2 px-4 py-2 border border-border bg-muted rounded-xl cursor-pointer text-sm font-medium hover:bg-muted/80 transition-colors">
+                       <Upload className="h-4 w-4" /> Tải ảnh lên
+                       <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          toast.success('Đang tải ảnh lên...');
+                          const fd = new FormData(); fd.append('file', file); fd.append('folder', 'announcements');
+                          try {
+                             const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+                             const data = await res.json();
+                             if (data.url) setForm(f => ({ ...f, text: data.url }));
+                          } catch { toast.error('Upload thất bại'); }
+                       }} />
+                     </label>
+                   )}
+                </div>
               </div>
               <div>
                 <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Link (không bắt buộc)</label>

@@ -188,28 +188,21 @@ export function Header() {
                   <li key={item.label}>
                     <Link
                       href={item.href}
-                      className={`group relative flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-all duration-200 ${
-                        isActive
-                          ? 'text-[#5054FE]'
-                          : 'text-gray-600'
-                      }`}
+                      className="group relative flex items-center gap-2 px-5 py-3.5"
                       onClick={() => { setActiveTab(index); setIsMenuOpen(false) }}
                     >
-                      <div className="relative w-4 h-4 transition-transform group-hover:scale-110 group-hover:-translate-y-0.5">
-                        <Icon className={`absolute inset-0 h-4 w-4 transition-opacity ${isActive ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'}`} />
-                        <Icon className={`absolute inset-0 h-4 w-4 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} style={{ stroke: `url(#${item.gradId})` }} />
-                      </div>
+                      {/* Icon */}
+                      <Icon className={`h-4 w-4 transition-colors ${isActive ? 'text-black' : 'text-gray-600 group-hover:text-black'}`} />
                       
-                      <span 
-                        className={`transition-colors duration-300 ${isActive ? 'text-transparent' : 'text-gray-600 group-hover:text-transparent'}`} 
-                        style={{ backgroundImage: item.gradient, WebkitBackgroundClip: 'text', backgroundClip: 'text' }}
-                      >
+                      {/* Label - Black and Bold */}
+                      <span className={`text-[15px] transition-colors duration-200 font-bold ${isActive ? 'text-black' : 'text-black/80 group-hover:text-black'}`}>
                         {item.label}
                       </span>
+                      
                       {/* Underline */}
-                      <span className={`absolute bottom-0 left-2 right-2 h-[3px] rounded-full transition-all duration-300 ${
-                        isActive ? 'bg-[#5054FE] opacity-100' : 'bg-[#5054FE] opacity-0 group-hover:opacity-100'
-                      }`} style={isActive ? { background: item.gradient } : undefined} />
+                      <span className={`absolute bottom-0 left-2 right-2 h-[3px] rounded-full bg-black transition-all duration-300 ${
+                        isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                      }`} />
                     </Link>
                   </li>
                 )

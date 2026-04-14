@@ -20,17 +20,18 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const supabase = await createClient()
 
+  // Map image_url -> bg_gradient and position -> badge
   const { data, error } = await supabase
     .from('hero_slides')
     .insert({
-      badge: body.badge ?? '',
+      badge: body.position ?? 'hero',
       title: body.title ?? '',
-      title_highlight: body.title_highlight ?? '',
-      description: body.description ?? '',
-      button_text: body.button_text ?? 'Xem ngay',
-      button_gradient: body.button_gradient ?? 'linear-gradient(135deg, #5054FE, #9B56FF)',
-      bg_gradient: body.bg_gradient ?? 'from-purple-100 via-blue-50 to-pink-100',
-      href: body.href ?? '/products',
+      title_highlight: '',
+      description: '',
+      button_text: '',
+      button_gradient: '',
+      bg_gradient: body.image_url ?? '',
+      href: body.href ?? '',
       sort_order: body.sort_order ?? 0,
       is_active: body.is_active ?? true,
     })

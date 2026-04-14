@@ -295,7 +295,7 @@ export class AdminService {
 
     // Fetch emails and auth phone from auth.users
     const { data: { users: authUsers } } = await supabaseAdmin.auth.admin.listUsers()
-    const authMap = new Map(authUsers.map(u => [u.id, { email: u.email, phone: u.phone }]))
+    const authMap = new Map(authUsers.map(u => [u.id, { email: u.email, phone: u.phone || u.user_metadata?.phone }]))
 
     // Merge auth info into profiles
     const mergedData = (profilesData ?? []).map(p => {

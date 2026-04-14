@@ -1,180 +1,168 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, ChevronLeft, ChevronRight, Star, Shield, Zap } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
-const slides = [
-  {
-    id: 1,
-    badge: "🔥 Hot Deal",
-    title: "Professional",
-    titleHighlight: "Pickleball Gear",
-    description: "Khám phá bộ sưu tập vợt & phụ kiện Pickleball cao cấp từ các thương hiệu hàng đầu thế giới.",
-    buttonText: "Khám phá ngay",
-    buttonGradient: "linear-gradient(135deg, #5054FE, #9B56FF)",
-    bgGradient: "from-purple-100 via-blue-50 to-pink-100",
-    href: "/products",
-  },
-  {
-    id: 2,
-    badge: "⭐ Best Seller",
-    title: "JOOLA Ben Johns",
-    titleHighlight: "Hyperion CAS",
-    description: "Vợt #1 thế giới — Sử dụng bởi tay vợt số 1 Ben Johns. Carbon fiber, spin tối đa.",
-    buttonText: "Xem ngay",
-    buttonGradient: "linear-gradient(135deg, #FF6B6B, #FF8E53)",
-    bgGradient: "from-orange-100 via-red-50 to-yellow-100",
-    href: "/products?brand=JOOLA",
-  },
-  {
-    id: 3,
-    badge: "🎁 Flash Sale",
-    title: "Giảm đến 50%",
-    titleHighlight: "Combo Tiết Kiệm",
-    description: "Mua vợt + túi + grip — tiết kiệm ngay 50%. Số lượng có hạn, nhanh tay lên!",
-    buttonText: "Mua combo",
-    buttonGradient: "linear-gradient(135deg, #11998E, #38EF7D)",
-    bgGradient: "from-green-100 via-teal-50 to-lime-100",
-    href: "/products",
-  },
-  {
-    id: 4,
-    badge: "🏆 Member VIP",
-    title: "Đăng ký thành viên",
-    titleHighlight: "Ưu đãi độc quyền",
-    description: "Giảm thêm 10% mọi đơn hàng, tích điểm đổi quà, giao hàng miễn phí.",
-    buttonText: "Đăng ký ngay",
-    buttonGradient: "linear-gradient(135deg, #667EEA, #764BA2)",
-    bgGradient: "from-violet-100 via-purple-50 to-pink-100",
-    href: "/auth/register",
-  },
-]
+interface Slide {
+  id: string
+  badge: string // position
+  title: string
+  bg_gradient: string // image_url
+  href: string
+  is_active: boolean
+}
 
 export function Hero() {
   const [current, setCurrent] = useState(0)
+  const [slides, setSlides] = useState<Slide[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch('/api/admin/slides')
+        const data = await res.json()
+        setSlides(data.slides?.filter((s: Slide) => s.is_active) ?? [])
+      } catch (e) {}
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const heroSlides = slides.filter(s => !s.badge || s.badge === 'hero')
+  const leftBanner = slides.find(s => s.badge === 'left')
+  const right1Banner = slides.find(s => s.badge === 'right1')
+  const right2Banner = slides.find(s => s.badge === 'right2')
+
+  const effectiveHeroSlides = heroSlides.length > 0 ? heroSlides : [
+     // Fallback if none so the slider doesn't break
+     { id: 'fb', badge: 'hero', title: 'PicklePro Hero', bg_gradient: '/images/fallback.jpg', href: '/products', is_active: true }
+  ]
 
   // Auto slide every 5s
   useEffect(() => {
+    if (effectiveHeroSlides.length <= 1) return
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % slides.length)
+      setCurrent((prev) => (prev + 1) % effectiveHeroSlides.length)
     }, 5000)
     return () => clearInterval(timer)
-  }, [])
+  }, [effectiveHeroSlides.length])
 
-  const prev = () => setCurrent((c) => (c - 1 + slides.length) % slides.length)
-  const next = () => setCurrent((c) => (c + 1) % slides.length)
+  const prev = () => setCurrent((c) => (c - 1 + effectiveHeroSlides.length) % effectiveHeroSlides.length)
+  const next = () => setCurrent((c) => (c + 1) % effectiveHeroSlides.length)
 
-  const slide = slides[current]
+  const slide = effectiveHeroSlides[current]
+
+  if (loading) {
+    return <section className="py-6 md:py-10"><div className="container mx-auto px-4"><div className="h-[360px] bg-gray-100 animate-pulse rounded-2xl" /></div></section>
+  }
 
   return (
     <section className="relative overflow-hidden py-6 md:py-10">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={{ minHeight: '360px' }}>
           {/* Left Side Panel */}
-          <Link href="/products" className="hidden lg:block lg:col-span-2">
-            <div className="relative h-full rounded-2xl overflow-hidden group cursor-pointer"
-              style={{ background: 'linear-gradient(135deg, #FFECD2, #FCB69F)' }}>
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                <span className="text-5xl mb-3">🏓</span>
-                <h3 className="text-base font-bold text-gray-900 mb-1">PicklePro Shop</h3>
-                <p className="text-xs text-gray-800 mb-3">Vợt & phụ kiện cao cấp</p>
-                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-gray-900 shadow-lg"
-                  style={{ background: 'linear-gradient(135deg, #FF6B6B, #FF8E53)' }}>
-                  Xem chi tiết
-                </span>
-              </div>
-            </div>
-          </Link>
+          {leftBanner ? (
+             <Link href={leftBanner.href || '#'} className="hidden lg:block lg:col-span-2">
+               <div className="relative h-full rounded-2xl overflow-hidden group cursor-pointer bg-gray-100">
+                 {leftBanner.bg_gradient && leftBanner.bg_gradient.length > 0 ? (
+                    <Image src={leftBanner.bg_gradient} alt={leftBanner.title || 'Left Banner'} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                 ) : (
+                    <div className="absolute inset-0 bg-gray-200" />
+                 )}
+                 {/* Dark overlay specifically for text readability if title exists */}
+                 {leftBanner.title && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-4 text-center">
+                       <h3 className="text-white font-bold">{leftBanner.title}</h3>
+                    </div>
+                 )}
+               </div>
+             </Link>
+          ) : (
+             <div className="hidden lg:block lg:col-span-2 rounded-2xl bg-gray-100" />
+          )}
 
           {/* Center Banner Slider */}
           <div className="lg:col-span-8 relative">
-            <div className={`relative rounded-2xl overflow-hidden bg-gradient-to-br ${slide.bgGradient} transition-all duration-500`}
-              style={{ minHeight: '360px' }}>
-              {/* Background decorations */}
-              <div className="absolute inset-0 opacity-30">
-                <div className="absolute top-10 left-10 w-48 h-48 bg-white/40 rounded-full blur-3xl" />
-                <div className="absolute bottom-10 right-10 w-64 h-64 bg-white/30 rounded-full blur-3xl" />
-              </div>
+            <div className="relative rounded-2xl overflow-hidden bg-gray-100 transition-all duration-500 h-full min-h-[360px] group">
+              {slide?.bg_gradient && slide.bg_gradient.length > 0 && (
+                 <Image src={slide.bg_gradient} alt={slide.title || 'Hero Slide'} fill className="object-cover" />
+              )}
+              
+              {/* Optional clickable overlay if it has a link */}
+              {slide?.href && (
+                 <Link href={slide.href} className="absolute inset-0 z-10" />
+              )}
 
-              <div className="relative z-10 flex flex-col justify-center h-full p-8 md:p-12">
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-sm border border-white/40 w-fit mb-4">
-                  <span className="text-sm font-semibold text-gray-800">{slide.badge}</span>
-                </div>
-
-                {/* Title */}
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-3">
-                  <span className="text-gray-900">{slide.title}</span>
-                  <br />
-                  <span className="bg-clip-text text-transparent" style={{ backgroundImage: slide.buttonGradient }}>
-                    {slide.titleHighlight}
-                  </span>
-                </h1>
-
-                <p className="text-base text-gray-700 max-w-lg mb-6">{slide.description}</p>
-
-                {/* Button */}
-                <div>
-                  <Link href={slide.href}>
-                    <Button size="lg" className="text-gray-900 font-bold rounded-lg px-8 py-5 text-base shadow-xl transition-all hover:scale-105"
-                      style={{ background: slide.buttonGradient }}>
-                      {slide.buttonText} <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
-                </div>
-
-                {/* Trust Badges */}
-                <div className="flex flex-wrap items-center gap-5 pt-5">
-                  <span className="flex items-center gap-1.5 text-xs text-gray-700">
-                    <Shield className="h-4 w-4 text-lime-dark" /> Bảo hành 12 tháng
-                  </span>
-                  <span className="flex items-center gap-1.5 text-xs text-gray-700">
-                    <Star className="h-4 w-4 text-lime-dark fill-lime" /> 4.9/5 từ 2000+ đánh giá
-                  </span>
-                </div>
-              </div>
+              {slide?.title && (
+                 <div className="absolute bottom-10 left-10 z-20 pointer-events-none">
+                    <h2 className="text-3xl md:text-5xl font-black text-white drop-shadow-lg">{slide.title}</h2>
+                 </div>
+              )}
 
               {/* Navigation Arrows */}
-              <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white transition-all z-20">
-                <ChevronLeft className="h-5 w-5 text-gray-700" />
-              </button>
-              <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white transition-all z-20">
-                <ChevronRight className="h-5 w-5 text-gray-700" />
-              </button>
+              {effectiveHeroSlides.length > 1 && (
+                 <>
+                   <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 backdrop-blur-sm shadow-lg flex-items-center justify-center hover:bg-white transition-all z-20 opacity-0 group-hover:opacity-100 flex items-center">
+                     <ChevronLeft className="h-5 w-5 text-gray-700 ml-[0.35rem]" />
+                   </button>
+                   <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 backdrop-blur-sm shadow-lg flex-items-center justify-center hover:bg-white transition-all z-20 opacity-0 group-hover:opacity-100 flex items-center">
+                     <ChevronRight className="h-5 w-5 text-gray-700 ml-1.5" />
+                   </button>
+                 </>
+              )}
 
               {/* Dots */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-                {slides.map((_, i) => (
-                  <button key={i} onClick={() => setCurrent(i)}
-                    className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? 'w-7 bg-white shadow-md' : 'bg-white/50 hover:bg-white/70'}`} />
-                ))}
-              </div>
+              {effectiveHeroSlides.length > 1 && (
+                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                   {effectiveHeroSlides.map((_, i) => (
+                     <button key={i} onClick={() => setCurrent(i)}
+                       className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? 'w-7 bg-[#c2e55c] shadow-md' : 'bg-white/50 hover:bg-white/70'}`} />
+                   ))}
+                 </div>
+              )}
             </div>
           </div>
 
           {/* Right Side Panels */}
           <div className="hidden lg:flex lg:col-span-2 flex-col gap-4">
-            <Link href="/auth/login" className="flex-1 relative group cursor-pointer">
-              <div className="h-full rounded-2xl overflow-hidden p-5 flex flex-col justify-center items-center text-center"
-                style={{ background: 'linear-gradient(135deg, #A18CD1, #FBC2EB)' }}>
-                <span className="text-4xl mb-2">🏆</span>
-                <h4 className="font-bold text-gray-900 text-sm mb-0.5">Member VIP</h4>
-                <p className="text-gray-800 text-xs">Ưu đãi độc quyền</p>
-              </div>
-            </Link>
-            <Link href="/products" className="flex-1 relative group cursor-pointer">
-              <div className="h-full rounded-2xl overflow-hidden p-5 flex flex-col justify-center items-center text-center"
-                style={{ background: 'linear-gradient(135deg, #FF9A9E, #FECFEF)' }}>
-                <span className="text-4xl mb-2">🎁</span>
-                <h4 className="font-bold text-gray-900 text-sm mb-0.5">Flash Sale</h4>
-                <p className="text-gray-800 text-xs">Giảm 50% hôm nay</p>
-              </div>
-            </Link>
+             {/* Right 1 */}
+             {right1Banner ? (
+                <Link href={right1Banner.href || '#'} className="flex-1 relative group cursor-pointer overflow-hidden rounded-2xl bg-gray-100">
+                   {right1Banner.bg_gradient && right1Banner.bg_gradient.length > 0 && (
+                      <Image src={right1Banner.bg_gradient} alt={right1Banner.title || 'Right Banner 1'} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                   )}
+                   {right1Banner.title && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center p-3">
+                         <h4 className="font-bold text-white text-sm">{right1Banner.title}</h4>
+                      </div>
+                   )}
+                </Link>
+             ) : (
+                <div className="flex-1 rounded-2xl bg-gray-100" />
+             )}
+             
+             {/* Right 2 */}
+             {right2Banner ? (
+                <Link href={right2Banner.href || '#'} className="flex-1 relative group cursor-pointer overflow-hidden rounded-2xl bg-gray-100">
+                   {right2Banner.bg_gradient && right2Banner.bg_gradient.length > 0 && (
+                      <Image src={right2Banner.bg_gradient} alt={right2Banner.title || 'Right Banner 2'} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                   )}
+                   {right2Banner.title && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center p-3">
+                         <h4 className="font-bold text-white text-sm">{right2Banner.title}</h4>
+                      </div>
+                   )}
+                </Link>
+             ) : (
+                <div className="flex-1 rounded-2xl bg-gray-100" />
+             )}
           </div>
         </div>
       </div>
     </section>
   )
 }
+
