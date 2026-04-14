@@ -1,9 +1,10 @@
-﻿"use client"
+"use client"
 
 import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import useEmblaCarousel from "embla-carousel-react"
 
 interface Slide {
   id: string
@@ -18,6 +19,7 @@ export function Hero() {
   const [current, setCurrent] = useState(0)
   const [slides, setSlides] = useState<Slide[]>([])
   const [loading, setLoading] = useState(true)
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
 
   useEffect(() => {
     async function load() {
@@ -41,19 +43,24 @@ export function Hero() {
      { id: 'fb', badge: 'hero', title: 'PicklePro Hero', bg_gradient: '/images/fallback.jpg', href: '/products', is_active: true }
   ]
 
+  useEffect(() => {
+    if (!emblaApi) return
+    const onSelect = () => setCurrent(emblaApi.selectedScrollSnap())
+    emblaApi.on('select', onSelect)
+    onSelect()
+    return () => { emblaApi.off('select', onSelect) }
+  }, [emblaApi])
+
   // Auto slide every 5s
   useEffect(() => {
-    if (effectiveHeroSlides.length <= 1) return
-    const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % effectiveHeroSlides.length)
-    }, 5000)
+    if (!emblaApi) return
+    const timer = setInterval(() => { emblaApi.scrollNext() }, 5000)
     return () => clearInterval(timer)
-  }, [effectiveHeroSlides.length])
+  }, [emblaApi])
 
-  const prev = () => setCurrent((c) => (c - 1 + effectiveHeroSlides.length) % effectiveHeroSlides.length)
-  const next = () => setCurrent((c) => (c + 1) % effectiveHeroSlides.length)
-
-  const slide = effectiveHeroSlides[current]
+  const prev = () => emblaApi?.scrollPrev()
+  const next = () => emblaApi?.scrollNext()
+  const scrollTo = (i: number) => emblaApi?.scrollTo(i)
 
   if (loading) {
     return <section className="py-6 md:py-10"><div className="container mx-auto px-4"><div className="h-[360px] bg-gray-100 animate-pulse rounded-2xl" /></div></section>
@@ -86,29 +93,35 @@ export function Hero() {
 
           {/* Center Banner Slider */}
           <div className="lg:col-span-8 relative">
-            <div className="relative rounded-2xl overflow-hidden bg-gray-100 transition-all duration-500 h-full min-h-[360px] group">
-              {slide?.bg_gradient && slide.bg_gradient.length > 0 && (
-                 <Image src={slide.bg_gradient} alt={slide.title || 'Hero Slide'} fill className="object-cover" />
-              )}
-              
-              {/* Optional clickable overlay if it has a link */}
-              {slide?.href && (
-                 <Link href={slide.href} className="absolute inset-0 z-10" />
-              )}
+            <div className="relative rounded-2xl overflow-hidden bg-gray-100 h-full min-h-[360px] group" ref={emblaRef}>
+              <div className="flex touch-pan-y cursor-grab active:cursor-grabbing w-full h-[360px] lg:h-full">
+                {effectiveHeroSlides.map((slide, idx) => (
+                  <div key={slide.id || idx} className="relative flex-[0_0_100%] min-w-0 h-full select-none">
+                    {slide?.bg_gradient && slide.bg_gradient.length > 0 && (
+                       <Image src={slide.bg_gradient} alt={slide.title || 'Hero Slide'} fill className="object-cover" draggable={false} priority={idx === 0} />
+                    )}
+                    
+                    {/* Optional clickable overlay if it has a link */}
+                    {slide?.href && (
+                       <Link href={slide.href} className="absolute inset-0 z-10" draggable={false} />
+                    )}
 
-              {slide?.title && (
-                 <div className="absolute bottom-10 left-10 z-20 pointer-events-none">
-                    <h2 className="text-3xl md:text-5xl font-black text-white drop-shadow-lg">{slide.title}</h2>
-                 </div>
-              )}
+                    {slide?.title && (
+                       <div className="absolute bottom-10 left-10 z-20 pointer-events-none">
+                          <h2 className="text-3xl md:text-5xl font-black text-white drop-shadow-lg">{slide.title}</h2>
+                       </div>
+                    )}
+                  </div>
+                ))}
+              </div>
 
               {/* Navigation Arrows */}
               {effectiveHeroSlides.length > 1 && (
                  <>
-                   <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 backdrop-blur-sm shadow-lg flex-items-center justify-center hover:bg-white transition-all z-20 opacity-0 group-hover:opacity-100 flex items-center">
+                   <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white transition-all z-20 opacity-0 group-hover:opacity-100">
                      <ChevronLeft className="h-5 w-5 text-gray-700 ml-[0.35rem]" />
                    </button>
-                   <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 backdrop-blur-sm shadow-lg flex-items-center justify-center hover:bg-white transition-all z-20 opacity-0 group-hover:opacity-100 flex items-center">
+                   <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 backdrop-blur-sm shadow-lg flex items-center justify-center hover:bg-white transition-all z-20 opacity-0 group-hover:opacity-100">
                      <ChevronRight className="h-5 w-5 text-gray-700 ml-1.5" />
                    </button>
                  </>
@@ -118,7 +131,7 @@ export function Hero() {
               {effectiveHeroSlides.length > 1 && (
                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
                    {effectiveHeroSlides.map((_, i) => (
-                     <button key={i} onClick={() => setCurrent(i)}
+                     <button key={i} onClick={() => scrollTo(i)}
                        className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? 'w-7 bg-[#c2e55c] shadow-md' : 'bg-white/50 hover:bg-white/70'}`} />
                    ))}
                  </div>

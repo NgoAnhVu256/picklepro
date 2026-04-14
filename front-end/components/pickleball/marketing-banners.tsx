@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import useEmblaCarousel from "embla-carousel-react"
 
 interface Slide {
   id: string
@@ -15,6 +16,7 @@ interface Slide {
 export function MarketingBanners() {
   const [slides, setSlides] = useState<Slide[]>([])
   const [loading, setLoading] = useState(true)
+  const [emblaRef] = useEmblaCarousel({ dragFree: true, containScroll: 'trimSnaps' })
 
   useEffect(() => {
     async function load() {
@@ -32,10 +34,12 @@ export function MarketingBanners() {
     return (
       <section className="py-6 md:py-10 bg-white border-t border-border/10">
         <div className="container mx-auto px-4 max-w-[1200px]">
-          <div className="flex flex-nowrap overflow-x-auto hide-scrollbar gap-3 md:gap-4 lg:gap-6 pb-4">
-            {[1,2,3,4,5].map(i => (
-              <div key={i} className="w-[150px] sm:w-[200px] md:w-[240px] lg:w-[calc(20%-1.2rem)] aspect-[9/16] lg:aspect-[10/16] shrink-0 bg-gray-100 animate-pulse rounded-[1.5rem] md:rounded-[2rem]" />
-            ))}
+          <div className="overflow-hidden">
+            <div className="flex flex-nowrap gap-3 md:gap-4 lg:gap-6 pb-4">
+              {[1,2,3,4,5].map(i => (
+                <div key={i} className="w-[150px] sm:w-[200px] md:w-[240px] lg:w-[calc(20%-1.2rem)] aspect-[9/16] lg:aspect-[10/16] flex-[0_0_auto] bg-gray-100 animate-pulse rounded-[1.5rem] md:rounded-[2rem]" />
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -51,13 +55,15 @@ export function MarketingBanners() {
     <section className="pt-4 pb-10 bg-white border-t border-border/10">
       <div className="container mx-auto px-4 max-w-[1200px]">
         {/* Horizontal Scroll Carousel */}
-        <div className="flex flex-nowrap overflow-x-auto hide-scrollbar gap-3 md:gap-4 lg:gap-6 snap-x snap-mandatory pb-4">
-          {effectiveSlides.map((slide, index) => (
-            <Link 
-              key={slide.id || index} 
-              href={slide.href || '#'} 
-              className="relative w-[150px] sm:w-[200px] md:w-[240px] lg:w-[calc(20%-1.2rem)] aspect-[9/16] lg:aspect-[10/16] shrink-0 snap-center group overflow-hidden rounded-[1.5rem] md:rounded-[2rem] shadow-md hover:shadow-xl hover:shadow-lime/10 border border-black/5 bg-white hover:-translate-y-1 transition-all duration-300"
-            >
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex flex-nowrap gap-3 md:gap-4 lg:gap-6 pb-4 cursor-grab active:cursor-grabbing">
+            {effectiveSlides.map((slide, index) => (
+              <div key={slide.id || index} className="w-[150px] sm:w-[200px] md:w-[240px] lg:w-[calc(20%-1.2rem)] aspect-[9/16] lg:aspect-[10/16] flex-[0_0_auto]">
+                <Link 
+                  href={slide.href || '#'} 
+                  className="relative w-full h-full block group overflow-hidden rounded-[1.5rem] md:rounded-[2rem] shadow-md hover:shadow-xl hover:shadow-lime/10 border border-black/5 bg-white hover:-translate-y-1 transition-all duration-300 select-none"
+                  draggable={false}
+                >
               {slide.bg_gradient && slide.bg_gradient.length > 0 && (
                 <Image 
                   src={slide.bg_gradient} 
@@ -79,8 +85,10 @@ export function MarketingBanners() {
                   <div className="w-8 h-1 bg-lime mt-3 rounded-full group-hover:w-16 transition-all duration-300" />
                 </div>
               )}
-            </Link>
-          ))}
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

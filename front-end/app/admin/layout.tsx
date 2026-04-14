@@ -20,7 +20,7 @@ const navItems = [
   { href: '/admin/customers', label: 'Khách hàng', icon: Users },
   { href: '/admin/promotions', label: 'Khuyến mãi', icon: BadgePercent },
   { href: '/admin/blogs', label: 'Bài viết', icon: Newspaper },
-  { href: '/admin/slides', label: 'Hero Slides', icon: SlidersHorizontal },
+  { href: '/admin/slides', label: 'Quản lý Banners', icon: SlidersHorizontal },
   { href: '/admin/announcements', label: 'Thông báo chạy', icon: Megaphone },
   { href: '/admin/settings', label: 'Cài đặt', icon: Settings },
   { href: '/admin/account', label: 'Tài khoản', icon: UserCog },
@@ -158,7 +158,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* Main Content */}
-      <div className="lg:ml-64 flex-1 flex flex-col min-h-screen">
+      <div className="lg:ml-64 flex-1 flex flex-col min-h-screen min-w-0 w-full lg:w-[calc(100%-16rem)] overflow-x-hidden">
         {/* Top Bar */}
         <header className="sticky top-0 z-40 bg-white/80 dark:bg-card text-card-foreground shadow-sm/80 backdrop-blur-xl border-b border-gray-200 dark:border-border px-4 py-3 flex items-center gap-3 transition-colors">
           <button
