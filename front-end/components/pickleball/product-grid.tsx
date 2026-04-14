@@ -75,9 +75,8 @@ export function ProductGrid() {
         <div className="flex items-end justify-between mb-10">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-              Sản Phẩm <span className="text-lime-dark">Nổi Bật</span>
+              Sản Phẩm nổi bật
             </h2>
-            <p className="text-muted-foreground">Được yêu thích nhất bởi cộng đồng Pickleball Việt Nam</p>
           </div>
           <Link href="/products">
             <Button variant="outline" className="hidden md:flex rounded-full border-lime/30 hover:bg-lime/10 text-lime-dark font-medium">

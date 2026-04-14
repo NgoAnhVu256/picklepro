@@ -287,7 +287,7 @@ export default function ProductDetailPage() {
 
             {/* Variations */}
             <div className="space-y-6 pt-4 border-t border-border/50">
-              {/* Brand instead of Version */}
+              {/* Brand */}
               <div className="space-y-2">
                 <label className="text-base font-medium text-foreground opacity-80">Thương hiệu:</label>
                 <div className="flex items-center">
@@ -297,40 +297,91 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Colors mapper to images */}
-              <div className="space-y-3">
-                <label className="text-base font-medium text-foreground opacity-80">Màu sắc:</label>
-                <div className="flex items-center gap-3">
-                  {(() => {
-                    const fallbackColors = ['#FDE047', '#93C5FD', '#F472B6', '#D6D3D1', '#15803D', '#EF4444', '#A855F7']
-                    const images = product.product_images || []
-                    if (images.length === 0) return <span className="text-xs text-muted-foreground">Mặc định</span>
-                    return images.map((img, idx) => {
-                      const colorHex = img.color_code || fallbackColors[idx % fallbackColors.length]
-                      const colorName = img.color_name || `Màu ${idx + 1}`
-                      const isSelected = selectedImage === img.url || (!selectedImage && idx === 0)
-                      return (
-                        <button 
-                          key={img.id} 
-                          onClick={() => setSelectedImage(img.url)}
-                          className={`w-10 h-10 rounded-xl border-2 transition-all shadow-sm ${isSelected ? 'border-lime-dark scale-110' : 'border-border hover:border-lime/50'} p-0.5 relative group/btn`}
-                          title={colorName}
-                        >
-                          <div className={`w-full h-full rounded-lg flex items-center justify-center`} style={{ backgroundColor: colorHex }}>
-                            {isSelected && <Check className="w-5 h-5 text-white drop-shadow-md" style={{ filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.5))' }} />}
-                          </div>
-                          
-                          {/* Tooltip */}
-                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20">
-                            {colorName}
-                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-black/80 rotate-45"></div>
-                          </div>
-                        </button>
-                      )
-                    })
-                  })()}
-                </div>
-              </div>
+              {/* Category-specific attributes */}
+              {(() => {
+                const catSlug = product.categories?.slug || ''
+                
+                // Vợt Pickleball: show thickness options
+                if (catSlug === 'vot-pickleball') {
+                  const thicknessOptions = ['14mm', '16mm']
+                  const specThickness = product.specs?.['Độ dày'] || product.specs?.['Thickness'] || null
+                  return (
+                    <div className="space-y-3">
+                      <label className="text-base font-medium text-foreground opacity-80">Độ dày mặt vợt:</label>
+                      <div className="flex items-center gap-3">
+                        {thicknessOptions.map((t) => {
+                          const isMatch = specThickness ? specThickness.includes(t.replace('mm','')) : t === '16mm'
+                          return (
+                            <span
+                              key={t}
+                              className={`px-5 py-2.5 rounded-xl border-2 text-sm font-bold cursor-default transition-all ${isMatch ? 'border-lime-dark bg-lime/10 text-lime-dark shadow-sm' : 'border-border text-muted-foreground bg-muted/30'}`}
+                            >
+                              {t}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                }
+                
+                // Quần áo: show size + color
+                if (catSlug === 'quan-ao') {
+                  const sizes = ['S', 'M', 'L', 'XL', 'XXL']
+                  const fallbackColors = ['#FDE047', '#93C5FD', '#F472B6', '#D6D3D1', '#15803D', '#EF4444', '#A855F7']
+                  const images = product.product_images || []
+                  return (
+                    <>
+                      <div className="space-y-3">
+                        <label className="text-base font-medium text-foreground opacity-80">Size:</label>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {sizes.map((s) => (
+                            <span
+                              key={s}
+                              className="px-4 py-2 rounded-xl border-2 border-border text-sm font-bold cursor-default text-foreground hover:border-lime/50 transition-all bg-white"
+                            >
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-base font-medium text-foreground opacity-80">Màu sắc:</label>
+                        <div className="flex items-center gap-3">
+                          {images.length === 0 ? (
+                            <span className="text-xs text-muted-foreground">Mặc định</span>
+                          ) : (
+                            images.map((img, idx) => {
+                              const colorHex = (img as any).color_code || fallbackColors[idx % fallbackColors.length]
+                              const colorName = (img as any).color_name || `Màu ${idx + 1}`
+                              const isSelected = selectedImage === img.url || (!selectedImage && idx === 0)
+                              return (
+                                <button 
+                                  key={img.id} 
+                                  onClick={() => setSelectedImage(img.url)}
+                                  className={`w-10 h-10 rounded-xl border-2 transition-all shadow-sm ${isSelected ? 'border-lime-dark scale-110' : 'border-border hover:border-lime/50'} p-0.5 relative group/btn`}
+                                  title={colorName}
+                                >
+                                  <div className="w-full h-full rounded-lg flex items-center justify-center" style={{ backgroundColor: colorHex }}>
+                                    {isSelected && <Check className="w-5 h-5 text-white drop-shadow-md" style={{ filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.5))' }} />}
+                                  </div>
+                                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20">
+                                    {colorName}
+                                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-black/80 rotate-45"></div>
+                                  </div>
+                                </button>
+                              )
+                            })
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )
+                }
+                
+                // Default for other categories: no color/size section
+                return null
+              })()}
             </div>
 
             {/* Actions (Quantity + Buttons) */}

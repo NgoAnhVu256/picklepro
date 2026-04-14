@@ -59,13 +59,13 @@ export function AnnouncementBar() {
   }
 
   return (
-    <div className="sticky top-0 z-[60] w-full shadow-md transition-all duration-700 ease-in-out relative overflow-hidden bg-black max-h-[80px] sm:max-h-[100px]" ref={emblaRef}>
+    <div className="sticky top-0 z-[60] w-full shadow-md transition-all duration-700 ease-in-out relative overflow-hidden bg-black" ref={emblaRef}>
       <div className="flex touch-pan-y cursor-grab active:cursor-grabbing w-full">
         {slides.map((slide, index) => {
            const content = slide.bg_gradient ? (
-             <img src={slide.bg_gradient} alt={slide.title || "Announcement Banner"} className="w-full object-cover max-h-[80px] sm:max-h-[100px]" draggable={false} />
+             <img src={slide.bg_gradient} alt={slide.title || "Announcement Banner"} className="w-full object-contain sm:object-cover sm:max-h-[100px]" draggable={false} />
            ) : (
-             <div className="py-3 px-4 w-full h-[80px] sm:h-[100px] flex justify-center items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-sm">
+             <div className="py-3 px-4 w-full flex justify-center items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-sm">
                 <Megaphone className="w-4 h-4" /> {slide.title || 'Thông báo mới nhất từ PicklePro'}
              </div>
            )
