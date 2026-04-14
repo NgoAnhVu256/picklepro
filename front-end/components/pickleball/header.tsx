@@ -81,7 +81,7 @@ export function Header() {
             {/* Logo — BIGGER */}
             <Link href="/" className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity">
               <Image src="/logo.png" alt="PicklePro Logo" width={80} height={80} className="rounded-xl" priority />
-              <span className="text-3xl font-bold bg-gradient-to-r from-lime-dark to-lime bg-clip-text text-transparent">
+              <span className="text-3xl font-bold text-black">
                 PicklePro
               </span>
             </Link>
@@ -90,8 +90,8 @@ export function Header() {
             <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-4">
               <div className="relative w-full">
                 <Input type="text" placeholder="Tìm kiếm vợt, phụ kiện..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-12 py-2.5 rounded-full border-2 border-lime/30 focus:border-lime bg-white/80 backdrop-blur-sm" />
-                <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white h-8 w-8">
+                  className="w-full pl-4 pr-12 py-2.5 rounded-full border-none bg-black text-white focus-visible:ring-0 placeholder:text-gray-400" />
+                <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-transparent hover:bg-white/10 text-white h-8 w-8">
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
@@ -139,10 +139,10 @@ export function Header() {
               {/* Cart Button — Purple gradient */}
               <Link href="/cart">
                 <Button className="flex items-center gap-2 backdrop-blur-md text-white font-semibold rounded-full px-4 py-2 shadow-lg shadow-purple-500/20 transition-all hover:opacity-90"
-                  style={{ background: 'linear-gradient(135deg, #5054FE, #9B56FF)' }}>
+                  style={{ background: 'linear-gradient(135deg, #B27BFF, #9A57FF)' }}>
                   <ShoppingCart className="h-4 w-4" />
                   <span className="text-sm hidden sm:inline">Giỏ hàng</span>
-                  <span className="bg-white text-[#5054FE] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">{totalItems}</span>
+                  <span className="bg-white text-[#9A57FF] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">{totalItems}</span>
                 </Button>
               </Link>
 
@@ -153,12 +153,12 @@ export function Header() {
           </div>
 
           {/* Mobile Search */}
-          <form onSubmit={handleSearch} className="md:hidden mt-3">
+          <form onSubmit={handleSearch} className="md:hidden mt-3 mx-4">
             <div className="relative w-full">
               <Input type="text" placeholder="Tìm kiếm vợt, phụ kiện..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-4 pr-12 py-2 rounded-full border-2 border-lime/30 focus:border-lime bg-white/80" />
-              <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-lime-dark hover:bg-lime-dark/80 text-white h-7 w-7">
-                <Search className="h-3.5 w-3.5" />
+                className="w-full pl-4 pr-12 py-2.5 rounded-full border-none bg-black text-white focus-visible:ring-0 placeholder:text-gray-400" />
+              <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-transparent hover:bg-white/10 text-white h-8 w-8">
+                <Search className="h-4 w-4" />
               </Button>
             </div>
           </form>

@@ -18,3 +18,9 @@ export async function getAdminUser() {
 export function adminUnauthorized() {
   return NextResponse.json({ error: 'Không có quyền admin' }, { status: 403 })
 }
+
+export async function requireAdmin() {
+  const user = await getAdminUser()
+  if (!user) return adminUnauthorized()
+  return null
+}
