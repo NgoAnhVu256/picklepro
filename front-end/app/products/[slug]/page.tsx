@@ -41,10 +41,6 @@ export default function ProductDetailPage() {
   const [liked, setLiked] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  
-  // States for variants & gifts
-  const [selectedVersion, setSelectedVersion] = useState('14mm')
-  const [selectedGifts, setSelectedGifts] = useState<string[]>(['ball', 'tape'])
 
   const { addItem } = useCart()
 
@@ -290,29 +286,20 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Variations */}
-            <div className="space-y-5 pt-4 border-t border-border/50">
-              {/* Version (Mock) */}
+            <div className="space-y-6 pt-4 border-t border-border/50">
+              {/* Brand instead of Version */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Phiên bản:</label>
-                <div className="flex items-center gap-3">
-                  <button 
-                    onClick={() => setSelectedVersion('14mm')}
-                    className={`px-5 py-2 border-2 font-semibold rounded-xl transition-colors ${selectedVersion === '14mm' ? 'border-lime-dark text-lime-dark bg-lime/10' : 'border-border text-muted-foreground hover:border-lime/50'}`}
-                  >
-                    14mm
-                  </button>
-                  <button 
-                    onClick={() => setSelectedVersion('16mm')}
-                    className={`px-5 py-2 border-2 font-semibold rounded-xl transition-colors ${selectedVersion === '16mm' ? 'border-lime-dark text-lime-dark bg-lime/10' : 'border-border text-muted-foreground hover:border-lime/50'}`}
-                  >
-                    16mm
-                  </button>
+                <label className="text-base font-medium text-foreground opacity-80">Thương hiệu:</label>
+                <div className="flex items-center">
+                  <span className="px-5 py-2 border-2 border-lime/30 text-lime-dark text-lg font-bold uppercase tracking-widest rounded-xl bg-gradient-to-r from-lime/10 to-transparent shadow-sm">
+                    {product.brand}
+                  </span>
                 </div>
               </div>
 
               {/* Colors mapper to images */}
               <div className="space-y-3">
-                <label className="text-sm font-medium text-foreground">Màu sắc:</label>
+                <label className="text-base font-medium text-foreground opacity-80">Màu sắc:</label>
                 <div className="flex items-center gap-3">
                   {(() => {
                     const fallbackColors = ['bg-[#FDE047]', 'bg-[#93C5FD]', 'bg-[#F472B6]', 'bg-[#D6D3D1]', 'bg-[#15803D]', 'bg-[#EF4444]', 'bg-[#A855F7]']
@@ -325,11 +312,11 @@ export default function ProductDetailPage() {
                         <button 
                           key={img.id} 
                           onClick={() => setSelectedImage(img.url)}
-                          className={`w-9 h-9 rounded-lg border-2 transition-all shadow-sm ${isSelected ? 'border-lime-dark scale-110' : 'border-border hover:border-lime/50'} p-0.5`}
+                          className={`w-10 h-10 rounded-xl border-2 transition-all shadow-sm ${isSelected ? 'border-lime-dark scale-110' : 'border-border hover:border-lime/50'} p-0.5`}
                           title={`Color ${idx+1}`}
                         >
-                          <div className={`w-full h-full rounded flex items-center justify-center ${colorClass}`}>
-                            {isSelected && <Check className="w-4 h-4 text-white/90 drop-shadow-sm" />}
+                          <div className={`w-full h-full rounded-lg flex items-center justify-center ${colorClass}`}>
+                            {isSelected && <Check className="w-5 h-5 text-white/90 drop-shadow-sm" />}
                           </div>
                         </button>
                       )
@@ -339,42 +326,15 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Gift Box */}
-            <div className="space-y-3 pt-4">
-              <label className="text-sm font-medium text-foreground">Quà tặng</label>
-              <div className="grid grid-cols-2 gap-4">
-                <button 
-                  onClick={() => setSelectedGifts(prev => prev.includes('ball') ? prev.filter(g => g !== 'ball') : [...prev, 'ball'])}
-                  className={`relative flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${selectedGifts.includes('ball') ? 'border-lime-dark bg-lime/10' : 'border-border bg-lime/5 hover:border-lime/50'}`}
-                >
-                  <div className={`absolute top-2 left-2 rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition-colors ${selectedGifts.includes('ball') ? 'bg-lime text-lime-dark border border-lime-dark/20' : 'bg-gray-100 border border-gray-300 text-transparent'}`}>
-                    <Check className="w-3.5 h-3.5 font-bold" />
-                  </div>
-                  <span className="text-4xl group-hover:scale-110 transition-transform">⚾</span>
-                  <p className="text-xs font-semibold text-foreground text-center">Box 3 bóng thi đấu</p>
-                </button>
-                <button 
-                  onClick={() => setSelectedGifts(prev => prev.includes('tape') ? prev.filter(g => g !== 'tape') : [...prev, 'tape'])}
-                  className={`relative flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all group ${selectedGifts.includes('tape') ? 'border-lime-dark bg-lime/10' : 'border-border bg-lime/5 hover:border-lime/50'}`}
-                >
-                  <div className={`absolute top-2 left-2 rounded-full w-5 h-5 flex items-center justify-center shadow-sm transition-colors ${selectedGifts.includes('tape') ? 'bg-lime text-lime-dark border border-lime-dark/20' : 'bg-gray-100 border border-gray-300 text-transparent'}`}>
-                    <Check className="w-3.5 h-3.5 font-bold" />
-                  </div>
-                  <span className="text-4xl group-hover:scale-110 transition-transform">🏸</span>
-                  <p className="text-xs font-semibold text-foreground text-center">Dán viền vợt</p>
-                </button>
-              </div>
-            </div>
-
             {/* Actions (Quantity + Buttons) */}
-            <div className="space-y-4 pt-4 border-t border-border/50">
+            <div className="space-y-5 pt-6 border-t border-border/50 mt-2">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Số lượng:</label>
+                <label className="text-base font-medium text-foreground opacity-80">Số lượng:</label>
                 <div className="flex items-center w-max rounded-xl border border-border bg-white shadow-sm overflow-hidden">
                   <button className="w-12 h-12 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground" onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={!inStock}>
                     <Minus className="h-4 w-4" />
                   </button>
-                  <span className="w-12 h-12 flex items-center justify-center font-bold text-base border-x border-border/50">{quantity}</span>
+                  <span className="w-12 h-12 flex items-center justify-center font-bold text-base border-x border-border/50 bg-gray-50/50">{quantity}</span>
                   <button className="w-12 h-12 flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground" onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} disabled={!inStock}>
                     <Plus className="h-4 w-4" />
                   </button>
@@ -406,7 +366,7 @@ export default function ProductDetailPage() {
 
                 {/* Wishlist icon */}
                 <button 
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all border-2 active:scale-95 shadow-sm bg-white ${liked ? 'border-red-500 text-red-500' : 'border-border hover:border-red-400 text-foreground'}`}
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all border-2 active:scale-95 shadow-sm bg-white ${liked ? 'border-red-500 text-red-500 bg-red-50/50' : 'border-border hover:border-red-400 text-foreground'}`}
                   disabled={!inStock} 
                   onClick={() => setLiked(!liked)}
                   title="Yêu thích"
@@ -415,10 +375,13 @@ export default function ProductDetailPage() {
                 </button>
               </div>
               
-              <div className="flex items-center gap-3 pt-2 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">Danh mục: <Link href={`/products?category=${product.categories?.slug || ''}`} className="text-lime-dark font-medium hover:underline">{product.categories?.name || 'Vợt Pickleball'}</Link></span>
-                <span className="text-border">|</span>
-                <span className="flex items-center gap-1">Thương hiệu: <span className="text-lime-dark font-medium">{product.brand}</span></span>
+              <div className="flex items-center gap-3 pt-3">
+                <span className="flex items-center gap-2 text-base text-muted-foreground">
+                  Danh mục: 
+                  <Link href={`/products?category=${product.categories?.slug || ''}`} className="text-lime-dark font-extrabold text-lg hover:underline transition-all">
+                    {product.categories?.name || 'Vợt Pickleball'}
+                  </Link>
+                </span>
               </div>
             </div>
 
