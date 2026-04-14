@@ -80,7 +80,7 @@ export function Header() {
           <div className="flex items-center justify-between gap-4">
             {/* Logo — BIGGER */}
             <Link href="/" className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity">
-              <Image src="/logo.png" alt="PicklePro Logo" width={56} height={56} className="rounded-xl" priority />
+              <Image src="/logo.png" alt="PicklePro Logo" width={80} height={80} className="rounded-xl" priority />
               <span className="text-3xl font-bold bg-gradient-to-r from-lime-dark to-lime bg-clip-text text-transparent">
                 PicklePro
               </span>

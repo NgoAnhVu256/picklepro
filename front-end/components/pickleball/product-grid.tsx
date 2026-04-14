@@ -39,7 +39,7 @@ export function ProductGrid() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/products?isFeatured=true&limit=6&sortBy=created_at&sortOrder=desc')
+    fetch('/api/products?isFeatured=true&limit=8&sortBy=created_at&sortOrder=desc')
       .then(r => r.json())
       .then(data => {
         setProducts(data.products ?? [])
@@ -88,8 +88,8 @@ export function ProductGrid() {
 
         {/* Loading */}
         {loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-            {[...Array(6)].map((_, i) => (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            {[...Array(8)].map((_, i) => (
               <div key={i} className="rounded-2xl sm:rounded-3xl bg-muted/30 h-[260px] sm:h-[340px] animate-pulse" />
             ))}
           </div>
@@ -98,7 +98,7 @@ export function ProductGrid() {
             <p className="text-lg">Chưa có sản phẩm nổi bật</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             {products.map((product) => {
               const catSlug = product.categories?.slug ?? ''
               const emoji = categoryEmojis[catSlug] ?? '🏓'
