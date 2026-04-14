@@ -110,7 +110,7 @@ export default function OrdersPage() {
                 <p className="text-muted-foreground mt-4">Đang tải đơn hàng...</p>
               </div>
             ) : orders.length === 0 ? (
-              <div className="rounded-3xl border border-lime/20 bg-gradient-to-b from-lime/5 to-transparent p-12 text-center">
+              <div className="rounded-3xl border border-lime/30 bg-gradient-to-b from-lime/10 to-transparent p-12 text-center">
                 <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
                 <h3 className="text-xl font-bold mb-2">Chưa có đơn hàng nào</h3>
                 <p className="text-muted-foreground mb-6">Hãy khám phá cửa hàng và đặt đơn hàng đầu tiên!</p>
@@ -126,7 +126,7 @@ export default function OrdersPage() {
                   const status = statusMap[order.status] || statusMap.pending
                   const StatusIcon = status.icon
                   return (
-                    <div key={order.id} className="rounded-2xl border border-lime/20 bg-gradient-to-b from-lime/5 to-transparent p-5 hover:border-lime/40 transition-colors">
+                    <div key={order.id} className="rounded-2xl border border-lime/30 bg-gradient-to-b from-lime/10 to-transparent p-5 hover:border-lime/40 transition-colors">
                       {/* Header */}
                       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                         <div className="flex items-center gap-3">

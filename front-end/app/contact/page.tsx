@@ -26,7 +26,7 @@ export default function ContactPage() {
         <p className="text-muted-foreground mb-8">Chúng tôi luôn sẵn sàng hỗ trợ bạn!</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
           {contacts.map((c) => (
-            <div key={c.label} className="flex gap-4 p-6 rounded-2xl border border-lime/20 bg-gradient-to-br from-lime/5 to-transparent">
+            <div key={c.label} className="flex gap-4 p-6 rounded-2xl border border-lime/30 bg-gradient-to-br from-lime/10 to-transparent">
               <div className="w-12 h-12 rounded-xl bg-lime/20 flex items-center justify-center shrink-0">
                 <c.icon className="h-6 w-6 text-lime-dark" />
               </div>

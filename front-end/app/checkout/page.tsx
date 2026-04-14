@@ -300,7 +300,7 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            <div className="rounded-3xl border border-lime/20 bg-gradient-to-b from-lime/5 to-transparent p-6 space-y-4">
+            <div className="rounded-3xl border border-lime/30 bg-gradient-to-b from-lime/10 to-transparent p-6 space-y-4">
               <h3 className="text-lg font-bold flex items-center gap-2"><MapPin className="h-5 w-5 text-lime-dark" /> Thông tin giao hàng</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -362,7 +362,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-lime/20 bg-gradient-to-b from-lime/5 to-transparent p-6 space-y-4">
+            <div className="rounded-3xl border border-lime/30 bg-gradient-to-b from-lime/10 to-transparent p-6 space-y-4">
               <h3 className="text-lg font-bold flex items-center gap-2"><CreditCard className="h-5 w-5 text-lime-dark" /> Phương thức thanh toán</h3>
 
               <RadioGroup value={form.paymentMethod} onValueChange={v => update('paymentMethod', v)} className="space-y-3">
@@ -419,7 +419,7 @@ export default function CheckoutPage() {
 
           {/* Summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 rounded-3xl border border-lime/20 bg-gradient-to-b from-lime/5 to-transparent p-6 space-y-4">
+            <div className="sticky top-24 rounded-3xl border border-lime/30 bg-gradient-to-b from-lime/10 to-transparent p-6 space-y-4">
               <h3 className="text-lg font-bold">Đơn hàng của bạn</h3>
 
               <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
