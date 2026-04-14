@@ -105,27 +105,71 @@ export class AdminService {
   }
 
   async createProduct(payload: any) {
-    const slug = payload.slug || this.generateSlug(payload.name)
-    const { data, error } = await supabaseAdmin
+    const { images, ...productData } = payload;
+    const slug = productData.slug || this.generateSlug(productData.name)
+    
+    // Set fallback image_url from primary image
+    if (images && images.length > 0) {
+      const primary = images.find((i: any) => i.is_primary) || images[0];
+      productData.image_url = primary.url;
+    }
+
+    const { data: product, error } = await supabaseAdmin
       .from('products')
-      .insert({ ...payload, slug })
+      .insert({ ...productData, slug })
       .select()
       .single()
 
     if (error) throw new ServiceError('CREATE_FAILED', error.message)
-    return data
+
+    if (images && images.length > 0) {
+      const imgPayload = images.map((img: any) => ({
+        product_id: product.id,
+        url: img.url,
+        is_primary: img.is_primary ?? false,
+        color_name: img.color_name || null,
+        color_code: img.color_code || null
+      }))
+      await supabaseAdmin.from('product_images').insert(imgPayload)
+    }
+
+    return product
   }
 
   async updateProduct(id: string, payload: any) {
-    const { data, error } = await supabaseAdmin
+    const { images, ...productData } = payload;
+    
+    // Set fallback image_url
+    if (images && images.length > 0) {
+      const primary = images.find((i: any) => i.is_primary) || images[0];
+      productData.image_url = primary.url;
+    }
+
+    const { data: product, error } = await supabaseAdmin
       .from('products')
-      .update({ ...payload, updated_at: new Date().toISOString() })
+      .update({ ...productData, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single()
 
     if (error) throw new ServiceError('UPDATE_FAILED', error.message)
-    return data
+
+    if (images !== undefined) {
+      // Refresh images
+      await supabaseAdmin.from('product_images').delete().eq('product_id', id)
+      if (images.length > 0) {
+        const imgPayload = images.map((img: any) => ({
+          product_id: id,
+          url: img.url,
+          is_primary: img.is_primary ?? false,
+          color_name: img.color_name || null,
+          color_code: img.color_code || null
+        }))
+        await supabaseAdmin.from('product_images').insert(imgPayload)
+      }
+    }
+
+    return product
   }
 
   async deleteProduct(id: string) {

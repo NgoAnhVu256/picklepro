@@ -11,7 +11,7 @@ function formatVND(n: number) {
 const EMPTY_FORM = {
   name: '', brand: '', price: '', original_price: '', stock: '',
   description: '', category_id: '', is_featured: false, is_active: true,
-  tags: '', specs: '', image_url: ''
+  tags: '', specs: '', images: [] as any[]
 }
 
 export default function AdminProductsPage() {
@@ -64,6 +64,10 @@ export default function AdminProductsPage() {
   const openAdd = () => { setEditing(null); setForm({ ...EMPTY_FORM }); setFormError(''); setShowModal(true) }
   const openEdit = (p: any) => {
     setEditing(p)
+    let initialImages = p.product_images || []
+    if (initialImages.length === 0 && p.image_url) {
+      initialImages = [{ url: p.image_url, is_primary: true, color_name: '', color_code: '' }]
+    }
     setForm({
       name: p.name, brand: p.brand, price: String(p.price),
       original_price: String(p.original_price ?? ''),
@@ -71,7 +75,7 @@ export default function AdminProductsPage() {
       category_id: p.category_id ?? '', is_featured: p.is_featured,
       is_active: p.is_active, tags: (p.tags ?? []).join(', '),
       specs: p.specs ? JSON.stringify(p.specs, null, 2) : '',
-      image_url: p.product_images?.[0]?.url || p.image_url || ''
+      images: initialImages
     })
     setFormError('')
     setShowModal(true)
@@ -88,7 +92,7 @@ export default function AdminProductsPage() {
       const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
       const data = await res.json()
       if (data.url) {
-        setForm(f => ({ ...f, image_url: data.url }))
+        setForm(f => ({ ...f, images: [...f.images, { url: data.url, is_primary: f.images.length === 0, color_name: '', color_code: '' }] }))
         toast.success('Tải ảnh thành công!')
       } else {
         toast.error(data.error || 'Upload thất bại')
@@ -97,6 +101,21 @@ export default function AdminProductsPage() {
       toast.error('Lỗi kết nối khi upload') 
     }
     setUploading(false)
+  }
+
+  const removeImage = (index: number) => {
+    setForm(f => ({
+      ...f,
+      images: f.images.filter((_, i) => i !== index)
+    }))
+  }
+
+  const updateImageColor = (index: number, field: string, value: string) => {
+    setForm(f => {
+      const newImages = [...f.images]
+      newImages[index] = { ...newImages[index], [field]: value }
+      return { ...f, images: newImages }
+    })
   }
 
   const handleSave = async () => {
@@ -118,10 +137,9 @@ export default function AdminProductsPage() {
       is_active: form.is_active,
       tags: form.tags ? form.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
       specs: form.specs ? (() => { try { return JSON.parse(form.specs) } catch { return null } })() : null,
+      images: form.images
     }
-    if (form.image_url) {
-      payload.images = [{ url: form.image_url, is_primary: true }]
-    }
+    
     const url = editing ? `/api/admin/products/${editing.id}` : '/api/admin/products'
     const method = editing ? 'PUT' : 'POST'
     try {
@@ -331,33 +349,68 @@ export default function AdminProductsPage() {
                     className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm font-mono resize-none" />
                 </div>
 
-                {/* Image Upload */}
-                <div className="sm:col-span-2">
-                  <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Hình ảnh sản phẩm</label>
-                  <div className="flex items-start gap-4">
-                    <div className="w-28 h-28 rounded-xl bg-muted border border-border flex items-center justify-center overflow-hidden shrink-0">
-                      {form.image_url ? (
-                        <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
-                      ) : (
-                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <label className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-gray-600 text-secondary-foreground text-sm cursor-pointer transition-all ${
-                        uploading ? 'opacity-50' : 'hover:border-lime hover:text-lime'
-                      }`}>
-                        <Upload className="h-4 w-4" />
-                        {uploading ? 'Đang upload...' : 'Chọn ảnh'}
-                        <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={uploading} />
-                      </label>
-                      <p className="text-muted-foreground text-xs">JPEG, PNG, WebP · Tối đa 5MB</p>
-                      {form.image_url && (
-                        <button type="button" onClick={() => setForm(f => ({...f, image_url: ''}))} className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300">
-                          <X className="h-3 w-3" /> Xóa ảnh
-                        </button>
-                      )}
-                    </div>
+                {/* Image Upload with Colors */}
+                <div className="sm:col-span-2 border-t border-border/50 pt-4 mt-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-bold text-foreground">Hình ảnh & Màu sắc</label>
+                    <label className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dashed border-lime/50 text-lime-dark bg-lime/5 text-sm cursor-pointer transition-all ${
+                      uploading ? 'opacity-50' : 'hover:border-lime hover:bg-lime/10'
+                    }`}>
+                      <Upload className="h-4 w-4" />
+                      {uploading ? 'Đang tải lên...' : 'Thêm ảnh mới'}
+                      <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={uploading} />
+                    </label>
                   </div>
+                  
+                  {form.images.length === 0 ? (
+                    <div className="text-center p-8 border-2 border-dashed border-border rounded-xl bg-muted/30">
+                      <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground">Chưa có hình ảnh nào.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {form.images.map((img, idx) => (
+                        <div key={idx} className={`relative flex gap-3 p-3 rounded-xl border ${img.is_primary ? 'border-lime bg-lime/5' : 'border-border bg-card'}`}>
+                          <div className="w-24 h-24 rounded-lg bg-white border border-border shrink-0 overflow-hidden relative group">
+                            <img src={img.url} className="w-full h-full object-contain" alt="" />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                              <button type="button" onClick={() => removeImage(idx)} className="p-1.5 bg-red-500 rounded-full text-white hover:scale-110 transition-transform">
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <label className="flex items-center gap-2 mb-1 cursor-pointer">
+                              <input type="radio" name="primary_image" className="accent-lime"
+                                checked={img.is_primary} 
+                                onChange={() => {
+                                  setForm(f => ({
+                                    ...f,
+                                    images: f.images.map((i, iIdx) => ({ ...i, is_primary: iIdx === idx }))
+                                  }))
+                                }} 
+                              />
+                              <span className="text-xs font-semibold text-foreground">Ảnh chính</span>
+                            </label>
+                            
+                            <div className="flex gap-2">
+                              <div className="flex-1">
+                                <input placeholder="Tên màu (VD: Đen)" value={img.color_name || ''} 
+                                  onChange={e => updateImageColor(idx, 'color_name', e.target.value)}
+                                  className="w-full px-2 py-1.5 rounded-md bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-xs" />
+                              </div>
+                              <div className="w-12 shrink-0">
+                                <input type="color" value={img.color_code || '#ffffff'} 
+                                  onChange={e => updateImageColor(idx, 'color_code', e.target.value)}
+                                  title="Mã màu"
+                                  className="w-full h-[30px] p-0 border-0 rounded-md cursor-pointer" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-6">

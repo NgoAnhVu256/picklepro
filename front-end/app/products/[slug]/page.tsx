@@ -302,21 +302,28 @@ export default function ProductDetailPage() {
                 <label className="text-base font-medium text-foreground opacity-80">Màu sắc:</label>
                 <div className="flex items-center gap-3">
                   {(() => {
-                    const fallbackColors = ['bg-[#FDE047]', 'bg-[#93C5FD]', 'bg-[#F472B6]', 'bg-[#D6D3D1]', 'bg-[#15803D]', 'bg-[#EF4444]', 'bg-[#A855F7]']
+                    const fallbackColors = ['#FDE047', '#93C5FD', '#F472B6', '#D6D3D1', '#15803D', '#EF4444', '#A855F7']
                     const images = product.product_images || []
                     if (images.length === 0) return <span className="text-xs text-muted-foreground">Mặc định</span>
                     return images.map((img, idx) => {
-                      const colorClass = fallbackColors[idx % fallbackColors.length]
+                      const colorHex = img.color_code || fallbackColors[idx % fallbackColors.length]
+                      const colorName = img.color_name || `Màu ${idx + 1}`
                       const isSelected = selectedImage === img.url || (!selectedImage && idx === 0)
                       return (
                         <button 
                           key={img.id} 
                           onClick={() => setSelectedImage(img.url)}
-                          className={`w-10 h-10 rounded-xl border-2 transition-all shadow-sm ${isSelected ? 'border-lime-dark scale-110' : 'border-border hover:border-lime/50'} p-0.5`}
-                          title={`Color ${idx+1}`}
+                          className={`w-10 h-10 rounded-xl border-2 transition-all shadow-sm ${isSelected ? 'border-lime-dark scale-110' : 'border-border hover:border-lime/50'} p-0.5 relative group/btn`}
+                          title={colorName}
                         >
-                          <div className={`w-full h-full rounded-lg flex items-center justify-center ${colorClass}`}>
-                            {isSelected && <Check className="w-5 h-5 text-white/90 drop-shadow-sm" />}
+                          <div className={`w-full h-full rounded-lg flex items-center justify-center`} style={{ backgroundColor: colorHex }}>
+                            {isSelected && <Check className="w-5 h-5 text-white drop-shadow-md" style={{ filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.5))' }} />}
+                          </div>
+                          
+                          {/* Tooltip */}
+                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20">
+                            {colorName}
+                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-black/80 rotate-45"></div>
                           </div>
                         </button>
                       )
