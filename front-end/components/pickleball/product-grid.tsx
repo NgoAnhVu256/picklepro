@@ -39,7 +39,7 @@ export function ProductGrid() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/products?isFeatured=true&limit=8&sortBy=created_at&sortOrder=desc')
+    fetch('/api/products?limit=8&sortBy=created_at&sortOrder=desc')
       .then(r => r.json())
       .then(data => {
         setProducts(data.products ?? [])
