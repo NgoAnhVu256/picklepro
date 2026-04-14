@@ -6,7 +6,7 @@ import Link from "next/link"
 export function ZaloWidget() {
   return (
     <Link
-        href="https://zalo.me/0373164472"
+        href="https://zalo.me/0846915120"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-[96px] right-6 z-40 w-14 h-14 bg-transparent border-none p-0 cursor-pointer group flex items-center justify-center transition-transform hover:scale-110 active:scale-95"

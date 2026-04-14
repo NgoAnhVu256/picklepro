@@ -15,8 +15,8 @@ const navItems = [
   { label: "VỢT PICKLEBALL", href: "/products?category=vot-pickleball", gradient: "linear-gradient(135deg, #FF6B6B, #FF8E53)" },
   { label: "PHỤ KIỆN", href: "/products?category=phu-kien", gradient: "linear-gradient(135deg, #5054FE, #9B56FF)" },
   { label: "BỘ SƯU TẬP", href: "/products", gradient: "linear-gradient(135deg, #F7971E, #FFD200)" },
-  { label: "TIN TỨC", href: "#",  gradient: "linear-gradient(135deg, #11998E, #38EF7D)" },
-  { label: "CỘNG ĐỒNG", href: "#",  gradient: "linear-gradient(135deg, #667EEA, #764BA2)" },
+  { label: "TIN TỨC", href: "/#home-blog-section",  gradient: "linear-gradient(135deg, #11998E, #38EF7D)" },
+  { label: "CỘNG ĐỒNG", href: "https://www.facebook.com/profile.php?id=61575468045037",  gradient: "linear-gradient(135deg, #667EEA, #764BA2)" },
 ]
 
 export function Header() {

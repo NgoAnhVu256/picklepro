@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   const contacts = [
-    { icon: Phone, label: 'Hotline', value: '0912 345 678', desc: 'Miễn phí cuộc gọi' },
+    { icon: Phone, label: 'Hotline / Zalo', value: '0846915120', desc: 'Miễn phí cuộc gọi' },
     { icon: Mail, label: 'Email', value: 'support@picklepro.vn', desc: 'Phản hồi trong 24h' },
-    { icon: MapPin, label: 'Showroom', value: '123 Nguyễn Huệ, Q.1, TP.HCM', desc: 'Mở cửa T2-CN' },
+    { icon: MapPin, label: 'Showroom', value: '136/107/6 Cầu Diễn, Bắc Từ Liêm, Hà Nội', desc: 'Mở cửa T2-CN' },
     { icon: Clock, label: 'Giờ làm việc', value: '8:00 - 21:00', desc: 'Thứ 2 đến Chủ nhật' },
   ]
 

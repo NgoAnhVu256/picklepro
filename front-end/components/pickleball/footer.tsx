@@ -14,7 +14,7 @@ const footerLinks = [
 import { Facebook, Instagram, Youtube, MessageCircle } from "lucide-react"
 
 const socialLinks = [
-  { icon: MessageCircle, href: "https://zalo.me/picklepro", label: "Zalo OA" },
+  { icon: MessageCircle, href: "https://zalo.me/0846915120", label: "Zalo OA" },
   { icon: Facebook, href: "https://www.facebook.com/profile.php?id=61575468045037", label: "Facebook" },
   { icon: Instagram, href: "https://instagram.com/picklepro", label: "Instagram" },
   { icon: Youtube, href: "https://youtube.com/picklepro", label: "YouTube" },

@@ -252,7 +252,7 @@ export default function CheckoutPage() {
             </div>
 
             <div className="text-center mt-5">
-              <span className="text-[#d9534f] text-[13px] font-bold">Hotline hỗ trợ: <a href="tel:18002097" className="underline">1800.2097</a></span>
+              <span className="text-[#d9534f] text-[13px] font-bold">Hotline hỗ trợ: <a href="tel:0846915120" className="underline">0846.915.120</a></span>
             </div>
 
           </div>

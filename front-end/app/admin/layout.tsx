@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Package, FolderOpen, ShoppingBag,
   Users, Settings, LogOut, Menu, X, ChevronRight, Store,
-  Percent, UserCog
+  Percent, UserCog, Newspaper
 } from 'lucide-react'
 
 const navItems = [
@@ -17,6 +17,7 @@ const navItems = [
   { href: '/admin/categories', label: 'Danh mục', icon: FolderOpen },
   { href: '/admin/orders', label: 'Đơn hàng', icon: ShoppingBag },
   { href: '/admin/customers', label: 'Khách hàng', icon: Users },
+  { href: '/admin/blogs', label: 'Bài viết', icon: Newspaper },
   { href: '/admin/promotions', label: 'Khuyến mãi', icon: Percent },
   { href: '/admin/settings', label: 'Cài đặt', icon: Settings },
   { href: '/admin/account', label: 'Tài khoản', icon: UserCog },
