@@ -6,19 +6,22 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
-  LayoutDashboard, Package, FolderOpen, ShoppingBag,
+  LayoutDashboard, Package, Tag, ShoppingCart,
   Users, Settings, LogOut, Menu, X, ChevronRight, Store,
-  Percent, UserCog, Newspaper
+  Percent, UserCog, Newspaper, SlidersHorizontal, Megaphone,
+  BadgePercent, Star, TrendingUp
 } from 'lucide-react'
 
 const navItems = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+  { href: '/admin', label: 'Tổng quan', icon: TrendingUp, exact: true },
   { href: '/admin/products', label: 'Sản phẩm', icon: Package },
-  { href: '/admin/categories', label: 'Danh mục', icon: FolderOpen },
-  { href: '/admin/orders', label: 'Đơn hàng', icon: ShoppingBag },
+  { href: '/admin/categories', label: 'Danh mục', icon: Tag },
+  { href: '/admin/orders', label: 'Đơn hàng', icon: ShoppingCart },
   { href: '/admin/customers', label: 'Khách hàng', icon: Users },
+  { href: '/admin/promotions', label: 'Khuyến mãi', icon: BadgePercent },
   { href: '/admin/blogs', label: 'Bài viết', icon: Newspaper },
-  { href: '/admin/promotions', label: 'Khuyến mãi', icon: Percent },
+  { href: '/admin/slides', label: 'Hero Slides', icon: SlidersHorizontal },
+  { href: '/admin/announcements', label: 'Thông báo chạy', icon: Megaphone },
   { href: '/admin/settings', label: 'Cài đặt', icon: Settings },
   { href: '/admin/account', label: 'Tài khoản', icon: UserCog },
 ]

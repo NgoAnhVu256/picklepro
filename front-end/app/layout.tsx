@@ -5,6 +5,7 @@ import { ChatWidgetWrapper } from '@/components/pickleball/chat-widget-wrapper'
 import { ZaloWidgetWrapper } from '@/components/pickleball/zalo-widget-wrapper'
 import { Providers } from '@/components/providers'
 import { Toaster } from 'sonner'
+import { ToastProvider } from '@/components/ui/toast-provider'
 import './globals.css'
 
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -91,13 +92,15 @@ export default function RootLayout({
         )}
       </head>
       <body className="font-sans antialiased" style={{ fontFamily: "'Google Sans', Inter, system-ui, sans-serif" }}>
-        <Providers>
-          {children}
-          <ChatWidgetWrapper />
-          <ZaloWidgetWrapper />
-          <Toaster position="bottom-right" richColors />
-          {process.env.NODE_ENV === 'production' && <Analytics />}
-        </Providers>
+        <ToastProvider>
+          <Providers>
+            {children}
+            <ChatWidgetWrapper />
+            <ZaloWidgetWrapper />
+            <Toaster position="bottom-right" richColors />
+            {process.env.NODE_ENV === 'production' && <Analytics />}
+          </Providers>
+        </ToastProvider>
       </body>
     </html>
   )
