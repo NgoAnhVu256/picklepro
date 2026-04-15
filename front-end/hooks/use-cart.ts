@@ -14,6 +14,8 @@ export interface CartItem {
   quantity: number
   image?: string
   slug: string
+  color?: string | null
+  size?: string | null
 }
 
 interface CartState {
@@ -22,8 +24,8 @@ interface CartState {
 
   // Actions
   addItem: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void
-  removeItem: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  removeItem: (productId: string, color?: string | null, size?: string | null) => void
+  updateQuantity: (productId: string, color: string | null | undefined, size: string | null | undefined, quantity: number) => void
   clearCart: () => void
   toggleCart: () => void
   openCart: () => void
@@ -34,6 +36,10 @@ interface CartState {
   getTotalPrice: () => number
 }
 
+// Utility function to identify unique items in the cart
+const isSameCartItem = (a: CartItem, b: Partial<CartItem>) => 
+  a.productId === b.productId && (a.color || null) === (b.color || null) && (a.size || null) === (b.size || null)
+
 export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
@@ -42,12 +48,12 @@ export const useCart = create<CartState>()(
 
       addItem: (item, quantity = 1) => {
         set((state) => {
-          const existing = state.items.find((i) => i.productId === item.productId)
+          const existing = state.items.find((i) => isSameCartItem(i, item))
 
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.productId === item.productId
+                isSameCartItem(i, item)
                   ? { ...i, quantity: i.quantity + quantity }
                   : i
               ),
@@ -55,26 +61,26 @@ export const useCart = create<CartState>()(
           }
 
           return {
-            items: [...state.items, { ...item, quantity }],
+            items: [...state.items, { ...item, quantity, color: item.color || null, size: item.size || null }],
           }
         })
       },
 
-      removeItem: (productId) => {
+      removeItem: (productId, color = null, size = null) => {
         set((state) => ({
-          items: state.items.filter((i) => i.productId !== productId),
+          items: state.items.filter((i) => !isSameCartItem(i, { productId, color, size })),
         }))
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (productId, color, size, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(productId)
+          get().removeItem(productId, color, size)
           return
         }
         if (quantity > 99) return // Giới hạn tối đa 99 sản phẩm
         set((state) => ({
           items: state.items.map((i) =>
-            i.productId === productId ? { ...i, quantity } : i
+            isSameCartItem(i, { productId, color, size }) ? { ...i, quantity } : i
           ),
         }))
       },

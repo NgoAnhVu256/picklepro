@@ -62,6 +62,8 @@ export class OrderService {
         product_id: item.productId,
         quantity: item.quantity,
         unit_price: product.price,
+        color: item.color || null,
+        size: item.size || null,
       })
     }
 

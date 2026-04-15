@@ -41,6 +41,9 @@ export default function ProductDetailPage() {
   const [liked, setLiked] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  
+  const [selectedColor, setSelectedColor] = useState<string | null>(null)
+  const [selectedSize, setSelectedSize] = useState<string | null>(null)
 
   const { addItem } = useCart()
 
@@ -52,6 +55,29 @@ export default function ProductDetailPage() {
         const data = await res.json()
         setProduct(data.product)
         setRelatedProducts(data.relatedProducts || [])
+
+        // Fallback or explicit parsing of variants
+        let initialColors: string[] = []
+        let initialSizes: string[] = []
+        try {
+          if (data.product?.specs?.colors) initialColors = Array.isArray(data.product.specs.colors) ? data.product.specs.colors : JSON.parse(data.product.specs.colors)
+          if (data.product?.specs?.sizes) initialSizes = Array.isArray(data.product.specs.sizes) ? data.product.specs.sizes : JSON.parse(data.product.specs.sizes)
+        } catch(e) {}
+        
+        // Setup initial default variants
+        if (initialColors.length > 0) setSelectedColor(initialColors[0])
+        else {
+          const cPatterns = ['Đỏ', 'Hồng', 'Xanh', 'Trắng', 'Đen', 'Xám', 'Vàng', 'Tím', 'Cam', 'Kem', 'Bạc', 'Than']
+          const foundC = cPatterns.find(c => data.product?.name?.includes(c))
+          if (foundC) setSelectedColor(foundC)
+        }
+
+        if (initialSizes.length > 0) setSelectedSize(initialSizes[0])
+        else {
+          const sMatch = data.product?.name?.match(/Size\s+(\S+)/i)
+          if (sMatch) setSelectedSize(sMatch[1])
+        }
+
       } catch (err) {
         console.error(err)
       } finally {
@@ -118,6 +144,8 @@ export default function ProductDetailPage() {
       brand: product.brand,
       price: product.price,
       slug: product.slug,
+      color: selectedColor,
+      size: selectedSize
     }, quantity)
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
@@ -207,14 +235,26 @@ export default function ProductDetailPage() {
           {/* Left — Image Gallery */}
           <div className="w-full">
             {/* Main Image */}
-            <div className="w-full aspect-square rounded-2xl sm:rounded-3xl bg-gradient-to-br from-lime/5 via-lime-light/10 to-lime/10 border border-lime/20 flex items-center justify-center relative overflow-hidden group">
-
+            <div 
+              className="w-full aspect-square rounded-2xl sm:rounded-3xl bg-gradient-to-br from-lime/5 via-lime-light/10 to-lime/10 border border-lime/20 flex items-center justify-center relative overflow-hidden group cursor-crosshair"
+              onMouseMove={(e) => {
+                const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
+                const x = ((e.clientX - left) / width) * 100
+                const y = ((e.clientY - top) / height) * 100
+                const img = e.currentTarget.querySelector('.zoom-img') as HTMLElement
+                if (img) img.style.transformOrigin = `${x}% ${y}%`
+              }}
+            >
               {/* Main Image Display */}
               {(() => {
                 const images = product.product_images || []
                 const primaryImg = images.find(i => i.is_primary) || images[0]
                 return primaryImg?.url ? (
-                  <img src={selectedImage || primaryImg.url} alt={product.name} className="w-full h-full object-contain p-4 sm:p-8 transition-transform duration-500 group-hover:scale-105" />
+                  <img 
+                    src={selectedImage || primaryImg.url} 
+                    alt={product.name} 
+                    className="zoom-img w-full h-full object-contain p-4 sm:p-8 transition-transform duration-200 group-hover:scale-[2] group-hover:p-0" 
+                  />
                 ) : (
                   <>
                     <div className="absolute w-40 h-40 sm:w-64 sm:h-64 bg-lime/20 rounded-full blur-3xl" />
@@ -388,17 +428,17 @@ export default function ProductDetailPage() {
                         <label className="text-sm font-medium text-foreground opacity-80">
                           {catSlug === 'giay-pickleball' ? 'Size giày:' : 'Size:'}
                         </label>
-                        <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap cursor-pointer">
                           {sizes.map((s) => {
-                            const isActive = sizeFromName === s
+                            const isActive = selectedSize === s
                             return (
-                              <span key={s} className={`px-3 py-1.5 rounded-lg border-2 text-sm font-bold transition-all ${
+                              <button key={s} onClick={() => setSelectedSize(s)} className={`px-3 py-1.5 rounded-lg border-2 text-sm font-bold transition-all outline-none ${
                                 isActive 
                                   ? 'border-lime-dark bg-lime/10 text-lime-dark shadow-sm' 
                                   : 'border-border text-muted-foreground hover:border-lime/50 bg-white cursor-pointer'
                               }`}>
                                 {s}
-                              </span>
+                              </button>
                             )
                           })}
                         </div>
@@ -407,12 +447,12 @@ export default function ProductDetailPage() {
                       {/* Color display */}
                       <div className="space-y-1.5">
                         <label className="text-sm font-medium text-foreground opacity-80">
-                          Màu sắc: {colorFromName && <span className="text-lime-dark font-bold">{colorFromName}</span>}
+                          Màu sắc: {selectedColor && <span className="text-lime-dark font-bold">{selectedColor}</span>}
                         </label>
                         <div className="flex items-center gap-2">
                           {images.length === 0 ? (
-                            <span className="inline-block px-4 py-1.5 border-2 border-lime/30 text-lime-dark text-sm font-bold rounded-lg bg-gradient-to-r from-lime/10 to-transparent shadow-sm">
-                              {colorFromName || 'Mặc định'}
+                            <span className="inline-block px-4 py-1.5 border-2 border-lime/30 text-lime-dark text-sm font-bold rounded-lg bg-gradient-to-r from-lime/10 to-transparent shadow-sm cursor-default">
+                              {selectedColor || 'Mặc định'}
                             </span>
                           ) : (
                             images.map((img, idx) => {
@@ -420,7 +460,7 @@ export default function ProductDetailPage() {
                               const colorName = (img as any).color_name || `Màu ${idx + 1}`
                               const isSelected = selectedImage === img.url || (!selectedImage && idx === 0)
                               return (
-                                <button key={img.id} onClick={() => setSelectedImage(img.url)}
+                                <button key={img.id} onClick={() => { setSelectedImage(img.url); setSelectedColor(colorName); }}
                                   className={`w-9 h-9 rounded-lg border-2 transition-all shadow-sm ${isSelected ? 'border-lime-dark scale-110' : 'border-border hover:border-lime/50'} p-0.5 relative group/btn`}
                                   title={colorName}>
                                   <div className="w-full h-full rounded-md flex items-center justify-center" style={{ backgroundColor: colorHex }}>

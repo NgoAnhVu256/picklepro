@@ -10,6 +10,8 @@ import type { PaginationMeta } from './product.dto'
 export interface CartItem {
   productId: string
   quantity: number
+  color?: string | null
+  size?: string | null
 }
 
 export interface CreateOrderDTO {

@@ -7,6 +7,8 @@ import { z } from 'zod'
 const cartItemSchema = z.object({
   productId: z.string().uuid('Product ID không hợp lệ'),
   quantity: z.number().min(1, 'Số lượng tối thiểu là 1').max(99, 'Số lượng tối đa là 99'),
+  color: z.string().nullable().optional(),
+  size: z.string().nullable().optional(),
 })
 
 export const createOrderSchema = z.object({

@@ -139,6 +139,8 @@ export interface OrderItem {
   product_id: string
   quantity: number
   unit_price: number
+  color?: string | null
+  size?: string | null
 }
 
 export type OrderItemInsert = Omit<OrderItem, 'id'>

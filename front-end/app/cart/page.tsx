@@ -74,27 +74,45 @@ export default function CartPage() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-lime-dark uppercase">{item.brand}</p>
-                      <Link href={`/products/${item.slug}`}>
-                        <h3 className="font-bold text-foreground line-clamp-2 hover:text-lime-dark transition-colors">{item.name}</h3>
-                      </Link>
+                    <div>
+                      <h3 className="font-bold text-foreground sm:text-lg leading-tight lg:truncate max-w-[200px] sm:max-w-[300px] md:max-w-[400px]">
+                        <Link href={`/products/${item.slug}`} className="hover:text-lime-dark transition-colors">{item.name}</Link>
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs sm:text-sm text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-md font-medium">{item.brand}</span>
+                        {(item.color || item.size) && (
+                          <div className="flex gap-1.5 text-xs text-muted-foreground border-l pl-2 border-border/50">
+                            {item.color && (
+                              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white border border-border shadow-sm">
+                                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#ccc' }}></span>
+                                {item.color}
+                              </span>
+                            )}
+                            {item.size && (
+                              <span className="px-2 py-0.5 rounded-md bg-white border border-border shadow-sm font-semibold">
+                                Size {item.size}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <button onClick={() => removeItem(item.productId)} className="shrink-0 p-1.5 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors">
+                    <button onClick={() => removeItem(item.productId, item.color, item.size)} className="shrink-0 p-1.5 rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors">
                       <X className="h-4 w-4" />
                     </button>
                   </div>
 
                   <div className="flex items-end justify-between mt-3">
-                    {/* Quantity */}
-                    <div className="flex items-center rounded-full border border-lime/30 overflow-hidden">
-                      <button className="px-3 py-1.5 hover:bg-lime/10 transition-colors" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
-                        <Minus className="h-3.5 w-3.5" />
-                      </button>
-                      <span className="px-3 py-1.5 font-bold text-sm min-w-[36px] text-center">{item.quantity}</span>
-                      <button className="px-3 py-1.5 hover:bg-lime/10 transition-colors" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
-                        <Plus className="h-3.5 w-3.5" />
-                      </button>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center rounded-lg border border-border bg-white shadow-sm overflow-hidden h-9">
+                        <button className="px-3 py-1.5 hover:bg-lime/10 transition-colors" onClick={() => updateQuantity(item.productId, item.color, item.size, item.quantity - 1)}>
+                          <Minus className="h-3.5 w-3.5 text-muted-foreground" />
+                        </button>
+                        <span className="w-8 text-center font-bold text-sm border-x border-border/50 bg-gray-50">{item.quantity}</span>
+                        <button className="px-3 py-1.5 hover:bg-lime/10 transition-colors" onClick={() => updateQuantity(item.productId, item.color, item.size, item.quantity + 1)}>
+                          <Plus className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Price */}

@@ -127,7 +127,15 @@ export default function AdminOrderDetailPage() {
           <tbody>
             {(order.order_items ?? []).map((item: any) => (
               <tr key={item.id} className="border-b border-border">
-                <td className="px-5 py-3 text-foreground font-medium">{item.products?.name ?? '—'}</td>
+                <td className="px-5 py-3 text-foreground font-medium">
+                  {item.products?.name ?? '—'}
+                  {(item.color || item.size) && (
+                    <span className="block text-xs text-muted-foreground mt-0.5">
+                      {item.color && <span className="mr-2">Màu: <b>{item.color}</b></span>}
+                      {item.size && <span>Size: <b>{item.size}</b></span>}
+                    </span>
+                  )}
+                </td>
                 <td className="px-5 py-3 text-muted-foreground">{item.products?.brand ?? '—'}</td>
                 <td className="px-5 py-3 text-secondary-foreground">{formatVND(item.unit_price)}</td>
                 <td className="px-5 py-3 text-secondary-foreground">×{item.quantity}</td>
