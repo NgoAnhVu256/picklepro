@@ -175,7 +175,7 @@ export default function CheckoutPage() {
 
   if (bankInfo) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] flex flex-col">
         <div className="w-full bg-[#fdfaf0] text-[#d9534f] text-xs sm:text-sm font-bold text-center py-2.5 border-b border-[#f3e5c7] shadow-sm z-10 sticky top-0">
           Quý Khách vui lòng không tắt trình duyệt cho đến khi nhận được kết quả giao dịch trên website. Xin cảm ơn!
         </div>
@@ -265,7 +265,7 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
         <Header />
         <div className="container mx-auto px-4 py-20 text-center">
           <span className="text-6xl block mb-4">🛒</span>
@@ -279,7 +279,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <Header />
 
       <div className="container mx-auto px-4 py-8">

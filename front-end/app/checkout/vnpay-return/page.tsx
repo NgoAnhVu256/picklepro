@@ -38,7 +38,7 @@ function VNPayReturnContent() {
   }, [searchParams])
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <Header />
 
       <div className="container mx-auto px-4 py-20 text-center">

@@ -26,7 +26,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
         <Header />
         <div className="container mx-auto px-4 py-20 text-center">
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-lime/10 mb-6">
@@ -46,7 +46,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <Header />
 
       <div className="container mx-auto px-4 py-8">

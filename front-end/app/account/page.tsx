@@ -96,7 +96,7 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
         <Header />
         <div className="container mx-auto px-4 py-20 text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-lime-dark" />
@@ -108,7 +108,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <Header />
 
       <div className="container mx-auto px-4 py-8">

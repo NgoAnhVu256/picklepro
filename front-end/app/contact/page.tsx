@@ -19,7 +19,7 @@ export default function ContactPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <Header />
       <main className="container mx-auto px-4 py-12">
         <h1 className="text-3xl font-extrabold text-foreground mb-2">Liên hệ PicklePro</h1>

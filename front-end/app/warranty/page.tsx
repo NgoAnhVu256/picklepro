@@ -18,7 +18,7 @@ export default function WarrantyPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <Header />
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         <h1 className="text-3xl font-extrabold text-foreground mb-2">Chính sách bảo hành</h1>

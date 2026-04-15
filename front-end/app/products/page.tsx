@@ -122,7 +122,7 @@ function ProductsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <Header />
 
       {/* Hero Banner */}

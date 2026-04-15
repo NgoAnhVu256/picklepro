@@ -36,7 +36,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
   if (!blog) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-xl text-muted-foreground">Không tìm thấy bài viết.</p>
@@ -49,7 +49,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
   const dateStr = format(new Date(blog.created_at), 'd MMMM, yyyy', { locale: vi })
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <Header />
       
       <main className="container mx-auto px-4 py-12 max-w-7xl">
@@ -101,7 +101,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
           <div className="flex-1 max-w-3xl">
             {/* Categories Tags */}
             <div className="flex items-center gap-4 mb-6 text-sm font-medium text-indigo-500">
-              <span className="border-b-2 border-indigo-200 pb-1">{blog.category_name}</span>
+              <span className="border-b-2 border-lime/40 pb-1 text-lime-dark">{blog.category_name}</span>
             </div>
 
             {/* Title */}
@@ -118,18 +118,18 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
             {/* Content properly formatted */}
             <div 
-              className="prose prose-lg max-w-none prose-img:rounded-2xl prose-a:text-indigo-600 hover:prose-a:text-indigo-500 prose-headings:font-bold"
+              className="prose prose-lg max-w-none prose-img:rounded-2xl prose-a:text-lime-dark hover:prose-a:text-lime-dark/80 prose-headings:font-bold"
               dangerouslySetInnerHTML={{ __html: blog.content || '' }} 
             />
           </div>
 
           {/* RIGHT SIDEBAR: SUGGESTIONS */}
           <div className="lg:w-80 shrink-0">
-            <h3 className="text-xl font-bold text-indigo-600 mb-6">PicklePro đề xuất</h3>
+            <h3 className="text-xl font-bold text-lime-dark mb-6">PicklePro đề xuất</h3>
             <div className="space-y-6">
               {related.filter(r => r.id !== blog.id).map(item => (
                 <Link href={`/blogs/${item.slug}`} key={item.id} className="block group">
-                  <h4 className="font-bold text-gray-800 leading-snug group-hover:text-indigo-600 transition-colors mb-2">
+                  <h4 className="font-bold text-foreground leading-snug group-hover:text-lime-dark transition-colors mb-2">
                     {item.title}
                   </h4>
                   <div className="flex items-center gap-1 text-xs text-gray-400">
