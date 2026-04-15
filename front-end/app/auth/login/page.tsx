@@ -34,6 +34,9 @@ function LoginContent() {
 
   const [googleLoading, setGoogleLoading] = useState(false)
 
+  // Domain thật cho redirect (tránh redirect về Vercel URL)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')
+
   const passwordChecks = [
     { label: 'Tối thiểu 6 ký tự', ok: registerForm.password.length >= 6 },
     { label: 'Ít nhất 1 chữ hoa', ok: /[A-Z]/.test(registerForm.password) },
@@ -104,7 +107,7 @@ function LoginContent() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo || '/')}`,
+          redirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(redirectTo || '/')}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -153,7 +156,7 @@ function LoginContent() {
             full_name: registerForm.fullName,
             phone: registerForm.phone || undefined,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo || '/')}`,
+          emailRedirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(redirectTo || '/')}`,
         },
       })
 
@@ -194,41 +197,81 @@ function LoginContent() {
     }
   }
 
-  const BrandingPanel = () => (
-    <div className="relative flex flex-col items-center justify-center bg-gradient-to-br from-[#0ea5e9] via-[#0284c7] to-[#0369a1] px-12 py-16 overflow-hidden">
-      <div className="absolute top-[-80px] left-[-80px] w-80 h-80 bg-white/10 rounded-full" />
-      <div className="absolute bottom-[-60px] right-[-60px] w-64 h-64 bg-white/10 rounded-full" />
-      <div className="absolute top-1/2 left-[-40px] w-40 h-40 bg-sky-300/20 rounded-full" />
-      <div className="absolute bottom-20 left-20 w-24 h-24 bg-white/5 rounded-full" />
+  // ==================== GOOGLE BUTTON ====================
+  const GoogleButton = ({ label }: { label: string }) => (
+    <button
+      onClick={handleGoogleAuth}
+      disabled={googleLoading}
+      className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-emerald-200 hover:bg-emerald-50/50 transition-colors font-semibold text-gray-700 text-base disabled:opacity-60"
+      style={{ fontFamily: "'Google Sans', sans-serif" }}
+    >
+      {googleLoading ? (
+        <Loader2 className="h-5 w-5 animate-spin" />
+      ) : (
+        <svg className="h-5 w-5" viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+        </svg>
+      )}
+      {googleLoading ? 'Đang chuyển đến Google...' : label}
+    </button>
+  )
+
+  // ==================== BRANDING PANEL ====================
+  const BrandingPanel = ({ isRegisterSide = false }: { isRegisterSide?: boolean }) => (
+    <div className="relative flex flex-col items-center justify-center px-12 py-16 overflow-hidden h-full"
+      style={{ background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 30%, #6ee7b7 70%, #34d399 100%)' }}>
+      {/* Decorative circles */}
+      <div className="absolute top-[-80px] left-[-80px] w-80 h-80 bg-white/20 rounded-full" />
+      <div className="absolute bottom-[-60px] right-[-60px] w-64 h-64 bg-white/20 rounded-full" />
+      <div className="absolute top-1/2 left-[-40px] w-40 h-40 bg-emerald-300/30 rounded-full" />
+      <div className="absolute bottom-20 left-20 w-24 h-24 bg-white/10 rounded-full" />
 
       <div className="relative z-10 flex flex-col items-center text-center">
-        <div className="w-40 h-40 relative mb-8 drop-shadow-2xl">
+        <div className="w-36 h-36 relative mb-8 drop-shadow-2xl">
           <img src="/favicon.ico" alt="PicklePro" className="w-full h-full object-contain" />
         </div>
-        <h1 className="text-3xl xl:text-4xl font-extrabold text-white mb-4 leading-tight">
-          Hệ thống quản lý<br />cửa hàng PicklePro
+        <h1 className="text-3xl xl:text-4xl font-extrabold text-emerald-900 mb-4 leading-tight">
+          {isRegisterSide ? (
+            <>Đã có tài khoản?</>
+          ) : (
+            <>Chào mừng trở lại!</>
+          )}
         </h1>
-        <p className="text-sky-100 text-base leading-relaxed max-w-xs">
-          Nền tảng thương mại PickleBall chuyên nghiệp - quản lý sản phẩm, đơn hàng và khách hàng dễ dàng.
+        <p className="text-emerald-700 text-base leading-relaxed max-w-xs mb-8">
+          {isRegisterSide
+            ? 'Đăng nhập để tiếp tục trải nghiệm mua sắm và quản lý đơn hàng của bạn.'
+            : 'Tạo tài khoản để khám phá bộ sưu tập Pickleball chính hãng từ các thương hiệu hàng đầu.'
+          }
         </p>
+        <button
+          type="button"
+          onClick={() => onSwitchMode(isRegisterSide ? 'login' : 'register')}
+          className="px-8 py-3 rounded-full border-2 border-emerald-800 text-emerald-900 font-bold text-sm uppercase tracking-wide hover:bg-emerald-800 hover:text-white transition-all duration-300"
+        >
+          {isRegisterSide ? 'Đăng nhập' : 'Đăng ký ngay'}
+        </button>
       </div>
-      <p className="absolute bottom-6 text-sky-200/60 text-xs">© 2026 PicklePro. All rights reserved.</p>
+      <p className="absolute bottom-6 text-emerald-600/50 text-xs">© 2026 PicklePro. All rights reserved.</p>
     </div>
   )
 
+  // ==================== LOGIN FORM ====================
   const LoginForm = ({ compact = false }: { compact?: boolean }) => (
     <div className="w-full max-w-sm">
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
-          <img src="/favicon.ico" alt="" className="h-9 w-9 object-contain hidden lg:block" />
-          <span className="text-sky-600 text-xl font-extrabold tracking-wide" style={{ fontFamily: "'Google Sans', sans-serif" }}>PicklePro</span>
+          <img src="/favicon.ico" alt="" className="h-9 w-9 object-contain" />
+          <span className="text-emerald-700 text-xl font-extrabold tracking-wide" style={{ fontFamily: "'Google Sans', sans-serif" }}>PicklePro</span>
         </div>
         <p className="text-gray-400 text-sm font-medium mt-1">Đăng nhập để truy cập hệ thống</p>
       </div>
 
       {redirectTo === '/checkout' && (
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-sky-50 border border-sky-200 mb-6 text-sm">
-          <ShoppingCart className="h-5 w-5 text-sky-600 shrink-0" />
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 mb-6 text-sm">
+          <ShoppingCart className="h-5 w-5 text-emerald-600 shrink-0" />
           <p className="text-gray-700">Vui lòng <b>đăng nhập</b> để tiếp tục thanh toán.</p>
         </div>
       )}
@@ -237,7 +280,7 @@ function LoginContent() {
         <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm mb-4">{loginError}</div>
       )}
       {loginSuccess && (
-        <div className="p-3 rounded-xl bg-green-50 border border-green-200 text-green-600 text-sm flex items-center gap-2 mb-4">
+        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm flex items-center gap-2 mb-4">
           <CheckCircle className="h-4 w-4 shrink-0" /> {loginSuccess}
         </div>
       )}
@@ -253,7 +296,7 @@ function LoginContent() {
               placeholder="your@email.com"
               value={loginEmail}
               onChange={(e) => setLoginEmail(e.target.value)}
-              className="pl-10 h-11 rounded-lg border-gray-200 focus:border-sky-400 focus:ring-sky-400/20 bg-gray-50/50"
+              className="pl-10 h-11 rounded-lg border-gray-200 focus:border-emerald-400 focus:ring-emerald-400/20 bg-gray-50/50"
               required
             />
           </div>
@@ -262,7 +305,7 @@ function LoginContent() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="login-password" className="text-base font-semibold text-gray-700" style={{ fontFamily: "'Google Sans', sans-serif" }}>Mật khẩu</Label>
-            <Link href="#" className="text-sm text-sky-500 hover:underline font-medium">Quên mật khẩu?</Link>
+            <Link href="#" className="text-sm text-emerald-500 hover:underline font-medium">Quên mật khẩu?</Link>
           </div>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -272,7 +315,7 @@ function LoginContent() {
               placeholder="••••••••"
               value={loginPassword}
               onChange={(e) => setLoginPassword(e.target.value)}
-              className="pl-10 pr-10 h-11 rounded-lg border-gray-200 focus:border-sky-400 bg-gray-50/50"
+              className="pl-10 pr-10 h-11 rounded-lg border-gray-200 focus:border-emerald-400 bg-gray-50/50"
               required
             />
             <button
@@ -288,8 +331,8 @@ function LoginContent() {
         <Button
           type="submit"
           disabled={loginLoading || !!loginSuccess}
-          className="w-full h-12 rounded-xl font-bold text-base bg-sky-500 hover:bg-sky-600 text-white transition-all shadow-md shadow-sky-500/30 active:scale-[0.98] mt-2"
-          style={{ fontFamily: "'Google Sans', sans-serif" }}
+          className="w-full h-12 rounded-xl font-bold text-base text-white transition-all shadow-md shadow-emerald-500/30 active:scale-[0.98] mt-2"
+          style={{ background: 'linear-gradient(135deg, #34d399, #059669)', fontFamily: "'Google Sans', sans-serif" }}
         >
           {loginLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Đăng nhập'}
         </Button>
@@ -301,46 +344,26 @@ function LoginContent() {
         <div className="flex-1 h-px bg-gray-100" />
       </div>
 
-      <button
-        onClick={handleGoogleAuth}
-        disabled={googleLoading}
-        className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors font-semibold text-gray-700 text-base disabled:opacity-60"
-        style={{ fontFamily: "'Google Sans', sans-serif" }}
-      >
-        {googleLoading ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          <svg className="h-5 w-5" viewBox="0 0 24 24">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-          </svg>
-        )}
-        {googleLoading ? 'Đang chuyển đến Google...' : 'Tiếp tục với Google'}
-      </button>
-
-      <p className="text-center text-base text-gray-500 mt-6" style={{ fontFamily: "'Google Sans', sans-serif" }}>
-        Chưa có tài khoản?{' '}
-        <button type="button" onClick={() => onSwitchMode('register')} className="text-sky-500 font-bold hover:underline">
-          Đăng ký ngay
-        </button>
-      </p>
+      <GoogleButton label="Tiếp tục với Google" />
 
       {compact && (
-        <p className="text-center text-sm text-gray-500 mt-3">
-          Bạn đang ở chế độ đăng nhập
+        <p className="text-center text-base text-gray-500 mt-6" style={{ fontFamily: "'Google Sans', sans-serif" }}>
+          Chưa có tài khoản?{' '}
+          <button type="button" onClick={() => onSwitchMode('register')} className="text-emerald-600 font-bold hover:underline">
+            Đăng ký ngay
+          </button>
         </p>
       )}
     </div>
   )
 
+  // ==================== REGISTER FORM ====================
   const RegisterForm = ({ compact = false }: { compact?: boolean }) => (
     <div className="w-full max-w-sm">
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
-          <img src="/favicon.ico" alt="" className="h-9 w-9 object-contain hidden lg:block" />
-          <span className="text-sky-600 text-xl font-extrabold tracking-wide" style={{ fontFamily: "'Google Sans', sans-serif" }}>PicklePro</span>
+          <img src="/favicon.ico" alt="" className="h-9 w-9 object-contain" />
+          <span className="text-emerald-700 text-xl font-extrabold tracking-wide" style={{ fontFamily: "'Google Sans', sans-serif" }}>PicklePro</span>
         </div>
         <p className="text-gray-400 text-sm font-medium mt-1">Tạo tài khoản mới để tiếp tục</p>
       </div>
@@ -349,28 +372,28 @@ function LoginContent() {
         <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm mb-4">{registerError}</div>
       )}
       {registerSuccess && (
-        <div className="p-3 rounded-xl bg-green-50 border border-green-200 text-green-600 text-sm flex items-center gap-2 mb-4">
+        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm flex items-center gap-2 mb-4">
           <CheckCircle className="h-4 w-4 shrink-0" /> {registerSuccess}
         </div>
       )}
 
-      <form onSubmit={handleRegisterSubmit} className="space-y-4">
-        <div className="space-y-1.5">
-          <Label className="text-base font-semibold text-gray-700">Họ và tên</Label>
+      <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+        <div className="space-y-1">
+          <Label className="text-sm font-semibold text-gray-700">Họ và tên</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Nguyễn Văn A"
               value={registerForm.fullName}
               onChange={(e) => updateRegister('fullName', e.target.value)}
-              className="pl-10 h-11 rounded-lg border-gray-200 focus:border-sky-400 bg-gray-50/50"
+              className="pl-10 h-10 rounded-lg border-gray-200 focus:border-emerald-400 bg-gray-50/50"
               required
             />
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <Label className="text-base font-semibold text-gray-700">Email</Label>
+        <div className="space-y-1">
+          <Label className="text-sm font-semibold text-gray-700">Email</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -378,14 +401,14 @@ function LoginContent() {
               placeholder="your@email.com"
               value={registerForm.email}
               onChange={(e) => updateRegister('email', e.target.value)}
-              className="pl-10 h-11 rounded-lg border-gray-200 focus:border-sky-400 bg-gray-50/50"
+              className="pl-10 h-10 rounded-lg border-gray-200 focus:border-emerald-400 bg-gray-50/50"
               required
             />
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <Label className="text-base font-semibold text-gray-700">Số điện thoại (tùy chọn)</Label>
+        <div className="space-y-1">
+          <Label className="text-sm font-semibold text-gray-700">Số điện thoại (tùy chọn)</Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 z-10" />
             <Input
@@ -394,18 +417,18 @@ function LoginContent() {
               onChange={(e) => handlePhoneChange(e.target.value)}
               maxLength={12}
               inputMode="tel"
-              className={`pl-10 pr-10 h-11 rounded-lg transition-colors ${
+              className={`pl-10 pr-10 h-10 rounded-lg transition-colors ${
                 phoneError
                   ? 'border-red-500 focus:border-red-500'
                   : registerForm.phone && isPhoneValid(registerForm.phone)
-                    ? 'border-sky-500 focus:border-sky-500'
-                    : 'border-gray-200 focus:border-sky-400'
+                    ? 'border-emerald-500 focus:border-emerald-500'
+                    : 'border-gray-200 focus:border-emerald-400'
               }`}
             />
             {registerForm.phone && (
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
                 {isPhoneValid(registerForm.phone)
-                  ? <CheckCircle2 className="h-4 w-4 text-sky-500" />
+                  ? <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                   : <AlertCircle className="h-4 w-4 text-red-500" />}
               </span>
             )}
@@ -417,8 +440,8 @@ function LoginContent() {
           )}
         </div>
 
-        <div className="space-y-1.5">
-          <Label className="text-base font-semibold text-gray-700">Mật khẩu</Label>
+        <div className="space-y-1">
+          <Label className="text-sm font-semibold text-gray-700">Mật khẩu</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -426,7 +449,7 @@ function LoginContent() {
               placeholder="••••••••"
               value={registerForm.password}
               onChange={(e) => updateRegister('password', e.target.value)}
-              className="pl-10 pr-10 h-11 rounded-lg border-gray-200 focus:border-sky-400 bg-gray-50/50"
+              className="pl-10 pr-10 h-10 rounded-lg border-gray-200 focus:border-emerald-400 bg-gray-50/50"
               required
             />
             <button
@@ -438,18 +461,18 @@ function LoginContent() {
             </button>
           </div>
           {registerForm.password && (
-            <div className="space-y-1 pt-1">
+            <div className="space-y-0.5 pt-1">
               {passwordChecks.map(({ label, ok }) => (
-                <div key={label} className={`flex items-center gap-2 text-xs ${ok ? 'text-sky-600' : 'text-gray-400'}`}>
-                  <CheckCircle2 className={`h-3.5 w-3.5 ${ok ? 'text-sky-600' : 'text-gray-300'}`} /> {label}
+                <div key={label} className={`flex items-center gap-2 text-xs ${ok ? 'text-emerald-600' : 'text-gray-400'}`}>
+                  <CheckCircle2 className={`h-3.5 w-3.5 ${ok ? 'text-emerald-600' : 'text-gray-300'}`} /> {label}
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        <div className="space-y-1.5">
-          <Label className="text-base font-semibold text-gray-700">Xác nhận mật khẩu</Label>
+        <div className="space-y-1">
+          <Label className="text-sm font-semibold text-gray-700">Xác nhận mật khẩu</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -457,7 +480,7 @@ function LoginContent() {
               placeholder="••••••••"
               value={registerForm.confirmPassword}
               onChange={(e) => updateRegister('confirmPassword', e.target.value)}
-              className="pl-10 h-11 rounded-lg border-gray-200 focus:border-sky-400 bg-gray-50/50"
+              className="pl-10 h-10 rounded-lg border-gray-200 focus:border-emerald-400 bg-gray-50/50"
               required
             />
           </div>
@@ -466,92 +489,86 @@ function LoginContent() {
         <Button
           type="submit"
           disabled={registerLoading || !!registerSuccess}
-          className="w-full h-12 rounded-xl font-bold text-base bg-sky-500 hover:bg-sky-600 text-white transition-all shadow-md shadow-sky-500/30"
+          className="w-full h-11 rounded-xl font-bold text-base text-white transition-all shadow-md shadow-emerald-500/30"
+          style={{ background: 'linear-gradient(135deg, #34d399, #059669)' }}
         >
           {registerLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <>Tạo tài khoản <ArrowRight className="h-4 w-4 ml-2" /></>}
         </Button>
       </form>
 
-      <div className="flex items-center gap-3 my-5">
+      <div className="flex items-center gap-3 my-4">
         <div className="flex-1 h-px bg-gray-100" />
         <span className="text-sm text-gray-400 font-medium">hoặc</span>
         <div className="flex-1 h-px bg-gray-100" />
       </div>
 
-      <button
-        onClick={handleGoogleAuth}
-        disabled={googleLoading}
-        className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors font-semibold text-gray-700 text-base disabled:opacity-60"
-        style={{ fontFamily: "'Google Sans', sans-serif" }}
-      >
-        {googleLoading ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          <svg className="h-5 w-5" viewBox="0 0 24 24">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-          </svg>
-        )}
-        {googleLoading ? 'Đang chuyển đến Google...' : 'Đăng ký với Google'}
-      </button>
-
-      <p className="text-center text-base text-gray-500 mt-6" style={{ fontFamily: "'Google Sans', sans-serif" }}>
-        Đã có tài khoản?{' '}
-        <button type="button" onClick={() => onSwitchMode('login')} className="text-sky-500 font-bold hover:underline">
-          Đăng nhập
-        </button>
-      </p>
+      <GoogleButton label="Đăng ký với Google" />
 
       {compact && (
-        <p className="text-center text-sm text-gray-500 mt-3">
-          Bạn đang ở chế độ đăng ký
+        <p className="text-center text-base text-gray-500 mt-5" style={{ fontFamily: "'Google Sans', sans-serif" }}>
+          Đã có tài khoản?{' '}
+          <button type="button" onClick={() => onSwitchMode('login')} className="text-emerald-600 font-bold hover:underline">
+            Đăng nhập
+          </button>
         </p>
       )}
     </div>
   )
 
-  return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-6 lg:py-10">
-      <div className="hidden lg:block w-full max-w-6xl">
-        <div className="overflow-hidden rounded-3xl shadow-2xl border border-sky-100 bg-white">
-          <div className={`flex w-[200%] transition-transform duration-700 ease-in-out ${mode === 'register' ? '-translate-x-1/2' : 'translate-x-0'}`}>
-            <div className="w-1/2 grid grid-cols-2 min-h-[760px]">
-              <BrandingPanel />
-              <div className="flex items-center justify-center px-8 py-10 bg-white">
-                <LoginForm />
-              </div>
-            </div>
+  // ==================== DESKTOP: SLIDING OVERLAY ====================
+  const isRegister = mode === 'register'
 
-            <div className="w-1/2 grid grid-cols-2 min-h-[760px]">
-              <div className="flex items-center justify-center px-8 py-10 bg-white">
-                <RegisterForm />
-              </div>
-              <BrandingPanel />
-            </div>
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4 py-6 lg:py-10"
+      style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 40%, #d1fae5 100%)' }}>
+
+      {/* ===== DESKTOP LAYOUT ===== */}
+      <div className="hidden lg:block w-full max-w-5xl">
+        <div className="relative overflow-hidden rounded-3xl shadow-2xl border border-emerald-100 bg-white" style={{ minHeight: '680px' }}>
+          
+          {/* Form containers - both always rendered, positioned absolute */}
+          {/* LOGIN FORM - right side */}
+          <div className={`absolute top-0 right-0 w-1/2 h-full flex items-center justify-center px-8 py-10 bg-white transition-all duration-700 ease-in-out ${
+            isRegister ? 'opacity-0 pointer-events-none translate-x-[20%]' : 'opacity-100 translate-x-0'
+          }`}>
+            <LoginForm />
+          </div>
+
+          {/* REGISTER FORM - left side */}
+          <div className={`absolute top-0 left-0 w-1/2 h-full flex items-center justify-center px-8 py-10 bg-white transition-all duration-700 ease-in-out ${
+            isRegister ? 'opacity-100 translate-x-0' : 'opacity-0 pointer-events-none -translate-x-[20%]'
+          }`}>
+            <RegisterForm />
+          </div>
+
+          {/* SLIDING OVERLAY PANEL */}
+          <div className={`absolute top-0 w-1/2 h-full transition-transform duration-700 ease-in-out z-20 ${
+            isRegister ? 'translate-x-full' : 'translate-x-0'
+          }`} style={{ left: 0 }}>
+            <BrandingPanel isRegisterSide={isRegister} />
           </div>
         </div>
       </div>
 
+      {/* ===== MOBILE LAYOUT ===== */}
       <div className="w-full max-w-md lg:hidden">
         <div className="mb-6 text-center">
           <img src="/favicon.ico" alt="PicklePro" className="h-16 w-16 mx-auto object-contain mb-3" />
-          <h1 className="text-2xl font-extrabold text-sky-600">PicklePro</h1>
+          <h1 className="text-2xl font-extrabold text-emerald-700">PicklePro</h1>
         </div>
-        <div className="rounded-2xl border border-sky-100 bg-white p-5 shadow-lg">
-          <div className="grid grid-cols-2 gap-2 mb-5 bg-sky-50 p-1 rounded-xl">
+        <div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-lg">
+          <div className="grid grid-cols-2 gap-2 mb-5 p-1 rounded-xl" style={{ background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)' }}>
             <button
               type="button"
               onClick={() => onSwitchMode('login')}
-              className={`h-10 rounded-lg text-sm font-semibold transition-colors ${mode === 'login' ? 'bg-white text-sky-600 shadow-sm' : 'text-sky-500'}`}
+              className={`h-10 rounded-lg text-sm font-semibold transition-colors ${mode === 'login' ? 'bg-white text-emerald-700 shadow-sm' : 'text-emerald-600'}`}
             >
               Đăng nhập
             </button>
             <button
               type="button"
               onClick={() => onSwitchMode('register')}
-              className={`h-10 rounded-lg text-sm font-semibold transition-colors ${mode === 'register' ? 'bg-white text-sky-600 shadow-sm' : 'text-sky-500'}`}
+              className={`h-10 rounded-lg text-sm font-semibold transition-colors ${mode === 'register' ? 'bg-white text-emerald-700 shadow-sm' : 'text-emerald-600'}`}
             >
               Đăng ký
             </button>
@@ -566,8 +583,8 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #f0fdf4, #d1fae5)' }}>
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
       </div>
     }>
       <LoginContent />

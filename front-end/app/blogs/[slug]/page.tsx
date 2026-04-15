@@ -6,9 +6,12 @@ import { vi } from "date-fns/locale"
 import Image from "next/image"
 import { BlogService } from "@picklepro/back-end"
 import Link from "next/link"
+import type { Metadata } from "next"
 
 // For SSR nextjs config
 export const dynamic = 'force-dynamic'
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://picklepro.vn'
 
 async function getBlog(slug: string) {
   const service = new BlogService()
@@ -30,6 +33,37 @@ async function getRelatedBlogs() {
   }
 }
 
+// Dynamic SEO metadata cho từng bài blog
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const blog = await getBlog(params.slug)
+  if (!blog) {
+    return { title: 'Bài viết không tồn tại | PicklePro' }
+  }
+  const description = blog.excerpt || blog.content?.replace(/<[^>]*>/g, '').substring(0, 160) || ''
+  return {
+    title: `${blog.title} | PicklePro Blog`,
+    description,
+    openGraph: {
+      title: blog.title,
+      description,
+      type: 'article',
+      url: `${APP_URL}/blogs/${blog.slug}`,
+      siteName: 'PicklePro',
+      locale: 'vi_VN',
+      publishedTime: blog.created_at,
+      authors: [blog.author || 'PicklePro'],
+      ...(blog.thumbnail ? { images: [{ url: blog.thumbnail, width: 1200, height: 630, alt: blog.title }] } : {}),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: blog.title,
+      description,
+      ...(blog.thumbnail ? { images: [blog.thumbnail] } : {}),
+    },
+    alternates: { canonical: `${APP_URL}/blogs/${blog.slug}` },
+  }
+}
+
 export default async function BlogDetailPage({ params }: { params: { slug: string } }) {
   const blog = await getBlog(params.slug)
   const related = await getRelatedBlogs()
@@ -48,9 +82,42 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
   const dateStr = format(new Date(blog.created_at), 'd MMMM, yyyy', { locale: vi })
 
+  // Article JSON-LD cho Google/AI Search
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: blog.title,
+    description: blog.excerpt || blog.content?.replace(/<[^>]*>/g, '').substring(0, 160) || '',
+    url: `${APP_URL}/blogs/${blog.slug}`,
+    datePublished: blog.created_at,
+    dateModified: blog.updated_at || blog.created_at,
+    author: { '@type': 'Person', name: blog.author || 'PicklePro' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'PicklePro',
+      url: APP_URL,
+      logo: { '@type': 'ImageObject', url: `${APP_URL}/favicon.ico` },
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${APP_URL}/blogs/${blog.slug}` },
+    ...(blog.thumbnail ? { image: blog.thumbnail } : {}),
+  }
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: APP_URL },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${APP_URL}/blogs` },
+      { '@type': 'ListItem', position: 3, name: blog.title },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <Header />
+      {/* JSON-LD Structured Data for SEO + AI */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       
       <main className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="flex flex-col lg:flex-row gap-12 text-gray-900">

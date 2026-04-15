@@ -59,12 +59,13 @@ export function AnnouncementBar() {
   if (slides.length === 0) {
      return (
        <div className="sticky top-0 z-[60] w-full shadow-md transition-all duration-700 ease-in-out">
-         <div className="py-2.5 px-4 w-full flex justify-center items-center gap-2 text-white font-bold text-sm" style={{ background: 'linear-gradient(90deg, #F97316, #EAB308)' }}>
-           <Megaphone className="w-4 h-4" /> CHÀO MỪNG BẠN ĐẾN VỚI PICKLEPRO SHOP
+         <div className="py-4 sm:py-2.5 px-6 sm:px-4 w-[92%] sm:w-full mx-auto flex justify-center items-center gap-2 text-white font-bold text-sm sm:text-sm rounded-b-xl sm:rounded-none" style={{ background: 'linear-gradient(90deg, #F97316, #EAB308)' }}>
+           <Megaphone className="w-5 h-5 sm:w-4 sm:h-4 shrink-0" /> 
+           <span className="text-center leading-snug">CHÀO MỪNG BẠN ĐẾN VỚI PICKLEPRO SHOP</span>
          </div>
          <button
            onClick={(e) => { e.preventDefault(); setIsVisible(false) }}
-           className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors z-[70]"
+           className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors z-[70]"
            aria-label="Đóng thông báo"
          >
            <X className="h-4 w-4" />
@@ -78,10 +79,13 @@ export function AnnouncementBar() {
       <div className="flex touch-pan-y cursor-grab active:cursor-grabbing w-full">
         {slides.map((slide, index) => {
            const content = slide.bg_gradient ? (
-             <img src={slide.bg_gradient} alt={slide.title || "Announcement Banner"} className="w-full object-contain sm:object-cover sm:max-h-[100px]" draggable={false} />
+             <div className="w-[92%] sm:w-full mx-auto">
+               <img src={slide.bg_gradient} alt={slide.title || "Announcement Banner"} className="w-full object-contain sm:object-cover min-h-[56px] sm:min-h-0 sm:max-h-[100px]" draggable={false} />
+             </div>
            ) : (
-             <div className="py-3 px-4 w-full flex justify-center items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-sm">
-                <Megaphone className="w-4 h-4" /> {slide.title || 'Thông báo mới nhất từ PicklePro'}
+             <div className="py-4 sm:py-3 px-6 sm:px-4 w-[92%] sm:w-full mx-auto flex justify-center items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-sm rounded-b-xl sm:rounded-none">
+                <Megaphone className="w-5 h-5 sm:w-4 sm:h-4 shrink-0" /> 
+                <span className="text-center leading-snug">{slide.title || 'Thông báo mới nhất từ PicklePro'}</span>
              </div>
            )
 
@@ -102,7 +106,7 @@ export function AnnouncementBar() {
       {/* Close button */}
       <button
         onClick={(e) => { e.preventDefault(); setIsVisible(false) }}
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors z-[70]"
+        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors z-[70]"
         aria-label="Đóng thông báo"
       >
         <X className="h-4 w-4" />
