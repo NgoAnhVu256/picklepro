@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '../../_helpers'
+import { notifyAdminRealtime } from '../../_realtime'
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const adminCheck = await requireAdmin()
@@ -25,6 +26,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  await notifyAdminRealtime({ scope: 'slides', action: 'updated' })
   return NextResponse.json({ slide: data })
 }
 
@@ -36,5 +38,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   const supabase = await createClient()
   const { error } = await supabase.from('hero_slides').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  await notifyAdminRealtime({ scope: 'slides', action: 'deleted' })
   return NextResponse.json({ success: true })
 }

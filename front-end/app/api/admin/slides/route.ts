@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '../_helpers'
+import { notifyAdminRealtime } from '../_realtime'
 
 export async function GET() {
   const supabase = await createClient()
@@ -39,5 +40,6 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  await notifyAdminRealtime({ scope: 'slides', action: 'created' })
   return NextResponse.json({ slide: data })
 }

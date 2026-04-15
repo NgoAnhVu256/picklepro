@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@picklepro/back-end'
 import { getAdminUser, adminUnauthorized } from '../_helpers'
+import { notifyAdminRealtime } from '../_realtime'
 
 export async function GET(req: NextRequest) {
   const user = await getAdminUser()
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) throw error
+    await notifyAdminRealtime({ scope: 'promotions', action: 'created' })
     return NextResponse.json(data, { status: 201 })
   } catch (e: any) {
     console.error('[Admin Promotions] Error:', e.message)

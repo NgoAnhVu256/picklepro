@@ -2,31 +2,43 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 import useEmblaCarousel from "embla-carousel-react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useAdminRealtime } from "@/hooks/use-admin-realtime"
 
 export function BlogSection() {
   const [blogs, setBlogs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [emblaRef, emblaApi] = useEmblaCarousel({ dragFree: true, containScroll: 'trimSnaps' })
 
-  useEffect(() => {
-    async function fetchBlogs() {
-      try {
-        const res = await fetch('/api/blogs?limit=10')
-        const data = await res.json()
-        setBlogs(data.blogs || [])
-      } catch (error) {
-        console.error("Failed to load blogs")
-      } finally {
-        setLoading(false)
-      }
+  const fetchBlogs = useCallback(async (withLoading = false) => {
+    if (withLoading) setLoading(true)
+    try {
+      const res = await fetch('/api/blogs?limit=10')
+      const data = await res.json()
+      setBlogs(data.blogs || [])
+    } catch {
+      // Ignore transient fetch errors.
+    } finally {
+      if (withLoading) setLoading(false)
     }
-    fetchBlogs()
   }, [])
+
+  useEffect(() => {
+    fetchBlogs(true)
+    const interval = setInterval(() => fetchBlogs(false), 20000)
+    return () => clearInterval(interval)
+  }, [fetchBlogs])
+
+  useAdminRealtime({
+    scopes: ['blogs'],
+    onChange: () => {
+      fetchBlogs(false)
+    },
+  })
 
   const scrollPrev = () => emblaApi && emblaApi.scrollPrev()
   const scrollNext = () => emblaApi && emblaApi.scrollNext()

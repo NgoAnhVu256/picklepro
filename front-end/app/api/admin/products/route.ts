@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { AdminService } from '@picklepro/back-end'
 import { getAdminUser, adminUnauthorized } from '../_helpers'
+import { notifyAdminRealtime } from '../_realtime'
 
 const adminService = new AdminService()
 
@@ -30,6 +31,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const data = await adminService.createProduct(body)
+    await notifyAdminRealtime({ scope: 'products', action: 'created' })
     return NextResponse.json(data, { status: 201 })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 400 })

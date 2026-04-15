@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@picklepro/back-end'
 import { getAdminUser, adminUnauthorized } from '../../_helpers'
+import { notifyAdminRealtime } from '../../_realtime'
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getAdminUser()
@@ -28,6 +29,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       .single()
 
     if (error) throw error
+    await notifyAdminRealtime({ scope: 'promotions', action: 'updated' })
     return NextResponse.json(data)
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })
@@ -46,6 +48,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       .eq('id', id)
 
     if (error) throw error
+    await notifyAdminRealtime({ scope: 'promotions', action: 'deleted' })
     return NextResponse.json({ success: true })
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })

@@ -1,14 +1,41 @@
+"use client"
+
 import Link from "next/link"
-import Image from "next/image"
-import { supabaseAdmin } from '@picklepro/back-end'
+import { useCallback, useEffect, useState } from "react"
+import { useAdminRealtime } from "@/hooks/use-admin-realtime"
 
-export async function Categories() {
-  const { data: categoriesData } = await supabaseAdmin
-    .from('categories')
-    .select('*')
-    .order('created_at', { ascending: false })
+interface Category {
+  id: string
+  slug: string
+  name: string
+  image_url: string | null
+}
 
-  const categories = categoriesData ?? []
+export function Categories() {
+  const [categories, setCategories] = useState<Category[]>([])
+
+  const loadCategories = useCallback(async () => {
+    try {
+      const response = await fetch('/api/categories')
+      const data = await response.json()
+      setCategories(data.categories ?? [])
+    } catch {
+      setCategories([])
+    }
+  }, [])
+
+  useEffect(() => {
+    loadCategories()
+    const interval = setInterval(loadCategories, 15000)
+    return () => clearInterval(interval)
+  }, [loadCategories])
+
+  useAdminRealtime({
+    scopes: ['categories'],
+    onChange: () => {
+      loadCategories()
+    },
+  })
 
   if (categories.length === 0) {
     return null
@@ -29,7 +56,7 @@ export async function Categories() {
       <div className="container mx-auto px-4 max-w-[1200px]">
         {/* Horizontal Scroll Area */}
         <div className="flex overflow-x-auto hide-scrollbar gap-6 md:gap-8 py-4 items-start justify-start md:justify-center">
-          {categories.map((category) => {
+          {categories.map((category: Category) => {
             const imgSrc = category.image_url || getFallbackImg(category.slug)
             return (
               <Link

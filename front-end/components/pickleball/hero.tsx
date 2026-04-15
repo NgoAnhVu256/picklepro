@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import useEmblaCarousel from "embla-carousel-react"
+import { useAdminRealtime } from "@/hooks/use-admin-realtime"
 
 interface Slide {
   id: string
@@ -21,17 +22,28 @@ export function Hero() {
   const [loading, setLoading] = useState(true)
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
 
-  useEffect(() => {
-    async function load() {
+   const loadSlides = useCallback(async (withLoading = false) => {
+      if (withLoading) setLoading(true)
       try {
-        const res = await fetch('/api/admin/slides')
-        const data = await res.json()
-        setSlides(data.slides?.filter((s: Slide) => s.is_active) ?? [])
-      } catch (e) {}
-      setLoading(false)
-    }
-    load()
-  }, [])
+         const res = await fetch('/api/admin/slides')
+         const data = await res.json()
+         setSlides(data.slides?.filter((s: Slide) => s.is_active) ?? [])
+      } catch {}
+      if (withLoading) setLoading(false)
+   }, [])
+
+  useEffect(() => {
+      loadSlides(true)
+      const interval = setInterval(() => loadSlides(false), 15000)
+      return () => clearInterval(interval)
+   }, [loadSlides])
+
+   useAdminRealtime({
+      scopes: ['slides'],
+      onChange: () => {
+         loadSlides(false)
+      },
+   })
 
   const heroSlides = slides.filter(s => !s.badge || s.badge === 'hero')
   const leftBanner = slides.find(s => s.badge === 'left')

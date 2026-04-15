@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getAdminUser, adminUnauthorized } from '../../_helpers'
+import { notifyAdminRealtime } from '../../_realtime'
 
 export async function POST(req: NextRequest) {
   const user = await getAdminUser()
@@ -32,6 +33,8 @@ export async function POST(req: NextRequest) {
     }
 
     if (hasError) throw hasError
+
+    await notifyAdminRealtime({ scope: 'categories', action: 'reordered' })
 
     return NextResponse.json({ success: true })
   } catch (e: any) {

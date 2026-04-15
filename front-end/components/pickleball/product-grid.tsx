@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button"
 import { ShoppingCart, Heart, Star, ArrowRight, Check, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useCart } from "@/hooks/use-cart"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
+import { useAdminRealtime } from "@/hooks/use-admin-realtime"
 
 interface Product {
   id: string; name: string; slug: string; brand: string
@@ -38,15 +39,32 @@ export function ProductGrid() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetch('/api/products?limit=8&sortBy=created_at&sortOrder=desc')
-      .then(r => r.json())
-      .then(data => {
-        setProducts(data.products ?? [])
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+  const loadProducts = useCallback(async (withLoading = false) => {
+    if (withLoading) setLoading(true)
+    try {
+      const response = await fetch('/api/products?limit=8&sortBy=created_at&sortOrder=desc')
+      const data = await response.json()
+      setProducts(data.products ?? [])
+    } finally {
+      if (withLoading) setLoading(false)
+    }
   }, [])
+
+  useEffect(() => {
+    loadProducts(true)
+    const interval = setInterval(() => {
+      loadProducts(false)
+    }, 15000)
+
+    return () => clearInterval(interval)
+  }, [loadProducts])
+
+  useAdminRealtime({
+    scopes: ['products'],
+    onChange: () => {
+      loadProducts(false)
+    },
+  })
 
   const handleAddToCart = (product: Product) => {
     addItem({

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { X, Megaphone } from 'lucide-react'
 import Link from 'next/link'
 import useEmblaCarousel from 'embla-carousel-react'
+import { useAdminRealtime } from '@/hooks/use-admin-realtime'
 
 interface Slide {
   id: string
@@ -19,16 +20,30 @@ export function AnnouncementBar() {
   const [slides, setSlides] = useState<Slide[]>([])
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
 
-  useEffect(() => {
-    fetch('/api/admin/slides')
-      .then(r => r.json())
-      .then(data => {
-        const active = (data.slides ?? [])
-          .filter((s: Slide) => s.is_active && s.badge === 'announcement')
-        setSlides(active)
-      })
-      .catch(() => {})
+  const loadSlides = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/slides')
+      const data = await response.json()
+      const active = (data.slides ?? [])
+        .filter((s: Slide) => s.is_active && s.badge === 'announcement')
+      setSlides(active)
+    } catch {
+      // Ignore transient fetch errors.
+    }
   }, [])
+
+  useEffect(() => {
+    loadSlides()
+    const interval = setInterval(loadSlides, 15000)
+    return () => clearInterval(interval)
+  }, [loadSlides])
+
+  useAdminRealtime({
+    scopes: ['slides'],
+    onChange: () => {
+      loadSlides()
+    },
+  })
 
   useEffect(() => {
     if (!emblaApi || slides.length <= 1) return

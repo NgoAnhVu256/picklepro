@@ -77,7 +77,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
 
             <div className="text-center pt-8 border-t border-gray-100">
               <div className="w-20 h-20 mx-auto rounded-full bg-lime/20 mb-4 overflow-hidden border-2 border-white shadow-lg">
-                <Image src="/logo.png" alt="PicklePro" width={80} height={80} className="object-cover w-full h-full" />
+                <Image src="/favicon.ico" alt="PicklePro" width={80} height={80} className="object-cover w-full h-full" unoptimized />
               </div>
               <p className="text-sm font-medium text-gray-500 mb-4">Xem bài viết này<br/>trên Facebook</p>
               <a 

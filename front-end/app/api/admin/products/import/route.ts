@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { AdminService, supabaseAdmin } from '@picklepro/back-end'
 import { getAdminUser, adminUnauthorized } from '../../_helpers'
+import { notifyAdminRealtime } from '../../_realtime'
 
 const adminService = new AdminService()
 
@@ -182,6 +183,10 @@ export async function POST(req: NextRequest) {
         results.errors.push(`Dòng ${i + 1}: ${err.message}`)
         results.failed++
       }
+    }
+
+    if (results.success > 0) {
+      await notifyAdminRealtime({ scope: 'products', action: 'imported' })
     }
 
     return NextResponse.json(results)

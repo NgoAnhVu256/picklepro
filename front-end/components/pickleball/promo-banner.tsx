@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useAdminRealtime } from '@/hooks/use-admin-realtime'
 
 interface Slide {
   id: string
@@ -16,17 +17,31 @@ export function PromoBanner() {
   const [slides, setSlides] = useState<Slide[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetch('/api/admin/slides')
-      .then(r => r.json())
-      .then(data => {
-        const active = (data.slides ?? [])
-          .filter((s: Slide) => s.is_active && s.badge === 'promo')
-        setSlides(active)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+  const loadSlides = useCallback(async (withLoading = false) => {
+    if (withLoading) setLoading(true)
+    try {
+      const response = await fetch('/api/admin/slides')
+      const data = await response.json()
+      const active = (data.slides ?? [])
+        .filter((s: Slide) => s.is_active && s.badge === 'promo')
+      setSlides(active)
+    } finally {
+      if (withLoading) setLoading(false)
+    }
   }, [])
+
+  useEffect(() => {
+    loadSlides(true)
+    const interval = setInterval(() => loadSlides(false), 15000)
+    return () => clearInterval(interval)
+  }, [loadSlides])
+
+  useAdminRealtime({
+    scopes: ['slides'],
+    onChange: () => {
+      loadSlides(false)
+    },
+  })
 
   if (loading) return null
 
