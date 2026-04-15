@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
           description: row.description || null,
           category_id: categoryId || null,
           is_featured: row.is_featured === 'true' || row.is_featured === 'True' || row.is_featured === true,
-          is_active: row.is_active === 'true' || row.is_active === 'True' || row.is_active === true || row.is_active === '',
+          is_active: row.is_active === 'false' || row.is_active === 'False' || row.is_active === false ? false : true,
           tags: parsedTags,
           specs: parsedSpecs,
         }

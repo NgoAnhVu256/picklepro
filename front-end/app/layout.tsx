@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: '/logo.png',
     apple: '/apple-icon.png',
   },
   alternates: {
@@ -64,7 +64,7 @@ export default function RootLayout({
     '@type': 'Organization',
     name: 'PicklePro',
     url: APP_URL,
-    logo: `${APP_URL}/favicon.ico`,
+    logo: `${APP_URL}/logo.png`,
     description: 'Cửa hàng vợt Pickleball cao cấp số 1 Việt Nam',
     contactPoint: { '@type': 'ContactPoint', telephone: '+84-xxx-xxx-xxx', contactType: 'customer service', areaServed: 'VN', availableLanguage: 'Vietnamese' },
     sameAs: ['https://facebook.com/picklepro', 'https://youtube.com/picklepro'],

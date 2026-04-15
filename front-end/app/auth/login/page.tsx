@@ -231,7 +231,7 @@ function LoginContent() {
 
       <div className="relative z-10 flex flex-col items-center text-center">
         <div className="w-36 h-36 relative mb-8 drop-shadow-2xl">
-          <img src="/favicon.ico" alt="PicklePro" className="w-full h-full object-contain" />
+          <img src="/logo.png" alt="PicklePro" className="w-full h-full object-contain" />
         </div>
         <h1 className="text-3xl xl:text-4xl font-extrabold text-emerald-900 mb-4 leading-tight">
           {isRegisterSide ? (
@@ -263,7 +263,7 @@ function LoginContent() {
     <div className="w-full max-w-sm">
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
-          <img src="/favicon.ico" alt="" className="h-9 w-9 object-contain" />
+          <img src="/logo.png" alt="" className="h-9 w-9 object-contain" />
           <span className="text-emerald-700 text-xl font-extrabold tracking-wide" style={{ fontFamily: "'Google Sans', sans-serif" }}>PicklePro</span>
         </div>
         <p className="text-gray-400 text-sm font-medium mt-1">Đăng nhập để truy cập hệ thống</p>
@@ -362,7 +362,7 @@ function LoginContent() {
     <div className="w-full max-w-sm">
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
-          <img src="/favicon.ico" alt="" className="h-9 w-9 object-contain" />
+          <img src="/logo.png" alt="" className="h-9 w-9 object-contain" />
           <span className="text-emerald-700 text-xl font-extrabold tracking-wide" style={{ fontFamily: "'Google Sans', sans-serif" }}>PicklePro</span>
         </div>
         <p className="text-gray-400 text-sm font-medium mt-1">Tạo tài khoản mới để tiếp tục</p>
@@ -553,7 +553,7 @@ function LoginContent() {
       {/* ===== MOBILE LAYOUT ===== */}
       <div className="w-full max-w-md lg:hidden">
         <div className="mb-6 text-center">
-          <img src="/favicon.ico" alt="PicklePro" className="h-16 w-16 mx-auto object-contain mb-3" />
+          <img src="/logo.png" alt="PicklePro" className="h-16 w-16 mx-auto object-contain mb-3" />
           <h1 className="text-2xl font-extrabold text-emerald-700">PicklePro</h1>
         </div>
         <div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-lg">
