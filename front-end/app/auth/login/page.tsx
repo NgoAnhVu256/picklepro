@@ -130,11 +130,11 @@ function LoginContent() {
         <div className="w-full max-w-sm">
           {/* Heading */}
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-1">
-              <img src="/logo.png" alt="" className="h-8 w-8 object-contain hidden lg:block" />
-              <span className="text-sky-600 text-sm font-bold uppercase tracking-widest">PicklePro</span>
+            <div className="flex items-center gap-2 mb-2">
+              <img src="/logo.png" alt="" className="h-9 w-9 object-contain hidden lg:block" />
+              <span className="text-sky-600 text-xl font-extrabold tracking-wide" style={{ fontFamily: "'Google Sans', sans-serif" }}>PicklePro</span>
             </div>
-            <p className="text-gray-500 text-sm mt-1">Đăng nhập để truy cập hệ thống</p>
+            <p className="text-gray-400 text-sm font-medium mt-1">Đăng nhập để truy cập hệ thống</p>
           </div>
 
           {/* Checkout banner */}
@@ -156,9 +156,9 @@ function LoginContent() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
+              <Label htmlFor="email" className="text-base font-semibold text-gray-700" style={{ fontFamily: "'Google Sans', sans-serif" }}>Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
@@ -175,8 +175,8 @@ function LoginContent() {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-sm font-medium text-gray-700">Mật khẩu</Label>
-                <Link href="#" className="text-xs text-sky-600 hover:underline">Quên mật khẩu?</Link>
+                <Label htmlFor="password" className="text-base font-semibold text-gray-700" style={{ fontFamily: "'Google Sans', sans-serif" }}>Mật khẩu</Label>
+                <Link href="#" className="text-sm text-sky-500 hover:underline font-medium">Quên mật khẩu?</Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -202,7 +202,8 @@ function LoginContent() {
             <Button
               type="submit"
               disabled={loading || !!success}
-              className="w-full h-11 rounded-lg font-bold text-sm bg-sky-500 hover:bg-sky-600 text-white transition-all shadow-md shadow-sky-500/30 active:scale-[0.98] mt-2"
+              className="w-full h-12 rounded-xl font-bold text-base bg-sky-500 hover:bg-sky-600 text-white transition-all shadow-md shadow-sky-500/30 active:scale-[0.98] mt-2"
+              style={{ fontFamily: "'Google Sans', sans-serif" }}
             >
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Đăng nhập'}
             </Button>
@@ -211,7 +212,7 @@ function LoginContent() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px bg-gray-100" />
-            <span className="text-xs text-gray-400">hoặc</span>
+            <span className="text-sm text-gray-400 font-medium">hoặc</span>
             <div className="flex-1 h-px bg-gray-100" />
           </div>
 
@@ -219,7 +220,8 @@ function LoginContent() {
           <button
             onClick={handleGoogleLogin}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors font-medium text-gray-700 text-sm disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors font-semibold text-gray-700 text-base disabled:opacity-60"
+            style={{ fontFamily: "'Google Sans', sans-serif" }}
           >
             {googleLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -235,9 +237,9 @@ function LoginContent() {
           </button>
 
           {/* Register */}
-          <p className="text-center text-sm text-gray-500 mt-6">
+          <p className="text-center text-base text-gray-500 mt-6" style={{ fontFamily: "'Google Sans', sans-serif" }}>
             Chưa có tài khoản?{' '}
-            <Link href={`/auth/register${redirectTo ? `?redirect=${redirectTo}` : ''}`} className="text-sky-600 font-semibold hover:underline">
+            <Link href={`/auth/register${redirectTo ? `?redirect=${redirectTo}` : ''}`} className="text-sky-500 font-bold hover:underline">
               Đăng ký ngay
             </Link>
           </p>
