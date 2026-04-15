@@ -91,7 +91,7 @@ export class AdminService {
   async getAdminProducts(page = 1, limit = 20, search = '') {
     let query = supabaseAdmin
       .from('products')
-      .select('*, categories(name, slug)', { count: 'exact' })
+      .select('*, categories(name, slug), product_images(id, url, is_primary)', { count: 'exact' })
 
     if (search) query = query.ilike('name', `%${search}%`)
 
@@ -123,11 +123,10 @@ export class AdminService {
       const imgPayload = images.map((img: any) => ({
         product_id: product.id,
         url: img.url,
-        is_primary: img.is_primary ?? false,
-        color_name: img.color_name || null,
-        color_code: img.color_code || null
+        is_primary: img.is_primary ?? false
       }))
-      await supabaseAdmin.from('product_images').insert(imgPayload)
+      const { error: imgError } = await supabaseAdmin.from('product_images').insert(imgPayload)
+      if (imgError) console.error("Create img error:", imgError)
     }
 
     return product
@@ -155,11 +154,10 @@ export class AdminService {
         const imgPayload = images.map((img: any) => ({
           product_id: id,
           url: img.url,
-          is_primary: img.is_primary ?? false,
-          color_name: img.color_name || null,
-          color_code: img.color_code || null
+          is_primary: img.is_primary ?? false
         }))
-        await supabaseAdmin.from('product_images').insert(imgPayload)
+        const { error: imgError } = await supabaseAdmin.from('product_images').insert(imgPayload)
+        if (imgError) console.error("Update img error:", imgError)
       }
     }
 
