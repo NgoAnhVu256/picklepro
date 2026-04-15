@@ -7,7 +7,7 @@ import { Footer } from '@/components/pickleball/footer'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ShoppingCart, Heart, Star, Minus, Plus, Truck, Shield, RotateCcw, ChevronRight, ArrowLeft, Share2, Check } from 'lucide-react'
+import { ShoppingCart, Heart, Star, Minus, Plus, Truck, Shield, RotateCcw, ChevronRight, ArrowLeft, Check } from 'lucide-react'
 import Link from 'next/link'
 import { useCart } from '@/hooks/use-cart'
 
@@ -208,18 +208,6 @@ export default function ProductDetailPage() {
           <div className="w-full">
             {/* Main Image */}
             <div className="w-full aspect-square rounded-2xl sm:rounded-3xl bg-gradient-to-br from-lime/5 via-lime-light/10 to-lime/10 border border-lime/20 flex items-center justify-center relative overflow-hidden group">
-              {/* Badges */}
-              <div className="absolute top-3 left-3 sm:top-4 sm:left-4 flex flex-col gap-1.5 z-10">
-                {product.is_featured && <Badge className="bg-lime text-lime-dark text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-3 sm:py-1 border-none shadow-sm">⭐ Nổi bật</Badge>}
-                {discount && <Badge className="bg-red-500 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-3 sm:py-1 border-none shadow-sm">-{discount}%</Badge>}
-              </div>
-
-              {/* Share button */}
-              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-lime-dark transition-all shadow-md border border-border/50">
-                  <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
-                </button>
-              </div>
 
               {/* Main Image Display */}
               {(() => {
@@ -250,9 +238,15 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Thumbnail Gallery — Horizontal scroll on all screens */}
+            {/* Thumbnail Gallery — Horizontal scroll with mouse wheel */}
             {product.product_images && product.product_images.length > 1 && (
-              <div className="flex gap-2 sm:gap-3 mt-3 sm:mt-4 overflow-x-auto pb-2 scrollbar-hide">
+              <div 
+                className="flex gap-2 sm:gap-3 mt-3 sm:mt-4 overflow-x-auto pb-2 scrollbar-hide cursor-grab active:cursor-grabbing"
+                onWheel={(e) => {
+                  e.currentTarget.scrollLeft += e.deltaY
+                  e.preventDefault()
+                }}
+              >
                 {product.product_images.map((img) => (
                   <button key={img.id} onClick={() => setSelectedImage(img.url)}
                     className={`shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all p-0.5 sm:p-1 bg-white ${
