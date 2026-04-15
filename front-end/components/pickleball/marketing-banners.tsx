@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import useEmblaCarousel from "embla-carousel-react"
@@ -12,51 +12,30 @@ interface Slide {
   bg_gradient: string
   href: string
   is_active: boolean
+  badge?: string
 }
 
-export function MarketingBanners() {
-  const [slides, setSlides] = useState<Slide[]>([])
-  const [loading, setLoading] = useState(true)
+interface MarketingBannersProps {
+  initialSlides?: Slide[]
+}
+
+export function MarketingBanners({ initialSlides = [] }: MarketingBannersProps) {
+  const marketingOnly = initialSlides.filter(s => s.is_active && s.badge === 'marketing')
+  const [slides, setSlides] = useState<Slide[]>(marketingOnly)
   const [emblaRef] = useEmblaCarousel({ dragFree: true, containScroll: 'trimSnaps' })
 
-  const loadSlides = useCallback(async (withLoading = false) => {
-    if (withLoading) setLoading(true)
+  const reloadSlides = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/slides')
       const data = await res.json()
       setSlides(data.slides?.filter((s: Slide) => s.is_active && s.badge === 'marketing') ?? [])
     } catch {}
-    if (withLoading) setLoading(false)
   }, [])
-
-  useEffect(() => {
-    loadSlides(true)
-    const interval = setInterval(() => loadSlides(false), 15000)
-    return () => clearInterval(interval)
-  }, [loadSlides])
 
   useAdminRealtime({
     scopes: ['slides'],
-    onChange: () => {
-      loadSlides(false)
-    },
+    onChange: () => reloadSlides(),
   })
-
-  if (loading) {
-    return (
-      <section className="py-6 md:py-10 bg-white border-t border-border/10">
-        <div className="container mx-auto px-4 max-w-[1200px]">
-          <div className="overflow-hidden">
-            <div className="flex flex-nowrap gap-3 md:gap-4 lg:gap-6 pb-4">
-              {[1,2,3,4,5].map(i => (
-                <div key={i} className="w-[150px] sm:w-[200px] md:w-[240px] lg:w-[calc(20%-1.2rem)] aspect-[9/16] lg:aspect-[10/16] flex-[0_0_auto] bg-gray-100 animate-pulse rounded-[1.5rem] md:rounded-[2rem]" />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-    )
-  }
 
   const effectiveSlides = slides.length > 0 ? slides : [
     { id: 'fb1', title: 'PicklePro Pro', bg_gradient: '/images/banner1.png', href: '/products', is_active: true },
@@ -82,6 +61,7 @@ export function MarketingBanners() {
                   alt={slide.title || 'Marketing Banner'} 
                   fill 
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                  sizes="(max-width: 640px) 150px, (max-width: 768px) 200px, 240px"
                 />
               )}
 
@@ -105,4 +85,3 @@ export function MarketingBanners() {
     </section>
   )
 }
-

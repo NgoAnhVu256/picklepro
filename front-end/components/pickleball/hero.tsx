@@ -16,34 +16,29 @@ interface Slide {
   is_active: boolean
 }
 
-export function Hero() {
+interface HeroProps {
+  initialSlides?: Slide[]
+}
+
+export function Hero({ initialSlides = [] }: HeroProps) {
   const [current, setCurrent] = useState(0)
-  const [slides, setSlides] = useState<Slide[]>([])
-  const [loading, setLoading] = useState(true)
+  const activeSlides = initialSlides.filter(s => s.is_active)
+  const [slides, setSlides] = useState<Slide[]>(activeSlides)
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
 
-   const loadSlides = useCallback(async (withLoading = false) => {
-      if (withLoading) setLoading(true)
-      try {
-         const res = await fetch('/api/admin/slides')
-         const data = await res.json()
-         setSlides(data.slides?.filter((s: Slide) => s.is_active) ?? [])
-      } catch {}
-      if (withLoading) setLoading(false)
-   }, [])
+  // Chỉ reload khi Admin thay đổi — KHÔNG setInterval
+  const reloadSlides = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/slides')
+      const data = await res.json()
+      setSlides(data.slides?.filter((s: Slide) => s.is_active) ?? [])
+    } catch {}
+  }, [])
 
-  useEffect(() => {
-      loadSlides(true)
-      const interval = setInterval(() => loadSlides(false), 15000)
-      return () => clearInterval(interval)
-   }, [loadSlides])
-
-   useAdminRealtime({
-      scopes: ['slides'],
-      onChange: () => {
-         loadSlides(false)
-      },
-   })
+  useAdminRealtime({
+    scopes: ['slides'],
+    onChange: () => reloadSlides(),
+  })
 
   const heroSlides = slides.filter(s => !s.badge || s.badge === 'hero')
   const leftBanner = slides.find(s => s.badge === 'left')
@@ -51,7 +46,6 @@ export function Hero() {
   const right2Banner = slides.find(s => s.badge === 'right2')
 
   const effectiveHeroSlides = heroSlides.length > 0 ? heroSlides : [
-     // Fallback if none so the slider doesn't break
      { id: 'fb', badge: 'hero', title: 'PicklePro Hero', bg_gradient: '/images/fallback.jpg', href: '/products', is_active: true }
   ]
 
@@ -74,10 +68,6 @@ export function Hero() {
   const next = () => emblaApi?.scrollNext()
   const scrollTo = (i: number) => emblaApi?.scrollTo(i)
 
-  if (loading) {
-    return <section className="py-6 md:py-10"><div className="container mx-auto px-4"><div className="h-[360px] bg-gray-100 animate-pulse rounded-2xl" /></div></section>
-  }
-
   return (
     <section className="relative overflow-hidden py-6 md:py-10">
       <div className="container mx-auto px-4">
@@ -91,7 +81,6 @@ export function Hero() {
                  ) : (
                     <div className="absolute inset-0 bg-gray-200" />
                  )}
-                 {/* Dark overlay specifically for text readability if title exists */}
                  {leftBanner.title && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-4 text-center">
                        <h3 className="text-white font-bold">{leftBanner.title}</h3>
@@ -113,7 +102,6 @@ export function Hero() {
                        <Image src={slide.bg_gradient} alt={slide.title || 'Hero Slide'} fill className="object-cover" draggable={false} priority={idx === 0} />
                     )}
                     
-                    {/* Optional clickable overlay if it has a link */}
                     {slide?.href && (
                        <Link href={slide.href} className="absolute inset-0 z-10" draggable={false} />
                     )}
@@ -190,4 +178,3 @@ export function Hero() {
     </section>
   )
 }
-

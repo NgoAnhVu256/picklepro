@@ -2,60 +2,36 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 import useEmblaCarousel from "embla-carousel-react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useAdminRealtime } from "@/hooks/use-admin-realtime"
 
-export function BlogSection() {
-  const [blogs, setBlogs] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+interface BlogSectionProps {
+  initialBlogs?: any[]
+}
+
+export function BlogSection({ initialBlogs = [] }: BlogSectionProps) {
+  const [blogs, setBlogs] = useState<any[]>(initialBlogs)
   const [emblaRef, emblaApi] = useEmblaCarousel({ dragFree: true, containScroll: 'trimSnaps' })
 
-  const fetchBlogs = useCallback(async (withLoading = false) => {
-    if (withLoading) setLoading(true)
+  const reloadBlogs = useCallback(async () => {
     try {
       const res = await fetch('/api/blogs?limit=10')
       const data = await res.json()
       setBlogs(data.blogs || [])
-    } catch {
-      // Ignore transient fetch errors.
-    } finally {
-      if (withLoading) setLoading(false)
-    }
+    } catch {}
   }, [])
-
-  useEffect(() => {
-    fetchBlogs(true)
-    const interval = setInterval(() => fetchBlogs(false), 20000)
-    return () => clearInterval(interval)
-  }, [fetchBlogs])
 
   useAdminRealtime({
     scopes: ['blogs'],
-    onChange: () => {
-      fetchBlogs(false)
-    },
+    onChange: () => reloadBlogs(),
   })
 
   const scrollPrev = () => emblaApi && emblaApi.scrollPrev()
   const scrollNext = () => emblaApi && emblaApi.scrollNext()
-
-  if (loading) return (
-    <div className="py-12 flex justify-center">
-      <div className="animate-pulse flex gap-4 overflow-hidden w-full max-w-[1200px] px-4">
-        {[1,2,3,4].map(i => (
-          <div key={i} className="flex-[0_0_80%] sm:flex-[0_0_40%] md:flex-[0_0_30%] lg:flex-[0_0_24%] min-w-0">
-            <div className="aspect-[16/10] bg-gray-200 rounded-2xl mb-4" />
-            <div className="h-4 bg-gray-200 rounded mb-2 w-3/4" />
-            <div className="h-4 bg-gray-200 rounded w-1/2" />
-          </div>
-        ))}
-      </div>
-    </div>
-  )
 
   if (blogs.length === 0) return null;
 
@@ -88,7 +64,8 @@ export function BlogSection() {
                         src={article.thumbnail} 
                         alt={article.title} 
                         fill 
-                        className="object-cover transition-transform duration-500 group-hover:scale-105" 
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 640px) 85vw, (max-width: 768px) 45vw, 24vw"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-500">📰</div>

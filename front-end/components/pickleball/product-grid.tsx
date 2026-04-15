@@ -1,16 +1,22 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ShoppingCart, Heart, Star, ArrowRight, Check, Loader2 } from "lucide-react"
+import { ShoppingCart, Heart, ArrowRight, Check } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { useCart } from "@/hooks/use-cart"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useCallback } from "react"
 import { useAdminRealtime } from "@/hooks/use-admin-realtime"
 
 interface Product {
   id: string; name: string; slug: string; brand: string
   price: number; original_price: number | null; is_featured: boolean
   categories: { name: string; slug: string } | null
+  product_images?: { id: string; url: string; is_primary: boolean }[]
+}
+
+interface ProductGridProps {
+  initialProducts?: Product[]
 }
 
 const brandColors: Record<string, string> = {
@@ -33,37 +39,23 @@ function formatPrice(price: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
 }
 
-export function ProductGrid() {
+export function ProductGrid({ initialProducts = [] }: ProductGridProps) {
   const { addItem } = useCart()
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set())
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const [products, setProducts] = useState<Product[]>(initialProducts)
 
-  const loadProducts = useCallback(async (withLoading = false) => {
-    if (withLoading) setLoading(true)
+  // Chỉ dùng Realtime listener — KHÔNG setInterval
+  const reloadProducts = useCallback(async () => {
     try {
       const response = await fetch('/api/products?limit=8&sortBy=created_at&sortOrder=desc')
       const data = await response.json()
       setProducts(data.products ?? [])
-    } finally {
-      if (withLoading) setLoading(false)
-    }
+    } catch {}
   }, [])
-
-  useEffect(() => {
-    loadProducts(true)
-    const interval = setInterval(() => {
-      loadProducts(false)
-    }, 15000)
-
-    return () => clearInterval(interval)
-  }, [loadProducts])
 
   useAdminRealtime({
     scopes: ['products'],
-    onChange: () => {
-      loadProducts(false)
-    },
+    onChange: () => reloadProducts(),
   })
 
   const handleAddToCart = (product: Product) => {
@@ -73,7 +65,6 @@ export function ProductGrid() {
       brand: product.brand,
       price: product.price,
       slug: product.slug,
-      quantity: 1,
     })
     setAddedIds(prev => new Set(prev).add(product.id))
     setTimeout(() => setAddedIds(prev => {
@@ -103,14 +94,7 @@ export function ProductGrid() {
           </Link>
         </div>
 
-        {/* Loading */}
-        {loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="rounded-2xl sm:rounded-3xl bg-muted/30 h-[260px] sm:h-[340px] animate-pulse" />
-            ))}
-          </div>
-        ) : products.length === 0 ? (
+        {products.length === 0 ? (
           <div className="text-center py-16 text-muted-foreground">
             <p className="text-lg">Chưa có sản phẩm nổi bật</p>
           </div>
@@ -122,6 +106,7 @@ export function ProductGrid() {
               const bg = brandColors[product.brand] ?? 'from-lime/10 via-lime-light/20 to-lime/10'
               const disc = discount(product)
               const isAdded = addedIds.has(product.id)
+              const primaryImg = product.product_images?.find(i => i.is_primary) || product.product_images?.[0]
 
               return (
                 <div key={product.id} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-lime/10 bg-white hover:shadow-xl hover:shadow-lime/15 transition-all duration-500 hover:-translate-y-1">
@@ -143,7 +128,17 @@ export function ProductGrid() {
                   {/* Image */}
                   <Link href={`/products/${product.slug}`}>
                     <div className={`relative h-32 sm:h-48 bg-gradient-to-br ${bg} flex items-center justify-center overflow-hidden`}>
-                      <span className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform duration-500">{emoji}</span>
+                      {primaryImg ? (
+                        <Image
+                          src={primaryImg.url}
+                          alt={product.name}
+                          fill
+                          className="object-contain p-2 group-hover:scale-110 transition-transform duration-500"
+                          sizes="(max-width: 640px) 50vw, 25vw"
+                        />
+                      ) : (
+                        <span className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform duration-500">{emoji}</span>
+                      )}
                     </div>
                   </Link>
 
@@ -153,8 +148,6 @@ export function ProductGrid() {
                     <Link href={`/products/${product.slug}`}>
                       <h3 className="text-xs sm:text-base font-bold text-foreground line-clamp-2 min-h-[2rem] sm:min-h-[3rem] hover:text-lime-dark transition-colors">{product.name}</h3>
                     </Link>
-
-
 
                     {/* Price + CTA */}
                     <div className="flex items-center justify-between mt-2 sm:mt-4">

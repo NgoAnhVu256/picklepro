@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { X, Megaphone } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import useEmblaCarousel from 'embla-carousel-react'
 import { useAdminRealtime } from '@/hooks/use-admin-realtime'
 
@@ -15,36 +16,31 @@ interface Slide {
   title?: string
 }
 
-export function AnnouncementBar() {
+interface AnnouncementBarProps {
+  initialSlides?: Slide[]
+}
+
+export function AnnouncementBar({ initialSlides = [] }: AnnouncementBarProps) {
   const [isVisible, setIsVisible] = useState(true)
-  const [slides, setSlides] = useState<Slide[]>([])
+  const announcementOnly = initialSlides.filter(s => s.is_active && s.badge === 'announcement')
+  const [slides, setSlides] = useState<Slide[]>(announcementOnly)
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
 
-  const loadSlides = useCallback(async () => {
+  // Chỉ reload khi Admin thay đổi
+  const reloadSlides = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/slides')
       const data = await response.json()
-      const active = (data.slides ?? [])
-        .filter((s: Slide) => s.is_active && s.badge === 'announcement')
-      setSlides(active)
-    } catch {
-      // Ignore transient fetch errors.
-    }
+      setSlides((data.slides ?? []).filter((s: Slide) => s.is_active && s.badge === 'announcement'))
+    } catch {}
   }, [])
-
-  useEffect(() => {
-    loadSlides()
-    const interval = setInterval(loadSlides, 15000)
-    return () => clearInterval(interval)
-  }, [loadSlides])
 
   useAdminRealtime({
     scopes: ['slides'],
-    onChange: () => {
-      loadSlides()
-    },
+    onChange: () => reloadSlides(),
   })
 
+  // Carousel auto-rotate (this is fine, it's for UI animation not data fetching)
   useEffect(() => {
     if (!emblaApi || slides.length <= 1) return
     const timer = setInterval(() => {
@@ -79,8 +75,16 @@ export function AnnouncementBar() {
       <div className="flex touch-pan-y cursor-grab active:cursor-grabbing w-full">
         {slides.map((slide, index) => {
            const content = slide.bg_gradient ? (
-             <div className="w-[92%] sm:w-full mx-auto">
-               <img src={slide.bg_gradient} alt={slide.title || "Announcement Banner"} className="w-full object-contain sm:object-cover min-h-[56px] sm:min-h-0 sm:max-h-[100px]" draggable={false} />
+             <div className="w-[92%] sm:w-full mx-auto relative">
+               <Image
+                 src={slide.bg_gradient}
+                 alt={slide.title || "Announcement Banner"}
+                 width={1200}
+                 height={80}
+                 className="w-full object-contain sm:object-cover min-h-[56px] sm:min-h-0 sm:max-h-[100px]"
+                 draggable={false}
+                 priority
+               />
              </div>
            ) : (
              <div className="py-4 sm:py-3 px-6 sm:px-4 w-[92%] sm:w-full mx-auto flex justify-center items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-sm rounded-b-xl sm:rounded-none">

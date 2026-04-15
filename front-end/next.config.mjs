@@ -10,7 +10,17 @@ const nextConfig = {
         hostname: 'xvkotjznfupazecaaucl.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
     ],
+    // Kích thước ảnh tối ưu cho responsive
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    // Định dạng ảnh hiện đại, nhẹ hơn JPEG 30-50%
+    formats: ['image/avif', 'image/webp'],
   },
   // Transpile back-end workspace package
   transpilePackages: ['@picklepro/back-end'],
