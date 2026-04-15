@@ -64,12 +64,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-white via-sky-50 to-[#bae6fd] flex items-center justify-center">
         <div className="text-center flex flex-col items-center">
-          <div className="w-[55vw] max-w-[400px] aspect-square relative mb-6 animate-pulse">
-            <Image src="/logo.png" alt="PicklePro" fill className="object-contain drop-shadow-2xl" priority />
+          <div className="w-[55vw] max-w-[380px] aspect-square relative mb-6 drop-shadow-2xl">
+            <Image src="/logo.png" alt="PicklePro" fill className="object-contain" priority />
           </div>
-          <p className="text-muted-foreground text-sm">Đang xác thực quyền admin...</p>
+          <div className="flex items-center gap-2 text-sky-600">
+            <div className="w-4 h-4 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
+            <p className="text-sm font-medium">Đang xác thực quyền admin...</p>
+          </div>
         </div>
       </div>
     )
