@@ -1,19 +1,19 @@
 // ============================================
-// Next.js Middleware
-// Chạy trên mỗi request để refresh session
+// Next.js Proxy
+// Chay tren moi request de refresh session
 // ============================================
 
 import { type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   return await updateSession(request)
 }
 
 export const config = {
   matcher: [
     /*
-     * Match tất cả request paths trừ:
+     * Match tat ca request paths tru:
      * - _next/static (static files)
      * - _next/image (image optimization)
      * - favicon.ico (browser icon)
