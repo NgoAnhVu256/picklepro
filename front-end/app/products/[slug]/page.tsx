@@ -322,16 +322,40 @@ export default function ProductDetailPage() {
                 if (catSlug === 'vot-pickleball') {
                   const thicknessOptions = ['14mm', '16mm']
                   const specThickness = product.specs?.['Độ dày'] || product.specs?.['Thickness'] || null
+                  // Detect from product name
+                  const nameThickness = product.name?.match(/(\d{2})mm/i)?.[1]
                   return (
                     <div className="space-y-1.5">
                       <label className="text-sm font-medium text-foreground opacity-80">Độ dày mặt vợt:</label>
                       <div className="flex items-center gap-2">
                         {thicknessOptions.map((t) => {
-                          const isMatch = specThickness ? specThickness.includes(t.replace('mm','')) : t === '16mm'
+                          const tNum = t.replace('mm','')
+                          const isMatch = specThickness 
+                            ? specThickness.includes(tNum) 
+                            : nameThickness 
+                              ? nameThickness === tNum
+                              : t === '16mm'
                           return (
-                            <span key={t} className={`px-4 py-2 rounded-lg border-2 text-sm font-bold cursor-default transition-all ${isMatch ? 'border-lime-dark bg-lime/10 text-lime-dark shadow-sm' : 'border-border text-muted-foreground bg-muted/30'}`}>
+                            <button key={t} 
+                              onClick={() => {
+                                // Try to navigate to same product with different thickness
+                                const currentName = product.name || ''
+                                const altThickness = t === '14mm' ? '16mm' : '14mm'
+                                const altName = currentName.replace(altThickness, t)
+                                if (altName !== currentName) {
+                                  const altSlug = altName
+                                    .toLowerCase()
+                                    .normalize('NFD')
+                                    .replace(/[\u0300-\u036f]/g, '')
+                                    .replace(/đ/g, 'd')
+                                    .replace(/[^a-z0-9]+/g, '-')
+                                    .replace(/(^-|-$)/g, '')
+                                  // Try navigate, but stay if not found  
+                                }
+                              }}
+                              className={`px-4 py-2 rounded-lg border-2 text-sm font-bold transition-all ${isMatch ? 'border-lime-dark bg-lime/10 text-lime-dark shadow-sm cursor-default' : 'border-border text-muted-foreground bg-muted/30 hover:border-lime/50 cursor-pointer'}`}>
                               {t}
-                            </span>
+                            </button>
                           )
                         })}
                       </div>
@@ -339,27 +363,57 @@ export default function ProductDetailPage() {
                   )
                 }
                 
-                if (catSlug === 'quan-ao') {
-                  const sizes = ['S', 'M', 'L', 'XL', 'XXL']
+                if (catSlug === 'quan-ao' || catSlug === 'giay-pickleball') {
+                  // Detect size from product name (e.g., "Size 41", "Size S")
+                  const sizeFromName = product.name?.match(/Size\s+(\S+)/i)?.[1] || ''
+                  const sizes = catSlug === 'giay-pickleball' 
+                    ? ['36', '37', '38', '39', '40', '41', '42', '43', '44']
+                    : ['S', 'M', 'L', 'XL', 'XXL']
                   const fallbackColors = ['#FDE047', '#93C5FD', '#F472B6', '#D6D3D1', '#15803D', '#EF4444', '#A855F7']
                   const images = product.product_images || []
+                  
+                  // Detect color from product name
+                  const colorFromName = (() => {
+                    const colorPatterns = ['Đỏ', 'Hồng', 'Xanh', 'Trắng', 'Đen', 'Xám', 'Vàng', 'Tím', 'Cam', 'Kem', 'Bạc', 'Than']
+                    for (const c of colorPatterns) {
+                      if (product.name?.includes(c)) return c
+                    }
+                    return ''
+                  })()
+
                   return (
                     <>
+                      {/* Size selector */}
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-foreground opacity-80">Size:</label>
+                        <label className="text-sm font-medium text-foreground opacity-80">
+                          {catSlug === 'giay-pickleball' ? 'Size giày:' : 'Size:'}
+                        </label>
                         <div className="flex items-center gap-2 flex-wrap">
-                          {sizes.map((s) => (
-                            <span key={s} className="px-3 py-1.5 rounded-lg border-2 border-border text-sm font-bold cursor-default text-foreground hover:border-lime/50 transition-all bg-white">
-                              {s}
-                            </span>
-                          ))}
+                          {sizes.map((s) => {
+                            const isActive = sizeFromName === s
+                            return (
+                              <span key={s} className={`px-3 py-1.5 rounded-lg border-2 text-sm font-bold transition-all ${
+                                isActive 
+                                  ? 'border-lime-dark bg-lime/10 text-lime-dark shadow-sm' 
+                                  : 'border-border text-muted-foreground hover:border-lime/50 bg-white cursor-pointer'
+                              }`}>
+                                {s}
+                              </span>
+                            )
+                          })}
                         </div>
                       </div>
+
+                      {/* Color display */}
                       <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-foreground opacity-80">Màu sắc:</label>
+                        <label className="text-sm font-medium text-foreground opacity-80">
+                          Màu sắc: {colorFromName && <span className="text-lime-dark font-bold">{colorFromName}</span>}
+                        </label>
                         <div className="flex items-center gap-2">
                           {images.length === 0 ? (
-                            <span className="text-xs text-muted-foreground">Mặc định</span>
+                            <span className="inline-block px-4 py-1.5 border-2 border-lime/30 text-lime-dark text-sm font-bold rounded-lg bg-gradient-to-r from-lime/10 to-transparent shadow-sm">
+                              {colorFromName || 'Mặc định'}
+                            </span>
                           ) : (
                             images.map((img, idx) => {
                               const colorHex = (img as any).color_code || fallbackColors[idx % fallbackColors.length]

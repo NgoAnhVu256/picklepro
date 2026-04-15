@@ -11,7 +11,8 @@ function formatVND(n: number) {
 const EMPTY_FORM = {
   name: '', brand: '', price: '', original_price: '', stock: '',
   description: '', category_id: '', is_featured: false, is_active: true,
-  tags: '', specs: '', images: [] as any[]
+  tags: '', specs: '', images: [] as any[],
+  color: '', size: ''
 }
 
 export default function AdminProductsPage() {
@@ -75,7 +76,8 @@ export default function AdminProductsPage() {
       category_id: p.category_id ?? '', is_featured: p.is_featured,
       is_active: p.is_active, tags: (p.tags ?? []).join(', '),
       specs: p.specs ? JSON.stringify(p.specs, null, 2) : '',
-      images: initialImages
+      images: initialImages,
+      color: p.specs?.color || '', size: p.specs?.size || ''
     })
     setFormError('')
     setShowModal(true)
@@ -136,7 +138,18 @@ export default function AdminProductsPage() {
       category_id: form.category_id || null, is_featured: form.is_featured,
       is_active: form.is_active,
       tags: form.tags ? form.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
-      specs: form.specs ? (() => { try { return JSON.parse(form.specs) } catch { return null } })() : null,
+      specs: (() => {
+        let baseSpecs = form.specs ? (() => { try { return JSON.parse(form.specs) } catch { return null } })() : null
+        // Merge color/size into specs for shoes/clothing
+        const selectedCat = categories.find((c: any) => c.id === form.category_id)
+        const catSlug = selectedCat?.slug || ''
+        if (catSlug === 'giay-pickleball' || catSlug === 'quan-ao') {
+          baseSpecs = baseSpecs || {}
+          if (form.color) baseSpecs.color = form.color
+          if (form.size) baseSpecs.size = form.size
+        }
+        return baseSpecs
+      })(),
       images: form.images
     }
     
@@ -348,6 +361,38 @@ export default function AdminProductsPage() {
                     rows={3} placeholder={'{"weight": "220g", "grip": "4.25"}'}
                     className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm font-mono resize-none" />
                 </div>
+
+                {/* Conditional: Color & Size for shoes/clothing */}
+                {(() => {
+                  const selectedCat = categories.find((c: any) => c.id === form.category_id)
+                  const catSlug = selectedCat?.slug || ''
+                  if (catSlug === 'giay-pickleball' || catSlug === 'quan-ao') {
+                    const shoesSizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44']
+                    const clothingSizes = ['S', 'M', 'L', 'XL', 'XXL']
+                    const sizes = catSlug === 'giay-pickleball' ? shoesSizes : clothingSizes
+                    return (
+                      <>
+                        <div>
+                          <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Màu sắc</label>
+                          <input value={form.color} onChange={e => setForm(f => ({...f, color: e.target.value}))}
+                            placeholder="VD: Đỏ, Xanh, Trắng..."
+                            className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm" />
+                        </div>
+                        <div>
+                          <label className="text-muted-foreground text-xs font-medium mb-1.5 block">
+                            {catSlug === 'giay-pickleball' ? 'Size giày' : 'Size quần áo'}
+                          </label>
+                          <select value={form.size} onChange={e => setForm(f => ({...f, size: e.target.value}))}
+                            className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm">
+                            <option value="">-- Chọn size --</option>
+                            {sizes.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                      </>
+                    )
+                  }
+                  return null
+                })()}
 
                 {/* Image Upload with Colors */}
                 <div className="sm:col-span-2 border-t border-border/50 pt-4 mt-2">
