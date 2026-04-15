@@ -107,12 +107,9 @@ export class AdminService {
   async createProduct(payload: any) {
     const { images, ...productData } = payload;
     const slug = productData.slug || this.generateSlug(productData.name)
-    
-    // Set fallback image_url from primary image
-    if (images && images.length > 0) {
-      const primary = images.find((i: any) => i.is_primary) || images[0];
-      productData.image_url = primary.url;
-    }
+
+    // Strip image_url since it's no longer in the DB schema
+    delete productData.image_url;
 
     const { data: product, error } = await supabaseAdmin
       .from('products')
@@ -138,12 +135,9 @@ export class AdminService {
 
   async updateProduct(id: string, payload: any) {
     const { images, ...productData } = payload;
-    
-    // Set fallback image_url
-    if (images && images.length > 0) {
-      const primary = images.find((i: any) => i.is_primary) || images[0];
-      productData.image_url = primary.url;
-    }
+
+    // Strip image_url since it's no longer in the DB schema
+    delete productData.image_url;
 
     const { data: product, error } = await supabaseAdmin
       .from('products')
