@@ -1,80 +1,129 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Save, Store, CreditCard, Truck, Bell, Globe, Shield, AlertCircle, CheckCircle2, Phone, Mail, MapPin } from 'lucide-react'
+import { Save, CheckCircle2, AlertCircle, Globe, Monitor, Share2, Search } from 'lucide-react'
+import { toast } from 'sonner'
 
-interface Settings {
+// ============================================================
+// Types
+// ============================================================
+interface SiteSettings {
+  // Thông tin chung
+  currency: string
+  timezone: string
+  language: string
+  date_format: string
+  vat_rate: number
+  import_tax_rate: number
+  // Công ty
   store_name: string
   store_phone: string
   store_email: string
   store_address: string
-  shipping_fee: string
-  free_shipping_threshold: string
-  bank_name: string
-  bank_account_number: string
-  bank_account_holder: string
-  telegram_enabled: boolean
-  zalo_link: string
+  store_website: string
+  // Giao diện
+  primary_color: string
+  logo_url: string
+  announcement_enabled: boolean
   maintenance_mode: boolean
+  // Mạng xã hội
+  facebook_url: string
+  instagram_url: string
+  youtube_url: string
+  zalo_link: string
+  tiktok_url: string
+  // SEO
+  seo_title: string
+  seo_description: string
+  seo_keywords: string
+  og_image_url: string
 }
 
-const DEFAULT_SETTINGS: Settings = {
+const DEFAULT: SiteSettings = {
+  currency: 'VND - Việt Nam Đồng',
+  timezone: 'Asia/Ho_Chi_Minh (UTC+7)',
+  language: 'Tiếng Việt',
+  date_format: 'dd/mm/yyyy',
+  vat_rate: 8,
+  import_tax_rate: 0,
   store_name: 'PicklePro',
   store_phone: '0373 164 472',
   store_email: 'support@picklepro.vn',
   store_address: 'Phú Yên, Việt Nam',
-  shipping_fee: '30000',
-  free_shipping_threshold: '500000',
-  bank_name: 'MBBANK',
-  bank_account_number: '2506200466666',
-  bank_account_holder: 'NGO TRI ANH VU',
-  telegram_enabled: true,
-  zalo_link: 'https://zalo.me/0373164472',
+  store_website: 'https://picklepro.vn',
+  primary_color: '#84cc16',
+  logo_url: '/logo.png',
+  announcement_enabled: true,
   maintenance_mode: false,
+  facebook_url: 'https://www.facebook.com/profile.php?id=61575468045037',
+  instagram_url: 'https://instagram.com/picklepro',
+  youtube_url: 'https://youtube.com/picklepro',
+  zalo_link: 'https://zalo.me/0373164472',
+  tiktok_url: '',
+  seo_title: 'PicklePro - Cửa hàng Vợt Pickleball cao cấp số 1 Việt Nam',
+  seo_description: 'Cửa hàng vợt Pickleball cao cấp số 1 Việt Nam. Đa dạng thương hiệu JOOLA, Selkirk, Paddletek, HEAD. Bảo hành chính hãng, giao hàng toàn quốc.',
+  seo_keywords: 'pickleball, vợt pickleball, picklepro, JOOLA, Selkirk, HEAD',
+  og_image_url: '/og-image.png',
 }
 
-const Section = ({ title, icon: Icon, iconColor, children }: { title: string; icon: any; iconColor: string; children: React.ReactNode }) => (
-  <div className="rounded-2xl bg-card text-card-foreground shadow-sm border border-border overflow-hidden">
-    <div className="px-6 py-4 border-b border-border flex items-center gap-2">
-      <Icon className={`h-5 w-5 ${iconColor}`} />
-      <h2 className="text-foreground font-bold">{title}</h2>
-    </div>
-    <div className="p-6 space-y-4">{children}</div>
+type TabKey = 'general' | 'company' | 'design' | 'social' | 'seo'
+
+const TABS: { key: TabKey; label: string; icon: any }[] = [
+  { key: 'general', label: 'Thông tin chung', icon: Globe },
+  { key: 'company', label: 'Công ty', icon: Globe },
+  { key: 'design', label: 'Giao diện', icon: Monitor },
+  { key: 'social', label: 'Mạng xã hội', icon: Share2 },
+  { key: 'seo', label: 'SEO', icon: Search },
+]
+
+// ============================================================
+// Sub-components
+// ============================================================
+const Row = ({ label, value }: { label: string; value: string | number }) => (
+  <div className="flex items-center justify-between py-4 border-b border-gray-100 last:border-0">
+    <span className="text-sm text-gray-600">{label}</span>
+    <span className="text-sm text-gray-900">{value}</span>
   </div>
 )
 
-const Field = ({ label, value, onChange, placeholder, type = 'text', disabled = false, icon: Icon }: any) => (
+const Field = ({ label, value, onChange, placeholder, type = 'text', hint }: {
+  label: string; value: string | number; onChange: (v: any) => void
+  placeholder?: string; type?: string; hint?: string
+}) => (
   <div>
-    <label className="text-muted-foreground text-xs font-medium mb-1.5 block">{label}</label>
-    <div className="relative">
-      {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />}
-      <input
-        type={type} value={value} onChange={e => onChange(e.target.value)}
-        placeholder={placeholder} disabled={disabled}
-        className={`w-full ${Icon ? 'pl-10' : 'px-3'} pr-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
-      />
-    </div>
+    <label className="text-xs font-medium text-gray-500 mb-1.5 block">{label}</label>
+    <input
+      type={type} value={value}
+      onChange={e => onChange(type === 'number' ? Number(e.target.value) : e.target.value)}
+      placeholder={placeholder}
+      className="w-full px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:border-lime-500 focus:ring-1 focus:ring-lime-200 text-sm transition-all"
+    />
+    {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
   </div>
 )
 
 const Toggle = ({ label, description, checked, onChange }: { label: string; description?: string; checked: boolean; onChange: (v: boolean) => void }) => (
-  <label className="flex items-center gap-4 cursor-pointer p-3 rounded-xl hover:bg-muted transition-all -mx-3">
-    <div className="flex-1">
-      <p className="text-foreground text-sm font-medium">{label}</p>
-      {description && <p className="text-muted-foreground text-xs mt-0.5">{description}</p>}
+  <label className="flex items-center justify-between py-3 cursor-pointer group">
+    <div>
+      <p className="text-sm font-medium text-gray-800 group-hover:text-lime-700 transition-colors">{label}</p>
+      {description && <p className="text-xs text-gray-400 mt-0.5">{description}</p>}
     </div>
-    <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-lime' : 'bg-gray-700'}`}>
-      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
+    <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-lime-500' : 'bg-gray-200'}`}>
+      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
       <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="sr-only" />
     </div>
   </label>
 )
 
+// ============================================================
+// Main Page
+// ============================================================
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<Settings>({ ...DEFAULT_SETTINGS })
+  const [settings, setSettings] = useState<SiteSettings>({ ...DEFAULT })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState({ type: '', text: '' })
+  const [activeTab, setActiveTab] = useState<TabKey>('general')
+  const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -90,12 +139,10 @@ export default function AdminSettingsPage() {
     load()
   }, [])
 
-  const showMessage = (type: string, text: string) => {
-    setMessage({ type, text })
-    setTimeout(() => setMessage({ type: '', text: '' }), 4000)
+  const update = (key: keyof SiteSettings, value: any) => {
+    setSettings(s => ({ ...s, [key]: value }))
+    setIsEditing(true)
   }
-
-  const update = (key: keyof Settings, value: any) => setSettings(s => ({ ...s, [key]: value }))
 
   const handleSave = async () => {
     setSaving(true)
@@ -105,89 +152,219 @@ export default function AdminSettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ settings }),
       })
-      if (res.ok) showMessage('success', 'Cài đặt đã được lưu!')
-      else showMessage('error', 'Không thể lưu cài đặt')
-    } catch { showMessage('error', 'Có lỗi xảy ra') }
+      if (res.ok) {
+        toast.success('Đã lưu cài đặt thành công!')
+        setIsEditing(false)
+      } else {
+        toast.error('Không thể lưu cài đặt')
+      }
+    } catch {
+      toast.error('Có lỗi xảy ra, thử lại sau!')
+    }
     setSaving(false)
   }
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="h-8 w-48 bg-muted rounded animate-pulse" />
-        {[...Array(3)].map((_, i) => <div key={i} className="h-48 bg-muted rounded-2xl animate-pulse" />)}
+      <div className="space-y-4 animate-pulse">
+        <div className="h-8 w-48 bg-gray-100 rounded-lg" />
+        <div className="h-10 w-full bg-gray-100 rounded-xl" />
+        <div className="h-64 w-full bg-gray-100 rounded-xl" />
       </div>
     )
   }
 
-
-
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-3xl">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Cài đặt hệ thống</h1>
-          <p className="text-muted-foreground text-sm mt-1">Cấu hình cửa hàng và thanh toán</p>
+          <h1 className="text-xl font-bold text-gray-900">Thiết lập Website</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Quản lý thông tin công ty, giao diện, SEO và mạng xã hội.</p>
         </div>
-        <button onClick={handleSave} disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-lime text-lime-dark font-bold hover:bg-lime-dark hover:text-foreground transition-all text-sm disabled:opacity-50 shadow-lg shadow-lime/20">
-          <Save className="h-4 w-4" /> {saving ? 'Đang lưu...' : 'Lưu cài đặt'}
-        </button>
+        {isEditing && (
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-lime-500 text-white font-semibold text-sm hover:bg-lime-600 transition-all disabled:opacity-60 shadow-md shadow-lime-200"
+          >
+            <Save className="h-4 w-4" />
+            {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+          </button>
+        )}
       </div>
 
-      {/* Toast */}
-      {message.text && (
-        <div className={`flex items-center gap-2 p-3 rounded-xl text-sm font-medium ${
-          message.type === 'success' ? 'bg-lime/10 text-lime border border-lime/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'
-        }`}>
-          {message.type === 'success' ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}
-          {message.text}
-        </div>
-      )}
+      {/* Tab navigation */}
+      <div className="flex gap-0 border-b border-gray-200">
+        {TABS.map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
+              activeTab === tab.key
+                ? 'border-gray-900 text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-      {/* Store Info */}
-      <Section title="Thông tin cửa hàng" icon={Store} iconColor="text-lime">
-        <Field label="Tên cửa hàng" value={settings.store_name} onChange={(v: string) => update('store_name', v)} placeholder="PicklePro" icon={Store} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Số điện thoại" value={settings.store_phone} onChange={(v: string) => update('store_phone', v)} placeholder="0373 164 472" icon={Phone} />
-          <Field label="Email liên hệ" value={settings.store_email} onChange={(v: string) => update('store_email', v)} placeholder="support@picklepro.vn" icon={Mail} />
-        </div>
-        <Field label="Địa chỉ" value={settings.store_address} onChange={(v: string) => update('store_address', v)} placeholder="Phú Yên, Việt Nam" icon={MapPin} />
-      </Section>
+      {/* Tab content */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        {/* === THÔNG TIN CHUNG === */}
+        {activeTab === 'general' && (
+          <div>
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="text-sm font-semibold text-gray-800">Thông tin chung</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Các thiết lập cơ bản cho hệ thống quản lý.</p>
+            </div>
+            <div className="px-6 py-2">
+              <Row label="Đơn vị tiền tệ" value={settings.currency} />
+              <Row label="Múi giờ" value={settings.timezone} />
+              <Row label="Ngôn ngữ" value={settings.language} />
+              <Row label="Định dạng ngày" value={`${settings.date_format} (${new Date().toLocaleDateString('vi-VN')})`} />
+              <Row label="Thuế VAT mặc định (%)" value={settings.vat_rate} />
+              <Row label="Thuế nhập khẩu (%)" value={settings.import_tax_rate} />
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+              <p className="text-xs text-gray-400">💡 Các thiết lập hệ thống được cấu hình cố định. Liên hệ kỹ thuật nếu cần thay đổi.</p>
+            </div>
+          </div>
+        )}
 
-      {/* Shipping */}
-      <Section title="Vận chuyển" icon={Truck} iconColor="text-blue-400">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Phí vận chuyển (VND)" value={settings.shipping_fee} onChange={(v: string) => update('shipping_fee', v)} placeholder="30000" type="number" />
-          <Field label="Miễn phí ship từ (VND)" value={settings.free_shipping_threshold} onChange={(v: string) => update('free_shipping_threshold', v)} placeholder="500000" type="number" />
-        </div>
-        <p className="text-muted-foreground text-xs">Đơn hàng từ {Number(settings.free_shipping_threshold).toLocaleString('vi-VN')}đ sẽ được miễn phí vận chuyển.</p>
-      </Section>
+        {/* === CÔNG TY === */}
+        {activeTab === 'company' && (
+          <div>
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="text-sm font-semibold text-gray-800">Thông tin công ty</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Cập nhật thông tin liên hệ và địa chỉ cửa hàng.</p>
+            </div>
+            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <Field label="Tên cửa hàng" value={settings.store_name} onChange={v => update('store_name', v)} placeholder="PicklePro" />
+              </div>
+              <Field label="Số điện thoại" value={settings.store_phone} onChange={v => update('store_phone', v)} placeholder="0373 164 472" />
+              <Field label="Email liên hệ" value={settings.store_email} onChange={v => update('store_email', v)} placeholder="support@picklepro.vn" />
+              <div className="sm:col-span-2">
+                <Field label="Địa chỉ" value={settings.store_address} onChange={v => update('store_address', v)} placeholder="Phú Yên, Việt Nam" />
+              </div>
+              <div className="sm:col-span-2">
+                <Field label="Website" value={settings.store_website} onChange={v => update('store_website', v)} placeholder="https://picklepro.vn" />
+              </div>
+            </div>
+          </div>
+        )}
 
-      {/* Bank Transfer */}
-      <Section title="Thông tin chuyển khoản" icon={CreditCard} iconColor="text-purple-400">
-        <Field label="Ngân hàng" value={settings.bank_name} onChange={(v: string) => update('bank_name', v)} placeholder="MBBANK" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Số tài khoản" value={settings.bank_account_number} onChange={(v: string) => update('bank_account_number', v)} placeholder="2506200466666" />
-          <Field label="Chủ tài khoản" value={settings.bank_account_holder} onChange={(v: string) => update('bank_account_holder', v)} placeholder="NGO TRI ANH VU" />
-        </div>
-      </Section>
+        {/* === GIAO DIỆN === */}
+        {activeTab === 'design' && (
+          <div>
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="text-sm font-semibold text-gray-800">Giao diện</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Tùy chỉnh màu sắc, logo và trạng thái hiển thị.</p>
+            </div>
+            <div className="p-6 space-y-4">
+              <Field label="URL Logo" value={settings.logo_url} onChange={v => update('logo_url', v)} placeholder="/logo.png" hint="Đường dẫn tệp ảnh logo (khuyến nghị: 80x80px, định dạng PNG)" />
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">Màu chủ đạo</label>
+                <div className="flex items-center gap-3">
+                  <input type="color" value={settings.primary_color} onChange={e => update('primary_color', e.target.value)}
+                    className="w-12 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5" />
+                  <span className="text-sm text-gray-600 font-mono">{settings.primary_color}</span>
+                </div>
+              </div>
+              <div className="border-t border-gray-100 pt-4 space-y-1">
+                <Toggle
+                  label="Thanh thông báo"
+                  description="Hiển thị thanh thông báo chạy ở đầu trang"
+                  checked={settings.announcement_enabled}
+                  onChange={v => update('announcement_enabled', v)}
+                />
+                <Toggle
+                  label="Chế độ bảo trì"
+                  description="Khi bật, khách hàng sẽ thấy trang thông báo bảo trì"
+                  checked={settings.maintenance_mode}
+                  onChange={v => update('maintenance_mode', v)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
-      {/* Notifications */}
-      <Section title="Thông báo & Tích hợp" icon={Bell} iconColor="text-yellow-400">
-        <Toggle label="Thông báo Telegram" description="Gửi thông báo đơn hàng mới qua Telegram Bot" checked={settings.telegram_enabled} onChange={v => update('telegram_enabled', v)} />
-        <Field label="Link Zalo chat" value={settings.zalo_link} onChange={(v: string) => update('zalo_link', v)} placeholder="https://zalo.me/0373164472" icon={Globe} />
-      </Section>
+        {/* === MẠNG XÃ HỘI === */}
+        {activeTab === 'social' && (
+          <div>
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="text-sm font-semibold text-gray-800">Mạng xã hội</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Cập nhật các liên kết mạng xã hội của PicklePro.</p>
+            </div>
+            <div className="p-6 space-y-4">
+              <Field label="🔵 Facebook" value={settings.facebook_url} onChange={v => update('facebook_url', v)} placeholder="https://facebook.com/picklepro" />
+              <Field label="📸 Instagram" value={settings.instagram_url} onChange={v => update('instagram_url', v)} placeholder="https://instagram.com/picklepro" />
+              <Field label="▶️ YouTube" value={settings.youtube_url} onChange={v => update('youtube_url', v)} placeholder="https://youtube.com/picklepro" />
+              <Field label="💬 Zalo" value={settings.zalo_link} onChange={v => update('zalo_link', v)} placeholder="https://zalo.me/0373164472" />
+              <Field label="🎵 TikTok" value={settings.tiktok_url} onChange={v => update('tiktok_url', v)} placeholder="https://tiktok.com/@picklepro" />
+            </div>
+          </div>
+        )}
 
-      {/* System */}
-      <Section title="Hệ thống" icon={Shield} iconColor="text-red-400">
-        <Toggle
-          label="Chế độ bảo trì"
-          description="Khi bật, khách hàng sẽ thấy trang thông báo bảo trì thay vì cửa hàng"
-          checked={settings.maintenance_mode}
-          onChange={v => update('maintenance_mode', v)}
-        />
-      </Section>
+        {/* === SEO === */}
+        {activeTab === 'seo' && (
+          <div>
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="text-sm font-semibold text-gray-800">SEO & Open Graph</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Tối ưu hóa tìm kiếm trên Google và mạng xã hội.</p>
+            </div>
+            <div className="p-6 space-y-4">
+              <Field
+                label="Tiêu đề trang (Title)"
+                value={settings.seo_title}
+                onChange={v => update('seo_title', v)}
+                placeholder="PicklePro - Cửa hàng Vợt Pickleball"
+                hint={`${settings.seo_title.length}/70 ký tự (khuyến nghị < 70)`}
+              />
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">Mô tả (Meta Description)</label>
+                <textarea
+                  value={settings.seo_description}
+                  onChange={e => update('seo_description', e.target.value)}
+                  rows={3}
+                  placeholder="Mô tả ngắn gọn về cửa hàng..."
+                  className="w-full px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:border-lime-500 text-sm resize-none transition-all"
+                />
+                <p className="text-xs text-gray-400 mt-1">{settings.seo_description.length}/160 ký tự (khuyến nghị &lt; 160)</p>
+              </div>
+              <Field
+                label="Từ khóa (Keywords)"
+                value={settings.seo_keywords}
+                onChange={v => update('seo_keywords', v)}
+                placeholder="pickleball, vợt pickleball, ..."
+                hint="Phân cách bằng dấu phẩy"
+              />
+              <Field
+                label="Ảnh chia sẻ OG Image"
+                value={settings.og_image_url}
+                onChange={v => update('og_image_url', v)}
+                placeholder="/og-image.png"
+                hint="Khuyến nghị kích thước: 1200x630px"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom save button */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-700 transition-all disabled:opacity-60"
+        >
+          <Save className="h-4 w-4" />
+          {saving ? 'Đang lưu...' : 'Lưu tất cả'}
+        </button>
+      </div>
     </div>
   )
 }
