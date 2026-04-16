@@ -80,7 +80,7 @@ export function Header() {
 
   return (
     <header className="relative z-50 w-full">
-      <div className="bg-white border-b border-lime/20 shadow-lg shadow-lime/5">
+      <div className="bg-gradient-to-r from-lime/10 via-white to-teal-50 border-b border-lime/20 shadow-lg shadow-lime/5">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity">
@@ -169,7 +169,7 @@ export function Header() {
         </div>
 
         {/* Navigation — Underline active/hover style */}
-        <nav className={`border-t border-lime/10 bg-white ${isMenuOpen ? 'block' : 'hidden md:block'}`}>
+        <nav className={`border-t border-lime/10 bg-white/40 backdrop-blur-md ${isMenuOpen ? 'block' : 'hidden md:block'}`}>
           <div className="container mx-auto px-4">
             
             {/* SVG Gradients for Icons */}

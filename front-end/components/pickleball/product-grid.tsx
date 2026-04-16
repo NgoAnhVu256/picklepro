@@ -5,6 +5,7 @@ import { ShoppingCart, Heart, Star, ArrowRight, Check, Loader2 } from "lucide-re
 import Link from "next/link"
 import { useCart } from "@/hooks/use-cart"
 import { useState, useEffect, useCallback } from "react"
+import { toast } from "sonner"
 import { useAdminRealtime } from "@/hooks/use-admin-realtime"
 
 interface Product {
@@ -76,6 +77,13 @@ export function ProductGrid() {
       quantity: 1,
     })
     setAddedIds(prev => new Set(prev).add(product.id))
+    toast.success("Thêm vào giỏ hàng thành công", {
+      duration: 3000,
+      action: {
+        label: "Xem giỏ hàng",
+        onClick: () => window.location.href = "/cart"
+      }
+    })
     setTimeout(() => setAddedIds(prev => {
       const next = new Set(prev)
       next.delete(product.id)
@@ -126,19 +134,11 @@ export function ProductGrid() {
               return (
                 <div key={product.id} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-lime/10 bg-white hover:shadow-xl hover:shadow-lime/15 transition-all duration-500 hover:-translate-y-1">
                   {/* Badge */}
-                  {disc > 0 && (
-                    <span className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-red-500 text-white">
-                      -{disc}%
-                    </span>
-                  )}
-                  {product.is_featured && disc === 0 && (
-                    <span className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-lime text-lime-dark">
+                  {product.is_featured && (
+                    <span className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-lime text-lime-dark shadow-sm">
                       Best Seller
                     </span>
                   )}
-                  <button className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-red-50 hover:text-red-500 transition-colors">
-                    <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
-                  </button>
 
                   {/* Image */}
                   <Link href={`/products/${product.slug}`}>

@@ -10,6 +10,8 @@ import { Slider } from '@/components/ui/slider'
 import { ShoppingCart, Heart, Star, ArrowRight, Filter, X, Search, SlidersHorizontal, Grid3X3, LayoutList, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { toast } from 'sonner'
+import { useCart } from '@/hooks/use-cart'
 
 interface Product {
   id: string
@@ -79,11 +81,12 @@ function ProductsContent() {
   const [category, setCategory] = useState(categoryFromUrl)
   const [sortBy, setSortBy] = useState('created_at')
   const [sortOrder, setSortOrder] = useState('desc')
-  const [priceRange, setPriceRange] = useState([0, 10000000])
+  const [priceRange, setPriceRange] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const { addItem } = useCart()
 
-  const fetchProducts = async () => {
-    setLoading(true)
+  const fetchProducts = async (page: number) => {
+    if (page === 1) setLoading(true)
     try {
       const params = new URLSearchParams()
       if (search) params.set('search', search)
@@ -91,19 +94,22 @@ function ProductsContent() {
       if (category) params.set('category', category)
       params.set('sortBy', sortBy)
       params.set('sortOrder', sortOrder)
-      params.set('page', currentPage.toString())
-      params.set('limit', '12')
-      if (priceRange[0] > 0) params.set('minPrice', priceRange[0].toString())
-      if (priceRange[1] < 10000000) params.set('maxPrice', priceRange[1].toString())
+      params.set('page', page.toString())
+      params.set('limit', '8')
+      
+      if (priceRange === 'under-1m') { params.set('maxPrice', '1000000') }
+      else if (priceRange === '1m-3m') { params.set('minPrice', '1000000'); params.set('maxPrice', '3000000') }
+      else if (priceRange === 'over-3m') { params.set('minPrice', '3000000') }
 
       const res = await fetch(`/api/products?${params.toString()}`)
       const data: ProductResponse = await res.json()
-      setProducts(data.products)
+      
+      setProducts(prev => page === 1 ? data.products : [...prev, ...data.products])
       setPagination(data.pagination)
     } catch (error) {
       console.error('Lỗi tải sản phẩm:', error)
     } finally {
-      setLoading(false)
+      if (page === 1) setLoading(false)
     }
   }
 
@@ -112,13 +118,39 @@ function ProductsContent() {
   }, [categoryFromUrl])
 
   useEffect(() => {
-    fetchProducts()
-  }, [currentPage, sortBy, sortOrder, brand, category])
+    setCurrentPage(1)
+    fetchProducts(1)
+  }, [sortBy, sortOrder, brand, category, priceRange])
+
+  const loadMore = () => {
+    const nextPage = currentPage + 1
+    setCurrentPage(nextPage)
+    fetchProducts(nextPage)
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     setCurrentPage(1)
-    fetchProducts()
+    fetchProducts(1)
+  }
+
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault()
+    addItem({
+      productId: product.id,
+      name: product.name,
+      brand: product.brand,
+      price: product.price,
+      slug: product.slug,
+      quantity: 1,
+    })
+    toast.success("Thêm vào giỏ hàng thành công", {
+      duration: 3000,
+      action: {
+        label: "Xem giỏ hàng",
+        onClick: () => window.location.href = "/cart"
+      }
+    })
   }
 
   return (
@@ -180,13 +212,42 @@ function ProductsContent() {
               </SelectContent>
             </Select>
 
+            {/* Category Filter */}
+            <Select value={category} onValueChange={(v) => { setCategory(v === 'all' ? '' : v); setCurrentPage(1) }}>
+              <SelectTrigger className="w-[120px] sm:w-[150px] rounded-full border-lime/30 text-xs sm:text-sm">
+                <SelectValue placeholder="Danh mục" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả danh mục</SelectItem>
+                <SelectItem value="vot-pickleball">Vợt Pickleball</SelectItem>
+                <SelectItem value="bong-pickleball">Bóng Pickleball</SelectItem>
+                <SelectItem value="giay-The-thao">Giày thể thao</SelectItem>
+                <SelectItem value="tui-balo">Túi / Balo</SelectItem>
+                <SelectItem value="phu-kien-grip">Phụ kiện & Grip</SelectItem>
+                <SelectItem value="quan-ao">Quần áo</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Price Filter */}
+            <Select value={priceRange} onValueChange={(v) => { setPriceRange(v === 'all' ? '' : v); setCurrentPage(1) }}>
+              <SelectTrigger className="w-[120px] sm:w-[150px] rounded-full border-lime/30 text-xs sm:text-sm">
+                <SelectValue placeholder="Tầm giá" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả giá</SelectItem>
+                <SelectItem value="under-1m">Dưới 1 triệu</SelectItem>
+                <SelectItem value="1m-3m">1 triệu - 3 triệu</SelectItem>
+                <SelectItem value="over-3m">Trên 3 triệu</SelectItem>
+              </SelectContent>
+            </Select>
+
             {/* Brand Filter */}
             <Select value={brand} onValueChange={(v) => { setBrand(v === 'all' ? '' : v); setCurrentPage(1) }}>
               <SelectTrigger className="w-[120px] sm:w-[150px] rounded-full border-lime/30 text-xs sm:text-sm">
                 <SelectValue placeholder="Thương hiệu" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="all">Tất cả thương hiệu</SelectItem>
                 <SelectItem value="JOOLA">JOOLA</SelectItem>
                 <SelectItem value="Selkirk">Selkirk</SelectItem>
                 <SelectItem value="HEAD">HEAD</SelectItem>
@@ -196,11 +257,6 @@ function ProductsContent() {
                 <SelectItem value="CRBN">CRBN</SelectItem>
               </SelectContent>
             </Select>
-
-            {/* Result Count */}
-            <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-              {pagination.total} SP
-            </span>
           </div>
         </div>
 
@@ -242,17 +298,13 @@ function ProductsContent() {
                     {/* Badges */}
                     <div className="absolute top-2 left-2 sm:top-4 sm:left-4 flex gap-1 sm:gap-2 z-10">
                       {product.is_featured && (
-                        <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-lime text-lime-dark">⭐ Nổi bật</span>
-                      )}
-                      {discount && (
-                        <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-red-500 text-white">-{discount}%</span>
+                        <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-lime text-lime-dark shadow-sm">⭐ Nổi bật</span>
                       )}
                     </div>
 
-                    {/* Wishlist */}
-                    <button className="absolute top-2 right-2 sm:top-4 sm:right-4 w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-white transition-all shadow-sm z-10"
-                      onClick={(e) => e.preventDefault()}>
-                      <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <button className="absolute top-2 right-2 sm:top-4 sm:right-4 w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-white hover:bg-lime-dark transition-all shadow-sm z-10"
+                      onClick={(e) => handleAddToCart(e, product)}>
+                      <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
                     </button>
 
                     {/* Image */}
@@ -296,39 +348,15 @@ function ProductsContent() {
           </div>
         )}
 
-        {/* Pagination */}
-        {pagination.totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-12">
+        {/* Pagination -> Load More */}
+        {currentPage < pagination.totalPages && products.length > 0 && (
+          <div className="flex items-center justify-center mt-12">
             <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full border-lime/30"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(p => p - 1)}
+              className="rounded-full px-12 py-6 text-base font-bold shadow-lg text-white"
+              style={{ background: 'linear-gradient(135deg, #11998E, #38EF7D)' }}
+              onClick={loadMore}
             >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-
-            {Array.from({ length: pagination.totalPages }).map((_, i) => (
-              <Button
-                key={i}
-                variant={currentPage === i + 1 ? 'default' : 'outline'}
-                size="icon"
-                className={`rounded-full ${currentPage === i + 1 ? 'bg-lime text-lime-dark hover:bg-lime-dark hover:text-white' : 'border-lime/30'}`}
-                onClick={() => setCurrentPage(i + 1)}
-              >
-                {i + 1}
-              </Button>
-            ))}
-
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full border-lime/30"
-              disabled={currentPage === pagination.totalPages}
-              onClick={() => setCurrentPage(p => p + 1)}
-            >
-              <ChevronRight className="h-4 w-4" />
+              Xem thêm Sản Phẩm
             </Button>
           </div>
         )}

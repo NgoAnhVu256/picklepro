@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ShoppingCart, Heart, Star, Minus, Plus, Truck, Shield, RotateCcw, ChevronRight, ArrowLeft, Check } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { useCart } from '@/hooks/use-cart'
 
 interface ProductFull {
@@ -148,6 +149,13 @@ export default function ProductDetailPage() {
       size: selectedSize
     }, quantity)
     setAddedToCart(true)
+    toast.success("Thêm vào giỏ hàng thành công", {
+      duration: 3000,
+      action: {
+        label: "Xem giỏ hàng",
+        onClick: () => window.location.href = "/cart"
+      }
+    })
     setTimeout(() => setAddedToCart(false), 2000)
   }
 
@@ -313,9 +321,6 @@ export default function ProductDetailPage() {
               
               {/* Price */}
               <div className="flex items-end gap-2">
-                {product.original_price && product.original_price > product.price && (
-                  <span className="text-sm sm:text-base text-muted-foreground line-through">{formatPrice(product.original_price)}</span>
-                )}
                 <span className="text-2xl sm:text-3xl font-extrabold text-foreground">{formatPrice(product.price)}</span>
               </div>
             </div>
@@ -499,7 +504,7 @@ export default function ProductDetailPage() {
                 <button 
                   className="flex-1 h-12 rounded-xl text-base font-bold transition-all active:scale-95 shadow-lg shadow-lime/30 bg-gradient-to-r from-lime-dark to-lime hover:opacity-90 text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none" 
                   disabled={!inStock} 
-                  onClick={() => { handleAddToCart(); window.location.href = '/checkout'; }}
+                  onClick={handleAddToCart}
                 >
                   Mua ngay
                 </button>
@@ -542,12 +547,37 @@ export default function ProductDetailPage() {
                 <TabsContent value="specs" className="mt-4">
                   {product.specs ? (
                     <div className="rounded-xl border border-border overflow-hidden bg-white">
-                      {Object.entries(product.specs).map(([key, value], i) => (
-                        <div key={key} className={`flex ${i % 2 === 0 ? 'bg-muted/30' : 'bg-transparent'}`}>
-                          <span className="w-[35%] sm:w-[40%] px-3 sm:px-5 py-3 text-xs sm:text-sm font-medium text-muted-foreground border-r border-border">{key}</span>
-                          <span className="flex-1 px-3 sm:px-5 py-3 text-xs sm:text-sm font-medium text-foreground">{value}</span>
-                        </div>
-                      ))}
+                      {Object.entries(product.specs).map(([key, value], i) => {
+                        let renderValue: React.ReactNode = value
+                        if (key.toLowerCase() === 'colors' || key.toLowerCase() === 'màu sắc') {
+                           const colors = value.split(/(?=[A-ZĐ])/).map(c => c.trim()).filter(Boolean)
+                           const colorMap: Record<string, string> = {
+                             'Đen': '#000000', 'Vàng': '#FBBF24', 'Đỏ': '#EF4444', 'Xanh': '#3B82F6', 
+                             'Trắng': '#FFFFFF', 'Xám': '#9CA3AF', 'Cam': '#F97316', 'Tím': '#A855F7',
+                             'Hồng': '#EC4899', 'Neon': '#D9F99D', 'Xanh lam': '#1D4ED8', 'Xanh lá': '#15803D'
+                           }
+                           renderValue = (
+                             <div className="flex flex-wrap items-center gap-3">
+                               {colors.map((c, idx) => {
+                                 const hex = colorMap[c] || '#CBD5E1'
+                                 return (
+                                   <div key={idx} className="flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-full border border-gray-100">
+                                     <span className="w-3.5 h-3.5 rounded-full shadow-inner border border-gray-200" style={{ backgroundColor: hex }}></span>
+                                     <span className="text-[13px]">{c}</span>
+                                   </div>
+                                 )
+                               })}
+                             </div>
+                           )
+                        }
+
+                        return (
+                          <div key={key} className={`flex ${i % 2 === 0 ? 'bg-muted/30' : 'bg-transparent'}`}>
+                            <span className="w-[35%] sm:w-[40%] px-3 sm:px-5 py-3 text-xs sm:text-sm font-medium text-muted-foreground border-r border-border flex items-center">{key}</span>
+                            <span className="flex-1 px-3 sm:px-5 py-3 text-xs sm:text-sm font-medium text-foreground min-h-[44px] flex items-center">{renderValue}</span>
+                          </div>
+                        )
+                      })}
                     </div>
                   ) : (
                     <div className="p-6 text-center border rounded-xl border-dashed">
