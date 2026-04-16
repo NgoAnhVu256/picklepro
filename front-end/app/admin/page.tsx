@@ -3,22 +3,20 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
-  TrendingUp, ShoppingBag, Package, Users,
-  ArrowUpRight, Clock, CheckCircle, Truck, XCircle, AlertCircle
+  DollarSign, ShoppingCart, Package, Users,
+  ArrowRight, ShoppingCart as ShoppingCartEmpty
 } from 'lucide-react'
 
 function formatVND(n: number) {
-  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
-  return new Intl.NumberFormat('vi-VN').format(n) + 'đ'
+  return new Intl.NumberFormat('vi-VN').format(n) + ' đ'
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
-  pending:   { label: 'Chờ xử lý',  color: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30', icon: Clock },
-  paid:      { label: 'Đã thanh toán', color: 'text-blue-400 bg-blue-400/10 border-blue-400/30', icon: CheckCircle },
-  shipping:  { label: 'Đang giao',  color: 'text-purple-400 bg-purple-400/10 border-purple-400/30', icon: Truck },
-  completed: { label: 'Hoàn thành', color: 'text-lime bg-lime/10 border-lime/30', icon: CheckCircle },
-  cancelled: { label: 'Đã hủy',    color: 'text-red-400 bg-red-400/10 border-red-400/30', icon: XCircle },
+const STATUS_MAP: Record<string, { label: string; dot: string; badgeText: string; badgeBg: string }> = {
+  pending:   { label: 'Chờ xử lý',      dot: 'bg-yellow-400', badgeText: 'text-yellow-600', badgeBg: 'bg-yellow-50' },
+  paid:      { label: 'Đã thanh toán',  dot: 'bg-blue-400',   badgeText: 'text-blue-600',   badgeBg: 'bg-blue-50' },
+  shipping:  { label: 'Đang giao',      dot: 'bg-purple-400', badgeText: 'text-purple-600', badgeBg: 'bg-purple-50' },
+  completed: { label: 'Hoàn thành',     dot: 'bg-emerald-400',badgeText: 'text-emerald-600',badgeBg: 'bg-emerald-50' },
+  cancelled: { label: 'Đã hủy',         dot: 'bg-red-400',    badgeText: 'text-red-600',    badgeBg: 'bg-red-50' },
 }
 
 export default function AdminDashboard() {
@@ -34,149 +32,197 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 rounded-2xl bg-gray-200 dark:bg-muted animate-pulse" />
-          ))}
+      <div className="space-y-6 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => <div key={i} className="h-32 rounded-2xl bg-gray-200" />)}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-64 rounded-2xl bg-gray-200 dark:bg-muted animate-pulse" />
-          <div className="h-64 rounded-2xl bg-gray-200 dark:bg-muted animate-pulse" />
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="h-96 rounded-2xl bg-gray-200" />
+          <div className="xl:col-span-2 h-96 rounded-2xl bg-gray-200" />
         </div>
       </div>
     )
   }
 
   const stats = data?.stats ?? {}
+  const statusCounts = data?.statusCounts ?? { pending: 0, paid: 0, shipping: 0, completed: 0, cancelled: 0 }
   const recentOrders = data?.recentOrders ?? []
-  const topProducts = data?.topProducts ?? []
-  const monthlyRevenue = data?.monthlyRevenue ?? []
 
   const statCards = [
-    { label: 'Tổng doanh thu', value: formatVND(stats.totalRevenue ?? 0), icon: TrendingUp, color: 'from-lime/20 to-lime/5 border-lime/20', iconColor: 'text-lime' },
-    { label: 'Đơn hàng', value: (stats.totalOrders ?? 0).toLocaleString(), icon: ShoppingBag, color: 'from-blue-500/20 to-blue-500/5 border-blue-500/20', iconColor: 'text-blue-400' },
-    { label: 'Sản phẩm', value: (stats.totalProducts ?? 0).toLocaleString(), icon: Package, color: 'from-purple-500/20 to-purple-500/5 border-purple-500/20', iconColor: 'text-purple-400' },
-    { label: 'Khách hàng', value: (stats.totalCustomers ?? 0).toLocaleString(), icon: Users, color: 'from-orange-500/20 to-orange-500/5 border-orange-500/20', iconColor: 'text-orange-400' },
+    { 
+      title: 'Tổng doanh thu', 
+      value: formatVND(stats.totalRevenue ?? 0), 
+      subtext: 'Từ đơn thành công', 
+      icon: DollarSign, 
+      iconBg: 'bg-[#4ade80]', 
+      iconColor: 'text-white',
+      trend: '+12%',
+      trendColor: 'text-emerald-500'
+    },
+    { 
+      title: 'Tổng đơn hàng', 
+      value: (stats.totalOrders ?? 0).toString(), 
+      subtext: `${statusCounts.pending ?? 0} đang chờ xử lý`, 
+      icon: ShoppingCart, 
+      iconBg: 'bg-[#3b82f6]', 
+      iconColor: 'text-white',
+      trend: '+8%',
+      trendColor: 'text-emerald-500'
+    },
+    { 
+      title: 'Sản phẩm', 
+      value: (stats.totalProducts ?? 0).toString(), 
+      subtext: 'Đang kinh doanh', 
+      icon: Package, 
+      iconBg: 'bg-[#f97316]', 
+      iconColor: 'text-white',
+      trend: '+5%',
+      trendColor: 'text-emerald-500'
+    },
+    { 
+      title: 'Khách hàng', 
+      value: (stats.totalCustomers ?? 0).toString(), 
+      subtext: 'Tài khoản đăng ký', 
+      icon: Users, 
+      iconBg: 'bg-[#a855f7]', 
+      iconColor: 'text-white',
+      trend: '+16%',
+      trendColor: 'text-emerald-500'
+    },
   ]
-
-  // Bar chart height
-  const maxRev = Math.max(...monthlyRevenue.map((m: any) => m.revenue), 1)
 
   return (
     <div className="space-y-6">
-      {/* Page Title */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground dark:text-muted-foreground text-sm mt-1">Tổng quan hoạt động cửa hàng PicklePro</p>
-      </div>
-
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((card) => (
-          <div key={card.label} className={`rounded-2xl bg-gradient-to-br ${card.color} border p-5`}>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">{card.label}</p>
-              <card.icon className={`h-5 w-5 ${card.iconColor}`} />
+      
+      {/* 4 Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 tracking-tight">
+        {statCards.map((card, i) => (
+          <div key={i} className="bg-white rounded-[20px] p-6 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col justify-between h-[140px]">
+            <div className="flex justify-between items-start">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${card.iconBg} shadow-sm`}>
+                <card.icon className={`h-6 w-6 ${card.iconColor}`} strokeWidth={2.5} />
+              </div>
+              <div className="flex items-center gap-1 text-[13px] font-bold">
+                <span className={card.trendColor}>
+                  <svg className="w-3.5 h-3.5 inline mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+                  {card.trend}
+                </span>
+              </div>
             </div>
-            <p className={`text-2xl font-bold ${card.iconColor}`}>{card.value}</p>
+            
+            <div className="mt-2">
+              <h3 className="text-2xl font-black text-gray-800">{card.value}</h3>
+              <p className="text-[13px] font-bold text-gray-800 mt-1">{card.title}</p>
+              <p className="text-[12px] text-gray-400 font-medium mt-0.5">{card.subtext}</p>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Revenue Chart */}
-        <div className="xl:col-span-2 rounded-2xl bg-white dark:bg-card text-card-foreground shadow-sm border border-gray-200 dark:border-border p-6 shadow-sm">
-          <h2 className="text-gray-900 dark:text-foreground font-bold mb-6">Doanh thu 6 tháng gần nhất</h2>
-          {monthlyRevenue.length === 0 ? (
-            <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">Chưa có dữ liệu</div>
-          ) : (
-            <div className="flex items-end gap-3 h-48">
-              {monthlyRevenue.map((m: any) => {
-                const height = Math.max((m.revenue / maxRev) * 100, 4)
-                const monthName = new Date(m.month + '-01').toLocaleDateString('vi-VN', { month: 'short' })
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+        
+        {/* Left Column: Order Statuses */}
+        <div className="space-y-6">
+          <div className="bg-white rounded-[20px] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-50">
+              <h2 className="text-[12px] font-bold text-gray-400 tracking-wider uppercase">Trạng thái đơn hàng</h2>
+            </div>
+            <div className="p-4 space-y-2">
+              {['pending', 'paid', 'shipping', 'completed', 'cancelled'].map(statusKey => {
+                const config = STATUS_MAP[statusKey]
+                const count = statusCounts[statusKey] || 0
                 return (
-                  <div key={m.month} className="flex-1 flex flex-col items-center gap-2">
-                    <p className="text-lime text-xs font-medium">{formatVND(m.revenue)}</p>
-                    <div
-                      className="w-full bg-gradient-to-t from-lime to-lime/60 rounded-t-lg transition-all duration-700"
-                      style={{ height: `${height}%` }}
-                    />
-                    <p className="text-muted-foreground text-xs">{monthName}</p>
+                  <div key={statusKey} className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2.5 h-2.5 rounded-full ${config.dot}`}></div>
+                      <span className="text-[14px] font-semibold text-gray-600">{config.label}</span>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-lg text-[13px] font-bold ${config.badgeBg} ${config.badgeText}`}>
+                      {count}
+                    </span>
                   </div>
                 )
               })}
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Top Products */}
-        <div className="rounded-2xl bg-white dark:bg-card text-card-foreground shadow-sm border border-gray-200 dark:border-border p-6 shadow-sm">
-          <h2 className="text-gray-900 dark:text-foreground font-bold mb-4">Top sản phẩm bán chạy</h2>
-          <div className="space-y-3">
-            {topProducts.length === 0 ? (
-              <p className="text-muted-foreground text-sm text-center py-8">Chưa có dữ liệu</p>
-            ) : topProducts.map((p: any, i: number) => (
-              <div key={p.slug} className="flex items-center gap-3">
-                <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
-                  i === 0 ? 'bg-yellow-500/20 text-yellow-500 dark:text-yellow-400' :
-                  i === 1 ? 'bg-gray-500/20 text-muted-foreground dark:text-muted-foreground' :
-                  i === 2 ? 'bg-orange-500/20 text-orange-500 dark:text-orange-400' : 'bg-gray-100 dark:bg-muted text-muted-foreground'
-                }`}>{i + 1}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-gray-900 dark:text-foreground text-sm font-medium truncate">{p.name}</p>
-                  <p className="text-muted-foreground text-xs">{p.qty} đã bán · {formatVND(p.revenue)}</p>
-                </div>
-              </div>
-            ))}
+          <div className="bg-[#4ade80] rounded-[20px] shadow-sm p-6 text-white">
+            <h2 className="text-[11px] font-bold tracking-widest uppercase opacity-90 mb-4">Doanh thu tổng</h2>
+            <h3 className="text-3xl font-black">{formatVND(stats.totalRevenue ?? 0)}</h3>
+            <div className="flex items-center gap-1 text-[13px] font-medium opacity-90 mt-2">
+              <ArrowRight className="w-4 h-4" />
+              <span>Từ đơn thanh toán thành công</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Recent Orders */}
-      <div className="rounded-2xl bg-white dark:bg-card text-card-foreground shadow-sm border border-gray-200 dark:border-border overflow-hidden shadow-sm">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-border">
-          <h2 className="text-gray-900 dark:text-foreground font-bold">Đơn hàng gần đây</h2>
-          <Link href="/admin/orders" className="text-lime-dark dark:text-lime text-sm hover:underline flex items-center gap-1">
-            Xem tất cả <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 dark:border-border">
-                <th className="text-left text-muted-foreground font-medium px-6 py-3">Mã đơn</th>
-                <th className="text-left text-muted-foreground font-medium px-6 py-3">Khách hàng</th>
-                <th className="text-left text-muted-foreground font-medium px-6 py-3 hidden sm:table-cell">Tổng tiền</th>
-                <th className="text-left text-muted-foreground font-medium px-6 py-3">Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentOrders.length === 0 ? (
-                <tr><td colSpan={4} className="text-center text-muted-foreground py-10">Chưa có đơn hàng</td></tr>
-              ) : recentOrders.map((order: any) => {
-                const s = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending
-                return (
-                  <tr key={order.id} className="border-b border-gray-100 dark:border-border hover:bg-gray-50 dark:hover:bg-muted/30 transition-colors">
-                    <td className="px-6 py-3">
-                      <Link href={`/admin/orders/${order.id}`} className="text-lime-dark dark:text-lime hover:underline font-mono text-xs">
-                        #{order.id.slice(0, 8)}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-3 text-gray-900 dark:text-foreground">{order.shipping_name}</td>
-                    <td className="px-6 py-3 text-gray-900 dark:text-foreground hidden sm:table-cell font-medium">{formatVND(order.total_amount)}</td>
-                    <td className="px-6 py-3">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${s.color}`}>
-                        <s.icon className="h-3 w-3" />
-                        {s.label}
-                      </span>
+        {/* Right Column: Recent Orders Table */}
+        <div className="xl:col-span-2 bg-white rounded-[20px] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-5">
+            <h2 className="text-[12px] font-bold text-gray-400 tracking-wider uppercase">Đơn hàng gần đây</h2>
+            <Link href="/admin/orders" className="text-[13px] font-bold text-[#4ade80] hover:text-[#22c55e] flex items-center gap-1 transition-colors">
+              Xem tất cả <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#1a1a1a] text-white text-[11px] uppercase tracking-wider font-bold">
+                  <th className="px-6 py-4 rounded-l-lg">Mã đơn</th>
+                  <th className="px-6 py-4">Khách hàng</th>
+                  <th className="px-6 py-4">Tổng tiền</th>
+                  <th className="px-6 py-4">Trạng thái</th>
+                  <th className="px-6 py-4 rounded-r-lg">Ngày</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-24 text-center">
+                      <div className="flex flex-col items-center justify-center text-gray-300">
+                        <ShoppingCartEmpty className="w-16 h-16 mb-4 opacity-50" strokeWidth={1} />
+                        <p className="text-[14px] font-medium">Chưa có đơn hàng nào</p>
+                      </div>
                     </td>
                   </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                ) : (
+                  recentOrders.map((order: any) => {
+                    const statusConfig = STATUS_MAP[order.status] || STATUS_MAP.pending
+                    const date = new Date(order.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                    
+                    return (
+                      <tr key={order.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
+                        <td className="px-6 py-4">
+                          <Link href={`/admin/orders/${order.id}`} className="text-[14px] font-bold text-gray-800 hover:text-[#4ade80] transition-colors">
+                            #{order.id.slice(0, 8).toUpperCase()}
+                          </Link>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-[14px] font-semibold text-gray-700">{order.shipping_name}</p>
+                          <p className="text-[12px] font-medium text-gray-400">{order.shipping_phone}</p>
+                        </td>
+                        <td className="px-6 py-4 text-[14px] font-extrabold text-[#4ade80]">
+                          {formatVND(order.total_amount)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${statusConfig.dot}`}></div>
+                            <span className="text-[13px] font-semibold text-gray-600">{statusConfig.label}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-[13px] font-medium text-gray-500">
+                          {date}
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
+
       </div>
     </div>
   )

@@ -15,7 +15,7 @@ export class AdminService {
   async getDashboardStats() {
     const [
       { count: totalProducts },
-      { count: totalOrders },
+      orderStatusesResult,
       { count: totalCustomers },
       revenueResult,
       recentOrders,
@@ -23,7 +23,7 @@ export class AdminService {
       monthlyRevenue,
     ] = await Promise.all([
       supabaseAdmin.from('products').select('*', { count: 'exact', head: true }).eq('is_active', true),
-      supabaseAdmin.from('orders').select('*', { count: 'exact', head: true }),
+      supabaseAdmin.from('orders').select('status'),
       supabaseAdmin.from('profiles').select('*', { count: 'exact', head: true }),
       supabaseAdmin.from('orders').select('total_amount').eq('status', 'completed'),
       supabaseAdmin
@@ -44,6 +44,16 @@ export class AdminService {
 
     // Tính tổng doanh thu
     const totalRevenue = (revenueResult.data ?? []).reduce((sum, o) => sum + o.total_amount, 0)
+    
+    // Đếm trạng thái đơn hàng
+    const orderStatuses = orderStatusesResult.data ?? []
+    const totalOrders = orderStatuses.length
+    const statusCounts = { pending: 0, paid: 0, shipping: 0, completed: 0, cancelled: 0 }
+    for (const o of orderStatuses) {
+      if (o.status in statusCounts) {
+        statusCounts[o.status as keyof typeof statusCounts]++
+      }
+    }
 
     // Aggregate top products
     const productSales: Record<string, { name: string; brand: string; slug: string; qty: number; revenue: number }> = {}
@@ -74,10 +84,11 @@ export class AdminService {
     return {
       stats: {
         totalRevenue,
-        totalOrders: totalOrders ?? 0,
+        totalOrders,
         totalProducts: totalProducts ?? 0,
         totalCustomers: totalCustomers ?? 0,
       },
+      statusCounts,
       recentOrders: recentOrders.data ?? [],
       topProducts: topProductsList,
       monthlyRevenue: months,
