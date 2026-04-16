@@ -79,8 +79,8 @@ export function AnnouncementBar() {
       <div className="flex touch-pan-y cursor-grab active:cursor-grabbing w-full">
         {slides.map((slide, index) => {
            const content = slide.bg_gradient ? (
-             <div className="w-full mx-auto relative h-full flex justify-center">
-               <img src={slide.bg_gradient} alt={slide.title || "Announcement Banner"} className="w-full h-[70px] sm:h-auto sm:max-h-[120px] object-fill sm:object-contain object-center" draggable={false} />
+             <div className="w-full mx-auto relative flex justify-center">
+               <img src={slide.bg_gradient} alt={slide.title || "Announcement Banner"} className="w-full h-auto max-h-[100px] sm:max-h-[120px] object-contain block" draggable={false} />
              </div>
            ) : (
              <div className="py-4 sm:py-3 px-6 sm:px-4 w-[92%] sm:w-full mx-auto flex justify-center items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-sm rounded-b-xl sm:rounded-none">
