@@ -124,6 +124,7 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<TabKey>('general')
   const [isEditing, setIsEditing] = useState(false)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -322,16 +323,104 @@ export default function AdminSettingsPage() {
               <h2 className="text-sm font-semibold text-gray-800">Giao diện</h2>
               <p className="text-xs text-gray-400 mt-0.5">Tùy chỉnh màu sắc, logo và trạng thái hiển thị.</p>
             </div>
-            <div className="p-6 space-y-4">
-              <Field label="URL Logo" value={settings.logo_url} onChange={v => update('logo_url', v)} placeholder="/logo.png" hint="Đường dẫn tệp ảnh logo (khuyến nghị: 80x80px, định dạng PNG)" />
+            <div className="p-6 space-y-6">
+
+              {/* Logo Upload */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-3 block">Logo cửa hàng</label>
+                <div className="flex items-start gap-5">
+
+                  {/* Preview */}
+                  <div className="w-24 h-24 rounded-xl border-2 border-gray-200 bg-gray-50 flex items-center justify-center shrink-0 overflow-hidden">
+                    {settings.logo_url ? (
+                      <img
+                        src={settings.logo_url}
+                        alt="Logo preview"
+                        className="w-full h-full object-contain p-1"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
+                    ) : (
+                      <span className="text-3xl">🖼️</span>
+                    )}
+                  </div>
+
+                  {/* Upload controls */}
+                  <div className="flex-1 space-y-2">
+                    <label
+                      className={`flex items-center justify-center gap-2 w-full py-3 px-4 border-2 border-dashed rounded-xl cursor-pointer transition-all text-sm font-medium
+                        ${uploadingLogo
+                          ? 'border-gray-300 text-gray-400 cursor-not-allowed'
+                          : 'border-lime-300 text-lime-700 hover:bg-lime-50 hover:border-lime-500'
+                        }`}
+                    >
+                      {uploadingLogo ? (
+                        <>
+                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                          </svg>
+                          Đang tải lên...
+                        </>
+                      ) : (
+                        <>📁 Chọn ảnh từ máy tính</>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                        className="hidden"
+                        disabled={uploadingLogo}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (!file) return
+                          setUploadingLogo(true)
+                          try {
+                            const fd = new FormData()
+                            fd.append('file', file)
+                            const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+                            const data = await res.json()
+                            if (data.url) {
+                              update('logo_url', data.url)
+                              toast.success('Tải logo lên thành công!')
+                            } else {
+                              toast.error(data.error || 'Tải lên thất bại')
+                            }
+                          } catch {
+                            toast.error('Lỗi kết nối, thử lại!')
+                          }
+                          setUploadingLogo(false)
+                          e.target.value = ''
+                        }}
+                      />
+                    </label>
+                    <p className="text-xs text-gray-400">Khuyến nghị: PNG/SVG nền trong, kích thước <strong>200x200px</strong> trở lên</p>
+                    {/* URL input fallback */}
+                    <input
+                      type="text"
+                      value={settings.logo_url}
+                      onChange={e => update('logo_url', e.target.value)}
+                      placeholder="Hoặc nhập URL logo..."
+                      className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-700 text-xs focus:outline-none focus:border-lime-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Màu chủ đạo */}
               <div>
                 <label className="text-xs font-medium text-gray-500 mb-1.5 block">Màu chủ đạo</label>
                 <div className="flex items-center gap-3">
-                  <input type="color" value={settings.primary_color} onChange={e => update('primary_color', e.target.value)}
-                    className="w-12 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5" />
-                  <span className="text-sm text-gray-600 font-mono">{settings.primary_color}</span>
+                  <input
+                    type="color"
+                    value={settings.primary_color}
+                    onChange={e => update('primary_color', e.target.value)}
+                    className="w-12 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5"
+                  />
+                  <span className="text-sm text-gray-700 font-mono font-medium">{settings.primary_color}</span>
+                  <span className="text-xs text-gray-400">— màu nút bấm, đường viền nổi bật trên web</span>
                 </div>
               </div>
+
+              {/* Toggles */}
               <div className="border-t border-gray-100 pt-4 space-y-1">
                 <Toggle
                   label="Thanh thông báo"

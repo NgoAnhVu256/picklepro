@@ -45,12 +45,8 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
   icons: {
-    icon: [
-      { url: '/logo.png', type: 'image/png' },
-      { url: '/icon-dark-32x32.png', sizes: '32x32', type: 'image/png' },
-    ],
+    icon: '/favicon.ico',
     apple: '/apple-icon.png',
-    shortcut: '/logo.png',
   },
   alternates: {
     canonical: APP_URL,
@@ -68,7 +64,7 @@ export default function RootLayout({
     '@type': 'Organization',
     name: 'PicklePro',
     url: APP_URL,
-    logo: `${APP_URL}/logo.png`,
+    logo: `${APP_URL}/favicon.ico`,
     description: 'Cửa hàng vợt Pickleball cao cấp số 1 Việt Nam',
     contactPoint: { '@type': 'ContactPoint', telephone: '+84-xxx-xxx-xxx', contactType: 'customer service', areaServed: 'VN', availableLanguage: 'Vietnamese' },
     sameAs: ['https://facebook.com/picklepro', 'https://youtube.com/picklepro'],
@@ -77,12 +73,8 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <head>
-        {/* Preconnect for Google Fonts - improves Safari/slow network */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Product+Sans:wght@400;700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-        {/* Favicon fallback for older browsers */}
-        <link rel="shortcut icon" href="/logo.png" type="image/png" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         {/* Google Analytics 4 */}
         {GA_MEASUREMENT_ID && (

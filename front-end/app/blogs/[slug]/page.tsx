@@ -96,7 +96,7 @@ export default async function BlogDetailPage({ params }: { params: { slug: strin
       '@type': 'Organization',
       name: 'PicklePro',
       url: APP_URL,
-      logo: { '@type': 'ImageObject', url: `${APP_URL}/logo.png` },
+      logo: { '@type': 'ImageObject', url: `${APP_URL}/favicon.ico` },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${APP_URL}/blogs/${blog.slug}` },
     ...(blog.thumbnail ? { image: blog.thumbnail } : {}),

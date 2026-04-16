@@ -75,24 +75,12 @@ export function AnnouncementBar() {
   }
 
   return (
-    <div className="sticky top-0 z-[60] w-full max-w-[100vw] shadow-md transition-all duration-700 ease-in-out relative flex items-center justify-center overflow-hidden" style={{ background: 'linear-gradient(90deg, #F97316, #EAB308)' }} ref={emblaRef}>
+    <div className="sticky top-0 z-[60] w-full shadow-md transition-all duration-700 ease-in-out relative overflow-hidden bg-black" ref={emblaRef}>
       <div className="flex touch-pan-y cursor-grab active:cursor-grabbing w-full">
         {slides.map((slide, index) => {
            const content = slide.bg_gradient ? (
-             <div className="w-full overflow-hidden" style={{ lineHeight: 0 }}>
-               <img
-                 src={slide.bg_gradient}
-                 alt={slide.title || "Announcement Banner"}
-                 draggable={false}
-                 style={{
-                   width: '100%',
-                   height: '60px',
-                   objectFit: 'cover',
-                   objectPosition: 'center',
-                   display: 'block',
-                 }}
-                 className="sm:!h-auto sm:!max-h-[120px] sm:!object-contain"
-               />
+             <div className="w-[92%] sm:w-full mx-auto">
+               <img src={slide.bg_gradient} alt={slide.title || "Announcement Banner"} className="w-full object-contain sm:object-cover min-h-[56px] sm:min-h-0 sm:max-h-[100px]" draggable={false} />
              </div>
            ) : (
              <div className="py-4 sm:py-3 px-6 sm:px-4 w-[92%] sm:w-full mx-auto flex justify-center items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-sm rounded-b-xl sm:rounded-none">
