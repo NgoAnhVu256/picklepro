@@ -33,6 +33,8 @@ const nextConfig = {
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
     ZALO_CHAT_LINK: process.env.ZALO_CHAT_LINK,
+    ZALO_OA_ACCESS_TOKEN: process.env.ZALO_OA_ACCESS_TOKEN,
+    ZALO_OA_SECRET: process.env.ZALO_OA_SECRET,
     VNPAY_TMN_CODE: process.env.VNPAY_TMN_CODE,
     VNPAY_HASH_SECRET: process.env.VNPAY_HASH_SECRET,
     VNPAY_URL: process.env.VNPAY_URL,
