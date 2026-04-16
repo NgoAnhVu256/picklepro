@@ -18,7 +18,23 @@ interface Slide {
 export function AnnouncementBar() {
   const [isVisible, setIsVisible] = useState(true)
   const [slides, setSlides] = useState<Slide[]>([])
+  const [announcementEnabled, setAnnouncementEnabled] = useState(true)
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
+
+  // Load settings — kiểm tra announcement_enabled
+  const loadSettings = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/settings')
+      if (res.ok) {
+        const data = await res.json()
+        if (data.settings && data.settings.announcement_enabled === false) {
+          setAnnouncementEnabled(false)
+        } else {
+          setAnnouncementEnabled(true)
+        }
+      }
+    } catch {}
+  }, [])
 
   const loadSlides = useCallback(async () => {
     try {
@@ -33,15 +49,17 @@ export function AnnouncementBar() {
   }, [])
 
   useEffect(() => {
+    loadSettings()
     loadSlides()
     const interval = setInterval(loadSlides, 15000)
     return () => clearInterval(interval)
-  }, [loadSlides])
+  }, [loadSettings, loadSlides])
 
   useAdminRealtime({
     scopes: ['slides'],
     onChange: () => {
       loadSlides()
+      loadSettings()
     },
   })
 
@@ -53,7 +71,7 @@ export function AnnouncementBar() {
     return () => clearInterval(timer)
   }, [emblaApi, slides.length])
 
-  if (!isVisible) return null
+  if (!isVisible || !announcementEnabled) return null
 
   // Fallback state
   if (slides.length === 0) {
