@@ -1,15 +1,134 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Plus, Pencil, Trash2, FolderOpen, AlertTriangle, Upload, ImageIcon, X } from 'lucide-react'
+import { useEffect, useState, useCallback } from 'react'
+import { Plus, Pencil, Trash2, FolderOpen, AlertTriangle, Upload, ImageIcon, X, Tag, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'sonner'
+
+// Predefined attribute templates per category type
+const ATTRIBUTE_TEMPLATES: Record<string, any[]> = {
+  'vot': [
+    { key: 'colors', label: 'Màu sắc', type: 'multi-text', placeholder: 'VD: Đỏ, Xanh, Đen' },
+    { key: 'version', label: 'Phiên bản', type: 'select', options: ['14mm', '16mm'], placeholder: 'Chọn phiên bản' },
+  ],
+  'quan-ao': [
+    { key: 'colors', label: 'Màu sắc', type: 'multi-text', placeholder: 'VD: Trắng, Đen, Xanh' },
+    { key: 'sizes', label: 'Size', type: 'multi-text', placeholder: 'VD: S, M, L, XL, XXL' },
+  ],
+  'giay': [
+    { key: 'colors', label: 'Màu sắc', type: 'multi-text', placeholder: 'VD: Trắng, Đen, Xám' },
+    { key: 'sizes', label: 'Size giày', type: 'multi-text', placeholder: 'VD: 38, 39, 40, 41, 42, 43' },
+  ],
+  'balo': [
+    { key: 'colors', label: 'Màu sắc', type: 'multi-text', placeholder: 'VD: Đen, Xanh Navy, Xám' },
+  ],
+}
+
+function getTemplate(slug: string) {
+  if (slug.includes('vot') || slug.includes('paddle')) return ATTRIBUTE_TEMPLATES['vot']
+  if (slug.includes('quan') || slug.includes('ao') || slug.includes('clothing')) return ATTRIBUTE_TEMPLATES['quan-ao']
+  if (slug.includes('giay') || slug.includes('shoe')) return ATTRIBUTE_TEMPLATES['giay']
+  if (slug.includes('balo') || slug.includes('bag') || slug.includes('tui')) return ATTRIBUTE_TEMPLATES['balo']
+  return []
+}
+
+// AttributeEditor: Edit attribute list for a category
+function AttributeEditor({ attributes, onChange }: { attributes: any[], onChange: (attrs: any[]) => void }) {
+  const addAttr = () => {
+    onChange([...attributes, { key: '', label: '', type: 'multi-text', placeholder: '' }])
+  }
+  const removeAttr = (i: number) => {
+    onChange(attributes.filter((_, idx) => idx !== i))
+  }
+  const updateAttr = (i: number, field: string, value: string) => {
+    const updated = [...attributes]
+    updated[i] = { ...updated[i], [field]: value }
+    onChange(updated)
+  }
+
+  return (
+    <div className="space-y-3">
+      {attributes.length === 0 && (
+        <p className="text-xs text-muted-foreground italic text-center py-3">
+          Danh mục này chưa có thuộc tính. Nhấn "+ Thêm thuộc tính" để thêm.
+        </p>
+      )}
+      {attributes.map((attr, i) => (
+        <div key={i} className="flex gap-2 items-start p-3 rounded-xl bg-muted/50 border border-border">
+          <div className="flex-1 grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <label className="text-muted-foreground mb-1 block">Key (mã)</label>
+              <input
+                value={attr.key}
+                onChange={e => updateAttr(i, 'key', e.target.value)}
+                placeholder="colors"
+                className="w-full px-2 py-1.5 rounded-lg bg-background border border-border outline-none focus:border-lime text-xs"
+              />
+            </div>
+            <div>
+              <label className="text-muted-foreground mb-1 block">Label (tên hiển thị)</label>
+              <input
+                value={attr.label}
+                onChange={e => updateAttr(i, 'label', e.target.value)}
+                placeholder="Màu sắc"
+                className="w-full px-2 py-1.5 rounded-lg bg-background border border-border outline-none focus:border-lime text-xs"
+              />
+            </div>
+            <div>
+              <label className="text-muted-foreground mb-1 block">Kiểu</label>
+              <select
+                value={attr.type}
+                onChange={e => updateAttr(i, 'type', e.target.value)}
+                className="w-full px-2 py-1.5 rounded-lg bg-background border border-border outline-none focus:border-lime text-xs"
+              >
+                <option value="multi-text">Nhiều giá trị (input)</option>
+                <option value="select">Chọn 1 (dropdown)</option>
+                <option value="text">Văn bản đơn</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-muted-foreground mb-1 block">Gợi ý</label>
+              <input
+                value={attr.placeholder || ''}
+                onChange={e => updateAttr(i, 'placeholder', e.target.value)}
+                placeholder="VD: Đỏ, Xanh, Đen"
+                className="w-full px-2 py-1.5 rounded-lg bg-background border border-border outline-none focus:border-lime text-xs"
+              />
+            </div>
+            {attr.type === 'select' && (
+              <div className="col-span-2">
+                <label className="text-muted-foreground mb-1 block">Các lựa chọn (cách nhau bởi dấu phẩy)</label>
+                <input
+                  value={(attr.options || []).join(', ')}
+                  onChange={e => updateAttr(i, 'options', e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean) as any)}
+                  placeholder="14mm, 16mm"
+                  className="w-full px-2 py-1.5 rounded-lg bg-background border border-border outline-none focus:border-lime text-xs"
+                />
+              </div>
+            )}
+          </div>
+          <button onClick={() => removeAttr(i)} className="p-1.5 text-red-400 hover:bg-red-400/10 rounded-lg mt-5">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ))}
+      <button
+        onClick={addAttr}
+        className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border-2 border-dashed border-lime/40 text-lime-dark hover:bg-lime/5 text-xs font-medium transition-all"
+      >
+        <Plus className="h-3.5 w-3.5" /> Thêm thuộc tính
+      </button>
+    </div>
+  )
+}
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<any>(null)
-  const [form, setForm] = useState({ name: '', slug: '', description: '', image_url: '' })
+  const [form, setForm] = useState<{
+    name: string; slug: string; description: string; image_url: string; attributes: any[]
+  }>({ name: '', slug: '', description: '', image_url: '', attributes: [] })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<any>(null)
@@ -18,18 +137,14 @@ export default function AdminCategoriesPage() {
   const [formError, setFormError] = useState('')
   const [slugError, setSlugError] = useState('')
   const [slugEdited, setSlugEdited] = useState(false)
+  const [showAttributes, setShowAttributes] = useState(false)
 
-  const generateSlug = (text: string) => {
-    return text.toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
-  }
+  const generateSlug = (text: string) =>
+    text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd')
+      .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
-  const checkDuplicateSlug = (newSlug: string, currentId?: string) => {
-    if (!newSlug) return false
-    return categories.some(c => c.slug === newSlug && c.id !== currentId)
-  }
+  const checkDuplicateSlug = (newSlug: string, currentId?: string) =>
+    !!newSlug && categories.some(c => c.slug === newSlug && c.id !== currentId)
 
   const fetchCategories = async () => {
     setLoading(true)
@@ -43,119 +158,88 @@ export default function AdminCategoriesPage() {
 
   const openAdd = () => {
     setEditing(null)
-    setForm({ name: '', slug: '', description: '', image_url: '' })
-    setFormError('')
-    setSlugError('')
-    setSlugEdited(false)
+    setForm({ name: '', slug: '', description: '', image_url: '', attributes: [] })
+    setFormError(''); setSlugError(''); setSlugEdited(false); setShowAttributes(false)
     setShowModal(true)
   }
 
   const openEdit = (c: any) => {
     setEditing(c)
-    setForm({ name: c.name, slug: c.slug ?? '', description: c.description ?? '', image_url: c.image_url ?? '' })
-    setFormError('')
-    setSlugError('')
-    setSlugEdited(true)
+    setForm({
+      name: c.name, slug: c.slug ?? '', description: c.description ?? '',
+      image_url: c.image_url ?? '',
+      attributes: Array.isArray(c.attributes) ? c.attributes : [],
+    })
+    setFormError(''); setSlugError(''); setSlugEdited(true); setShowAttributes(false)
     setShowModal(true)
   }
+
+  // Auto-populate attributes when slug changes
+  useEffect(() => {
+    if (!editing && form.slug && form.attributes.length === 0) {
+      const tpl = getTemplate(form.slug)
+      if (tpl.length > 0) setForm(f => ({ ...f, attributes: tpl }))
+    }
+  }, [form.slug, editing])
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
-    const fd = new FormData()
-    fd.append('file', file)
-    fd.append('folder', 'categories')
+    const fd = new FormData(); fd.append('file', file); fd.append('folder', 'categories')
     try {
       const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
       const data = await res.json()
-      if (data.url) {
-        setForm(f => ({ ...f, image_url: data.url }))
-        toast.success('Tải ảnh thành công!')
-      } else {
-        toast.error(data.error || 'Upload thất bại')
-      }
-    } catch { 
-      toast.error('Lỗi kết nối khi upload') 
-    }
+      if (data.url) { setForm(f => ({ ...f, image_url: data.url })); toast.success('Tải ảnh thành công!') }
+      else toast.error(data.error || 'Upload thất bại')
+    } catch { toast.error('Lỗi kết nối khi upload') }
     setUploading(false)
   }
 
   const handleSave = async () => {
-    if (!form.name.trim()) {
-      setFormError('Tên danh mục không được để trống')
-      return
-    }
+    if (!form.name.trim()) { setFormError('Tên danh mục không được để trống'); return }
     const finalSlug = form.slug || generateSlug(form.name)
-    if (checkDuplicateSlug(finalSlug, editing?.id)) {
-      setSlugError('Đường dẫn tĩnh (Slug) này đã tồn tại, vui lòng chọn tên khác!')
-      return
+    if (checkDuplicateSlug(finalSlug, editing?.id)) { setSlugError('Slug đã tồn tại!'); return }
+    setFormError(''); setSlugError(''); setSaving(true)
+    const payload: any = {
+      name: form.name, description: form.description, slug: finalSlug,
+      attributes: form.attributes,
     }
-    
-    setFormError('')
-    setSlugError('')
-    setSaving(true)
-    const payload: any = { name: form.name, description: form.description }
-    payload.slug = finalSlug
     if (form.image_url) payload.image_url = form.image_url
     const url = editing ? `/api/admin/categories/${editing.id}` : '/api/admin/categories'
     const method = editing ? 'PUT' : 'POST'
     try {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Lỗi server')
-      }
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Lỗi server') }
       toast.success(editing ? 'Cập nhật danh mục thành công' : 'Thêm mới danh mục thành công')
-      setShowModal(false)
-      fetchCategories()
-    } catch (error: any) {
-      toast.error(error.message || 'Lỗi khi lưu danh mục')
-    }
+      setShowModal(false); fetchCategories()
+    } catch (error: any) { toast.error(error.message || 'Lỗi khi lưu danh mục') }
     setSaving(false)
   }
 
   const handleDelete = async () => {
     if (!deleteTarget) return
-    setDeleting(true)
-    setDeleteError('')
+    setDeleting(true); setDeleteError('')
     try {
       const res = await fetch(`/api/admin/categories/${deleteTarget.id}`, { method: 'DELETE' })
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Không thể xóa danh mục')
-      }
-      toast.success('Xóa danh mục thành công')
-      setDeleteTarget(null)
-      fetchCategories()
-    } catch (error: any) {
-      setDeleteError(error.message)
-    }
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Không thể xóa') }
+      toast.success('Xóa danh mục thành công'); setDeleteTarget(null); fetchCategories()
+    } catch (error: any) { setDeleteError(error.message) }
     setDeleting(false)
   }
 
   const moveItem = async (index: number, direction: 'up' | 'down') => {
     const newCategories = [...categories]
-    if (direction === 'up' && index > 0) {
-      [newCategories[index - 1], newCategories[index]] = [newCategories[index], newCategories[index - 1]]
-    } else if (direction === 'down' && index < newCategories.length - 1) {
-      [newCategories[index + 1], newCategories[index]] = [newCategories[index], newCategories[index + 1]]
-    } else {
-      return
-    }
-    
+    if (direction === 'up' && index > 0) [newCategories[index - 1], newCategories[index]] = [newCategories[index], newCategories[index - 1]]
+    else if (direction === 'down' && index < newCategories.length - 1) [newCategories[index + 1], newCategories[index]] = [newCategories[index], newCategories[index + 1]]
+    else return
     setCategories(newCategories)
-    const itemIds = newCategories.map(c => c.id)
     try {
       await fetch('/api/admin/categories/reorder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: itemIds })
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: newCategories.map(c => c.id) })
       })
-      toast.success('Đã cập nhật thứ tự')
-    } catch {
-      toast.error('Lỗi khi sắp xếp')
-    }
+    } catch { toast.error('Lỗi khi sắp xếp') }
   }
 
   return (
@@ -174,37 +258,26 @@ export default function AdminCategoriesPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
-              {['Mã danh mục', 'Hình ảnh', 'Tên danh mục', 'Slug', 'Số SP', 'Thứ tự', 'Thao tác'].map(h => (
+              {['Mã danh mục', 'Hình ảnh', 'Tên danh mục', 'Slug', 'Thuộc tính', 'Số SP', 'Thứ tự', 'Thao tác'].map(h => (
                 <th key={h} className="text-left text-muted-foreground font-medium px-5 py-3 whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              [...Array(4)].map((_, i) => (
-                <tr key={i} className="border-b border-border">
-                  {[...Array(7)].map((_, j) => (
-                    <td key={j} className="px-5 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td>
-                  ))}
-                </tr>
-              ))
-            ) : categories.length === 0 ? (
-              <tr><td colSpan={7} className="text-center text-muted-foreground py-12">
-                <FolderOpen className="h-10 w-10 mx-auto mb-2 text-gray-700" />
-                <p>Chưa có danh mục nào</p>
+            {loading ? [...Array(4)].map((_, i) => (
+              <tr key={i} className="border-b border-border">
+                {[...Array(8)].map((_, j) => <td key={j} className="px-5 py-4"><div className="h-4 bg-muted rounded animate-pulse" /></td>)}
+              </tr>
+            )) : categories.length === 0 ? (
+              <tr><td colSpan={8} className="text-center text-muted-foreground py-12">
+                <FolderOpen className="h-10 w-10 mx-auto mb-2 text-gray-700" /><p>Chưa có danh mục nào</p>
               </td></tr>
             ) : categories.map((c, index) => (
               <tr key={c.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                <td className="px-5 py-3 text-secondary-foreground font-mono text-xs w-48 break-all">
-                  {c.id}
-                </td>
+                <td className="px-5 py-3 text-secondary-foreground font-mono text-xs w-48 break-all">{c.id}</td>
                 <td className="px-5 py-3">
                   <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center overflow-hidden shrink-0">
-                    {c.image_url ? (
-                      <img src={c.image_url} alt={c.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <FolderOpen className="h-5 w-5 text-muted-foreground" />
-                    )}
+                    {c.image_url ? <img src={c.image_url} alt={c.name} className="w-full h-full object-cover" /> : <FolderOpen className="h-5 w-5 text-muted-foreground" />}
                   </div>
                 </td>
                 <td className="px-5 py-3">
@@ -212,27 +285,32 @@ export default function AdminCategoriesPage() {
                   {c.description && <p className="text-muted-foreground text-xs">{c.description}</p>}
                 </td>
                 <td className="px-5 py-3 text-muted-foreground font-mono text-xs">{c.slug}</td>
+                <td className="px-5 py-3">
+                  {Array.isArray(c.attributes) && c.attributes.length > 0 ? (
+                    <div className="flex flex-wrap gap-1">
+                      {c.attributes.map((a: any) => (
+                        <span key={a.key} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-lime/10 text-lime-dark text-xs font-medium border border-lime/20">
+                          <Tag className="h-2.5 w-2.5" />{a.label}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </td>
                 <td className="px-5 py-3 text-secondary-foreground text-center">
                   <span className="inline-flex items-center justify-center px-2 py-1 rounded bg-muted text-xs font-bold text-foreground">{c.products?.[0]?.count ?? 0}</span>
                 </td>
                 <td className="px-5 py-3">
-                   <div className="flex items-center gap-1">
-                      <button disabled={index === 0} onClick={() => moveItem(index, 'up')} className="p-1 rounded bg-muted hover:bg-blue-400/20 hover:text-blue-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-                        ▲
-                      </button>
-                      <button disabled={index === categories.length - 1} onClick={() => moveItem(index, 'down')} className="p-1 rounded bg-muted hover:bg-blue-400/20 hover:text-blue-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-                        ▼
-                      </button>
-                   </div>
+                  <div className="flex items-center gap-1">
+                    <button disabled={index === 0} onClick={() => moveItem(index, 'up')} className="p-1 rounded bg-muted hover:bg-blue-400/20 hover:text-blue-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all">▲</button>
+                    <button disabled={index === categories.length - 1} onClick={() => moveItem(index, 'down')} className="p-1 rounded bg-muted hover:bg-blue-400/20 hover:text-blue-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all">▼</button>
+                  </div>
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2">
-                    <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg text-muted-foreground hover:text-blue-400 hover:bg-blue-400/10 transition-all">
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button onClick={() => setDeleteTarget(c)} className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg text-muted-foreground hover:text-blue-400 hover:bg-blue-400/10 transition-all"><Pencil className="h-4 w-4" /></button>
+                    <button onClick={() => setDeleteTarget(c)} className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </td>
               </tr>
@@ -244,88 +322,103 @@ export default function AdminCategoriesPage() {
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-card text-card-foreground shadow-sm rounded-2xl border border-border shadow-2xl">
-            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+          <div className="w-full max-w-lg bg-card text-card-foreground shadow-sm rounded-2xl border border-border shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
               <h2 className="text-foreground font-bold text-lg">{editing ? 'Sửa danh mục' : 'Thêm danh mục'}</h2>
               <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground text-2xl leading-none">×</button>
             </div>
             <div className="p-6 space-y-4">
+              {/* Name */}
               <div>
                 <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Tên danh mục *</label>
-                <input value={form.name} onChange={e => { 
-                  const val = e.target.value
-                  setFormError('')
-                  setSlugError('')
+                <input value={form.name} onChange={e => {
+                  const val = e.target.value; setFormError(''); setSlugError('')
                   if (!slugEdited) {
                     const newSlug = generateSlug(val)
-                    setForm(f => ({...f, name: val, slug: newSlug}))
-                    if (checkDuplicateSlug(newSlug, editing?.id)) {
-                      setSlugError('Slug tạo tự động bị trùng, vui lòng sửa lại thủ công!')
-                    }
-                  } else {
-                    setForm(f => ({...f, name: val}))
-                  }
+                    setForm(f => ({ ...f, name: val, slug: newSlug }))
+                    if (checkDuplicateSlug(newSlug, editing?.id)) setSlugError('Slug tạo tự động bị trùng!')
+                  } else setForm(f => ({ ...f, name: val }))
                 }}
-                  className={`w-full px-3 py-2.5 rounded-xl bg-muted border text-foreground focus:outline-none text-sm transition-all ${
-                    formError ? 'border-red-500 focus:border-red-500 ring-1 ring-red-500/20' : 'border-border focus:border-lime'
-                  }`} />
-                {formError && <p className="text-red-500 text-xs mt-1.5 animate-in slide-in-from-top-1 px-1">⚠️ {formError}</p>}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-muted border text-foreground focus:outline-none text-sm transition-all ${formError ? 'border-red-500' : 'border-border focus:border-lime'}`} />
+                {formError && <p className="text-red-500 text-xs mt-1">⚠️ {formError}</p>}
               </div>
+              {/* Slug */}
               <div>
-                <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Đường dẫn tĩnh (Slug) - Tự động nếu để trống</label>
+                <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Đường dẫn tĩnh (Slug)</label>
                 <input value={form.slug} onChange={e => {
-                  setSlugEdited(true)
-                  const val = generateSlug(e.target.value) // Cố tình force chuẩn format slug
-                  setForm(f => ({...f, slug: val}))
-                  if (checkDuplicateSlug(val, editing?.id)) {
-                    setSlugError('Đường dẫn tĩnh này đã tồn tại!')
-                  } else {
-                    setSlugError('')
-                  }
+                  setSlugEdited(true); const val = generateSlug(e.target.value)
+                  setForm(f => ({ ...f, slug: val }))
+                  setSlugError(checkDuplicateSlug(val, editing?.id) ? 'Slug đã tồn tại!' : '')
                 }}
-                  className={`w-full px-3 py-2.5 rounded-xl bg-muted border text-foreground focus:outline-none text-sm transition-all ${
-                    slugError ? 'border-red-500 focus:border-red-500 ring-1 ring-red-500/20' : 'border-border focus:border-lime'
-                  }`} />
-                {slugError && <p className="text-red-500 text-xs mt-1.5 animate-in slide-in-from-top-1 px-1">⚠️ {slugError}</p>}
+                  className={`w-full px-3 py-2.5 rounded-xl bg-muted border text-foreground focus:outline-none text-sm transition-all ${slugError ? 'border-red-500' : 'border-border focus:border-lime'}`} />
+                {slugError && <p className="text-red-500 text-xs mt-1">⚠️ {slugError}</p>}
               </div>
+              {/* Description */}
               <div>
                 <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Mô tả</label>
-                <input value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))}
+                <input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm" />
               </div>
-              {/* Image Upload */}
+              {/* Image */}
               <div>
                 <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Hình ảnh danh mục</label>
                 <div className="flex items-start gap-3">
                   <div className="w-20 h-20 rounded-xl bg-muted border border-border flex items-center justify-center overflow-hidden shrink-0">
-                    {form.image_url ? (
-                      <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                    )}
+                    {form.image_url ? <img src={form.image_url} alt="Preview" className="w-full h-full object-cover" /> : <ImageIcon className="h-6 w-6 text-muted-foreground" />}
                   </div>
                   <div className="flex-1 space-y-1.5">
-                    <label className={`flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-gray-600 text-secondary-foreground text-xs cursor-pointer transition-all ${
-                      uploading ? 'opacity-50' : 'hover:border-lime hover:text-lime'
-                    }`}>
-                      <Upload className="h-3.5 w-3.5" />
-                      {uploading ? 'Uploading...' : 'Chọn ảnh'}
+                    <label className={`flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-gray-600 text-secondary-foreground text-xs cursor-pointer transition-all ${uploading ? 'opacity-50' : 'hover:border-lime hover:text-lime'}`}>
+                      <Upload className="h-3.5 w-3.5" />{uploading ? 'Uploading...' : 'Chọn ảnh'}
                       <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={uploading} />
                     </label>
-                    {form.image_url && (
-                      <button type="button" onClick={() => setForm(f => ({...f, image_url: ''}))} className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300">
-                        <X className="h-3 w-3" /> Xóa ảnh
-                      </button>
-                    )}
+                    {form.image_url && <button type="button" onClick={() => setForm(f => ({ ...f, image_url: '' }))} className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300"><X className="h-3 w-3" />Xóa ảnh</button>}
                   </div>
                 </div>
               </div>
+
+              {/* Attributes Section */}
+              <div className="border-t border-border pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAttributes(!showAttributes)}
+                  className="w-full flex items-center justify-between text-sm font-semibold text-foreground hover:text-lime-dark transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-lime-dark" />
+                    Thuộc tính sản phẩm
+                    {form.attributes.length > 0 && (
+                      <span className="px-2 py-0.5 rounded-full bg-lime/20 text-lime-dark text-xs font-bold">{form.attributes.length}</span>
+                    )}
+                  </span>
+                  {showAttributes ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </button>
+                {!showAttributes && form.attributes.length === 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">Định nghĩa màu sắc, size, phiên bản... sẽ tự động áp dụng cho sản phẩm trong danh mục</p>
+                )}
+
+                {showAttributes && (
+                  <div className="mt-3 space-y-3">
+                    {/* Quick templates */}
+                    <div className="flex flex-wrap gap-2">
+                      <span className="text-xs text-muted-foreground self-center">Mẫu nhanh:</span>
+                      {Object.entries({ 'Vợt': 'vot', 'Quần áo': 'quan-ao', 'Giày': 'giay', 'Balo': 'balo' }).map(([label, key]) => (
+                        <button key={key} type="button"
+                          onClick={() => setForm(f => ({ ...f, attributes: ATTRIBUTE_TEMPLATES[key] }))}
+                          className="px-2.5 py-1 rounded-lg bg-lime/10 text-lime-dark text-xs font-medium hover:bg-lime/20 transition-all border border-lime/20"
+                        >{label}</button>
+                      ))}
+                      <button type="button" onClick={() => setForm(f => ({ ...f, attributes: [] }))}
+                        className="px-2.5 py-1 rounded-lg bg-muted text-muted-foreground text-xs hover:bg-red-400/10 hover:text-red-400 transition-all"
+                      >Xóa hết</button>
+                    </div>
+                    <AttributeEditor attributes={form.attributes} onChange={attrs => setForm(f => ({ ...f, attributes: attrs }))} />
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="px-6 py-4 border-t border-border flex gap-3 justify-end">
-              <button onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-sm">Hủy</button>
-              <button onClick={handleSave} disabled={saving || !form.name}
-                className="px-5 py-2 rounded-xl bg-lime text-lime-dark font-bold hover:bg-lime-dark hover:text-foreground transition-all text-sm disabled:opacity-50">
+            <div className="px-6 py-4 border-t border-border flex gap-3 justify-end sticky bottom-0 bg-card">
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-sm">Hủy</button>
+              <button onClick={handleSave} disabled={saving || !form.name} className="px-5 py-2 rounded-xl bg-lime text-lime-dark font-bold hover:bg-lime-dark hover:text-foreground transition-all text-sm disabled:opacity-50">
                 {saving ? 'Đang lưu...' : editing ? 'Cập nhật' : 'Thêm mới'}
               </button>
             </div>
@@ -338,27 +431,14 @@ export default function AdminCategoriesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className="w-full max-w-sm bg-card text-card-foreground shadow-sm rounded-2xl border border-red-500/30 p-6 shadow-2xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center">
-                <AlertTriangle className="h-6 w-6 text-red-400" />
-              </div>
-              <div>
-                <h3 className="text-foreground font-bold">Xác nhận xóa danh mục</h3>
-                <p className="text-muted-foreground text-xs mt-0.5">Thao tác này không thể hoàn tác</p>
-              </div>
+              <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center"><AlertTriangle className="h-6 w-6 text-red-400" /></div>
+              <div><h3 className="text-foreground font-bold">Xác nhận xóa danh mục</h3><p className="text-muted-foreground text-xs mt-0.5">Thao tác này không thể hoàn tác</p></div>
             </div>
-            
-            {deleteError && (
-              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm animate-in zoom-in-95">
-                ❌ {deleteError}
-              </div>
-            )}
-            
-            <p className="text-secondary-foreground text-sm mb-6">Xóa danh mục <strong className="text-foreground">"{deleteTarget.name}"</strong>? Nếu có sản phẩm trong danh mục này, thao tác sẽ thất bại.</p>
+            {deleteError && <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">❌ {deleteError}</div>}
+            <p className="text-secondary-foreground text-sm mb-6">Xóa danh mục <strong className="text-foreground">"{deleteTarget.name}"</strong>?</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteTarget(null)}
-                className="flex-1 px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-sm">Hủy</button>
-              <button onClick={handleDelete} disabled={deleting}
-                className="flex-1 px-4 py-2 rounded-xl bg-red-500 text-foreground font-bold hover:bg-red-600 transition-all text-sm disabled:opacity-50">
+              <button onClick={() => setDeleteTarget(null)} className="flex-1 px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-sm">Hủy</button>
+              <button onClick={handleDelete} disabled={deleting} className="flex-1 px-4 py-2 rounded-xl bg-red-500 text-foreground font-bold hover:bg-red-600 transition-all text-sm disabled:opacity-50">
                 {deleting ? 'Đang xóa...' : 'Xác nhận xóa'}
               </button>
             </div>

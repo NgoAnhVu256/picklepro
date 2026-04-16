@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { Plus, Pencil, Trash2, Search, Star, Package, ToggleLeft, ToggleRight, AlertTriangle, Upload, ImageIcon, X, FileSpreadsheet, Download, CheckCircle2, XCircle } from 'lucide-react'
+import { Plus, Pencil, Trash2, Search, Star, Package, ToggleLeft, ToggleRight, AlertTriangle, Upload, ImageIcon, X, FileSpreadsheet, Download, CheckCircle2, XCircle, Tag } from 'lucide-react'
 import { toast } from 'sonner'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 
 function formatVND(n: number) {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n)
@@ -12,7 +13,8 @@ const EMPTY_FORM = {
   name: '', brand: '', price: '', original_price: '', stock: '',
   description: '', category_id: '', is_featured: false, is_active: true,
   tags: '', specs: '', images: [] as any[],
-  color: '', size: '', version: ''
+  // Dynamic attribute values: key → string[] for multi-text, string for select/text
+  attrValues: {} as Record<string, string | string[]>,
 }
 
 export default function AdminProductsPage() {
@@ -31,6 +33,9 @@ export default function AdminProductsPage() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [formError, setFormError] = useState('')
+
+  // Category attributes loaded dynamically
+  const [categoryAttrs, setCategoryAttrs] = useState<any[]>([])
 
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<any>(null)
@@ -62,13 +67,19 @@ export default function AdminProductsPage() {
       .then(d => setCategories(Array.isArray(d) ? d : []))
   }, [])
 
-  const openAdd = () => { setEditing(null); setForm({ ...EMPTY_FORM }); setFormError(''); setShowModal(true) }
+  const openAdd = () => { setEditing(null); setForm({ ...EMPTY_FORM }); setFormError(''); setCategoryAttrs([]); setShowModal(true) }
   const openEdit = (p: any) => {
     setEditing(p)
     let initialImages = p.product_images || []
     if (initialImages.length === 0 && p.image_url) {
       initialImages = [{ url: p.image_url, is_primary: true, color_name: '', color_code: '' }]
     }
+    // Rebuild attrValues from specs
+    const specs = p.specs || {}
+    const attrValues: Record<string, any> = {}
+    ;['colors', 'sizes', 'version', 'color', 'size'].forEach(k => {
+      if (specs[k] !== undefined) attrValues[k] = specs[k]
+    })
     setForm({
       name: p.name, brand: p.brand, price: String(p.price),
       original_price: String(p.original_price ?? ''),
@@ -77,10 +88,12 @@ export default function AdminProductsPage() {
       is_active: p.is_active, tags: (p.tags ?? []).join(', '),
       specs: p.specs ? JSON.stringify(p.specs, null, 2) : '',
       images: initialImages,
-      color: p.specs?.color || '', size: p.specs?.size || ''
+      attrValues,
     })
     setFormError('')
     setShowModal(true)
+    // Load attributes for this category
+    if (p.category_id) loadCategoryAttrs(p.category_id)
   }
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,17 +133,41 @@ export default function AdminProductsPage() {
     })
   }
 
+  // Load attributes for a category
+  const loadCategoryAttrs = useCallback(async (catId: string) => {
+    try {
+      const cat = categories.find((c: any) => c.id === catId)
+      if (cat && Array.isArray(cat.attributes) && cat.attributes.length > 0) {
+        setCategoryAttrs(cat.attributes)
+        return
+      }
+      // Not cached yet: fetch from API
+      const res = await fetch('/api/admin/categories')
+      const data = await res.json()
+      const found = (Array.isArray(data) ? data : []).find((c: any) => c.id === catId)
+      setCategoryAttrs(Array.isArray(found?.attributes) ? found.attributes : [])
+    } catch { setCategoryAttrs([]) }
+  }, [categories])
+
+  const handleCategoryChange = (catId: string) => {
+    setForm(f => ({ ...f, category_id: catId, attrValues: {} }))
+    if (catId) loadCategoryAttrs(catId)
+    else setCategoryAttrs([])
+  }
+
   const handleSave = async () => {
-    if (!form.name.trim()) {
-      setFormError('Tên sản phẩm không được để trống')
-      return
-    }
-    if (!form.price || isNaN(Number(form.price))) {
-      setFormError('Giá sản phẩm không hợp lệ')
-      return
-    }
+    if (!form.name.trim()) { setFormError('Tên sản phẩm không được để trống'); return }
+    if (!form.price || isNaN(Number(form.price))) { setFormError('Giá sản phẩm không hợp lệ'); return }
     setFormError('')
     setSaving(true)
+
+    // Build specs from both free JSON + dynamic attribute values
+    let baseSpecs: any = form.specs ? (() => { try { return JSON.parse(form.specs) } catch { return {} } })() : {}
+    // Merge attrValues into specs
+    const av = (form as any).attrValues || {}
+    Object.keys(av).forEach(k => { if (av[k] !== '' && av[k] !== undefined) baseSpecs[k] = av[k] })
+
+    
     const payload: any = {
       name: form.name, brand: form.brand,
       price: Number(form.price), original_price: form.original_price ? Number(form.original_price) : null,
@@ -138,41 +175,18 @@ export default function AdminProductsPage() {
       category_id: form.category_id || null, is_featured: form.is_featured,
       is_active: form.is_active,
       tags: form.tags ? form.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
-      specs: (() => {
-        let baseSpecs = form.specs ? (() => { try { return JSON.parse(form.specs) } catch { return null } })() : null
-        // Merge specific attributes into specs base on category
-        const selectedCat = categories.find((c: any) => c.id === form.category_id)
-        const catSlug = selectedCat?.slug || ''
-        
-        if (['giay-the-thao', 'giay-pickleball', 'quan-ao', 'vot-pickleball', 'tui-balo'].includes(catSlug)) {
-          baseSpecs = baseSpecs || {}
-          if (form.color) baseSpecs.color = form.color
-          if (['giay-the-thao', 'giay-pickleball', 'quan-ao'].includes(catSlug) && form.size) {
-            baseSpecs.size = form.size
-          }
-          if (catSlug === 'vot-pickleball' && form.version) {
-            baseSpecs.version = form.version
-          }
-        }
-        return baseSpecs
-      })(),
+      specs: Object.keys(baseSpecs).length ? baseSpecs : null,
       images: form.images
     }
-    
     const url = editing ? `/api/admin/products/${editing.id}` : '/api/admin/products'
     const method = editing ? 'PUT' : 'POST'
     try {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Lỗi lưu sản phẩm')
-      }
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Lỗi lưu sản phẩm') }
       toast.success(editing ? 'Cập nhật sản phẩm thành công' : 'Thêm sản phẩm thành công')
       setShowModal(false)
       fetchProducts()
-    } catch(e: any) {
-      toast.error(e.message || 'Thao tác thất bại')
-    }
+    } catch(e: any) { toast.error(e.message || 'Thao tác thất bại') }
     setSaving(false)
   }
 
@@ -327,10 +341,15 @@ export default function AdminProductsPage() {
                 </div>
                 <div>
                   <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Danh mục</label>
-                  <select value={form.category_id} onChange={e => setForm(f => ({...f, category_id: e.target.value}))}
-                    className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm">
+                  <select
+                    value={form.category_id}
+                    onChange={e => handleCategoryChange(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm"
+                  >
                     <option value="">-- Chọn danh mục --</option>
-                    {categories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    {categories.map((c: any) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -357,75 +376,99 @@ export default function AdminProductsPage() {
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Mô tả sản phẩm</label>
-                  <textarea value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))}
-                    rows={3}
-                    className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm resize-none" />
+                  <RichTextEditor
+                    value={form.description}
+                    onChange={val => setForm(f => ({ ...f, description: val }))}
+                  />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Specs (JSON)</label>
+                  <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Specs nâng cao (JSON - tuỳ chọn)</label>
                   <textarea value={form.specs} onChange={e => setForm(f => ({...f, specs: e.target.value}))}
-                    rows={3} placeholder={'{"weight": "220g", "grip": "4.25"}'}
+                    rows={2} placeholder='{"weight": "220g", "grip": "4.25"}'
                     className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm font-mono resize-none" />
                 </div>
 
-                {/* Conditional: Category-Specific Attributes */}
-                {(() => {
-                  const selectedCat = categories.find((c: any) => c.id === form.category_id)
-                  const catSlug = selectedCat?.slug || ''
-                  
-                  const renderColorInput = () => (
-                    <div>
-                      <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Màu sắc</label>
-                      <input value={form.color || ''} onChange={e => setForm(f => ({...f, color: e.target.value}))}
-                        placeholder="VD: Đỏ, Xanh, Trắng..."
-                        className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm" />
+                {/* Dynamic Category Attributes */}
+                {categoryAttrs.length > 0 && (
+                  <div className="sm:col-span-2 border border-lime/20 rounded-xl p-4 bg-lime/5 space-y-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Tag className="h-4 w-4 text-lime-dark" />
+                      <span className="text-sm font-bold text-foreground">Thuộc tính sản phẩm</span>
                     </div>
-                  );
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {categoryAttrs.map((attr: any) => {
+                        const av = (form as any).attrValues || {}
+                        const val = av[attr.key]
+                        const setVal = (v: any) => setForm(f => ({ ...f, attrValues: { ...((f as any).attrValues || {}), [attr.key]: v } }))
 
-                  if (catSlug === 'giay-the-thao' || catSlug === 'giay-pickleball' || catSlug === 'quan-ao') {
-                    const shoesSizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44']
-                    const clothingSizes = ['S', 'M', 'L', 'XL', 'XXL']
-                    const sizes = (catSlug === 'giay-the-thao' || catSlug === 'giay-pickleball') ? shoesSizes : clothingSizes
-                    return (
-                      <>
-                        {renderColorInput()}
-                        <div>
-                          <label className="text-muted-foreground text-xs font-medium mb-1.5 block">
-                            {(catSlug === 'giay-the-thao' || catSlug === 'giay-pickleball') ? 'Size giày' : 'Size quần áo'}
-                          </label>
-                          <select value={form.size || ''} onChange={e => setForm(f => ({...f, size: e.target.value}))}
-                            className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm">
-                            <option value="">-- Chọn size --</option>
-                            {sizes.map(s => <option key={s} value={s}>{s}</option>)}
-                          </select>
-                        </div>
-                      </>
-                    )
-                  }
-                  
-                  if (catSlug === 'vot-pickleball') {
-                    return (
-                      <>
-                        {renderColorInput()}
-                        <div>
-                          <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Phiên bản (Độ dày)</label>
-                          <select value={form.version || ''} onChange={e => setForm(f => ({...f, version: e.target.value}))}
-                            className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm">
-                            <option value="">-- Chọn phiên bản --</option>
-                            <option value="14mm">14mm</option>
-                            <option value="16mm">16mm</option>
-                          </select>
-                        </div>
-                      </>
-                    )
-                  }
+                        if (attr.type === 'select') {
+                          return (
+                            <div key={attr.key}>
+                              <label className="text-xs text-muted-foreground mb-1 block">{attr.label}</label>
+                              <select value={val || ''} onChange={e => setVal(e.target.value)}
+                                className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm">
+                                <option value="">-- Chọn --</option>
+                                {(attr.options || []).map((o: string) => <option key={o} value={o}>{o}</option>)}
+                              </select>
+                            </div>
+                          )
+                        }
 
-                  if (catSlug === 'tui-balo') {
-                    return renderColorInput();
-                  }
-                  
-                  return null
-                })()}
+                        if (attr.type === 'multi-text') {
+                          // Multi-value: stored as array in specs[key]
+                          const arr: string[] = Array.isArray(val) ? val : (val ? String(val).split(',').map((s: string) => s.trim()).filter(Boolean) : [])
+                          return (
+                            <div key={attr.key} className="sm:col-span-2">
+                              <label className="text-xs text-muted-foreground mb-1 block">{attr.label}</label>
+                              <div className="flex flex-wrap gap-2 mb-2">
+                                {arr.map((item, idx) => (
+                                  <span key={idx} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-lime/20 text-lime-dark text-xs font-medium border border-lime/30">
+                                    {item}
+                                    <button type="button" onClick={() => setVal(arr.filter((_, i) => i !== idx))}
+                                      className="hover:text-red-500 transition-colors">×</button>
+                                  </span>
+                                ))}
+                              </div>
+                              <div className="flex gap-2">
+                                <input
+                                  placeholder={attr.placeholder || `Nhập ${attr.label}...`}
+                                  className="flex-1 px-3 py-2 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm"
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter' || e.key === ',') {
+                                      e.preventDefault()
+                                      const v = (e.target as HTMLInputElement).value.trim()
+                                      if (v && !arr.includes(v)) { setVal([...arr, v]); (e.target as HTMLInputElement).value = '' }
+                                    }
+                                  }}
+                                />
+                                <button type="button"
+                                  onClick={e => {
+                                    const input = (e.currentTarget.previousSibling as HTMLInputElement)
+                                    const v = input.value.trim()
+                                    if (v && !arr.includes(v)) { setVal([...arr, v]); input.value = '' }
+                                  }}
+                                  className="px-3 py-2 rounded-xl bg-lime text-lime-dark text-xs font-bold hover:bg-lime-dark hover:text-foreground transition-all"
+                                >+ Thêm</button>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">Nhấn Enter hoặc dấu phẩy để thêm nhiều giá trị</p>
+                            </div>
+                          )
+                        }
+
+                        // text (single)
+                        return (
+                          <div key={attr.key}>
+                            <label className="text-xs text-muted-foreground mb-1 block">{attr.label}</label>
+                            <input value={val || ''} onChange={e => setVal(e.target.value)}
+                              placeholder={attr.placeholder}
+                              className="w-full px-3 py-2 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm"
+                            />
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {/* Image Upload with Colors */}
                 <div className="sm:col-span-2 border-t border-border/50 pt-4 mt-2">

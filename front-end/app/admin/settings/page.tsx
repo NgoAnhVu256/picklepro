@@ -31,7 +31,10 @@ interface SiteSettings {
   instagram_url: string
   youtube_url: string
   zalo_link: string
+  zalo_url: string
   tiktok_url: string
+  // Thương hiệu
+  copyright_text: string
   // SEO
   seo_title: string
   seo_description: string
@@ -59,7 +62,9 @@ const DEFAULT: SiteSettings = {
   instagram_url: 'https://instagram.com/picklepro',
   youtube_url: 'https://youtube.com/picklepro',
   zalo_link: 'https://zalo.me/0373164472',
+  zalo_url: 'https://zalo.me/0373164472',
   tiktok_url: '',
+  copyright_text: '',
   seo_title: 'PicklePro - Cửa hàng Vợt Pickleball cao cấp số 1 Việt Nam',
   seo_description: 'Cửa hàng vợt Pickleball cao cấp số 1 Việt Nam. Đa dạng thương hiệu JOOLA, Selkirk, Paddletek, HEAD. Bảo hành chính hãng, giao hàng toàn quốc.',
   seo_keywords: 'pickleball, vợt pickleball, picklepro, JOOLA, Selkirk, HEAD',
