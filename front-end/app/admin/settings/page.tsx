@@ -220,16 +220,74 @@ export default function AdminSettingsPage() {
               <h2 className="text-sm font-semibold text-gray-800">Thông tin chung</h2>
               <p className="text-xs text-gray-400 mt-0.5">Các thiết lập cơ bản cho hệ thống quản lý.</p>
             </div>
-            <div className="px-6 py-2">
-              <Row label="Đơn vị tiền tệ" value={settings.currency} />
-              <Row label="Múi giờ" value={settings.timezone} />
-              <Row label="Ngôn ngữ" value={settings.language} />
-              <Row label="Định dạng ngày" value={`${settings.date_format} (${new Date().toLocaleDateString('vi-VN')})`} />
-              <Row label="Thuế VAT mặc định (%)" value={settings.vat_rate} />
-              <Row label="Thuế nhập khẩu (%)" value={settings.import_tax_rate} />
-            </div>
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
-              <p className="text-xs text-gray-400">💡 Các thiết lập hệ thống được cấu hình cố định. Liên hệ kỹ thuật nếu cần thay đổi.</p>
+            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Đơn vị tiền tệ */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">Đơn vị tiền tệ</label>
+                <select value={settings.currency} onChange={e => update('currency', e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:border-lime-500 text-sm">
+                  <option value="VND - Việt Nam Đồng">VND - Việt Nam Đồng</option>
+                  <option value="USD - US Dollar">USD - US Dollar</option>
+                  <option value="EUR - Euro">EUR - Euro</option>
+                </select>
+              </div>
+
+              {/* Múi giờ */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">Múi giờ</label>
+                <select value={settings.timezone} onChange={e => update('timezone', e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:border-lime-500 text-sm">
+                  <option value="Asia/Ho_Chi_Minh (UTC+7)">Asia/Ho_Chi_Minh (UTC+7)</option>
+                  <option value="Asia/Bangkok (UTC+7)">Asia/Bangkok (UTC+7)</option>
+                  <option value="Asia/Singapore (UTC+8)">Asia/Singapore (UTC+8)</option>
+                  <option value="UTC (UTC+0)">UTC (UTC+0)</option>
+                </select>
+              </div>
+
+              {/* Ngôn ngữ */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">Ngôn ngữ</label>
+                <select value={settings.language} onChange={e => update('language', e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:border-lime-500 text-sm">
+                  <option value="Tiếng Việt">Tiếng Việt</option>
+                  <option value="English">English</option>
+                </select>
+              </div>
+
+              {/* Định dạng ngày */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">
+                  Định dạng ngày <span className="text-gray-400 font-normal">({new Date().toLocaleDateString('vi-VN')})</span>
+                </label>
+                <select value={settings.date_format} onChange={e => update('date_format', e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:border-lime-500 text-sm">
+                  <option value="dd/mm/yyyy">dd/mm/yyyy</option>
+                  <option value="mm/dd/yyyy">mm/dd/yyyy</option>
+                  <option value="yyyy-mm-dd">yyyy-mm-dd</option>
+                </select>
+              </div>
+
+              {/* Thuế VAT */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">Thuế VAT mặc định (%)</label>
+                <input
+                  type="number" min={0} max={100} step={0.5}
+                  value={settings.vat_rate}
+                  onChange={e => update('vat_rate', Number(e.target.value))}
+                  className="w-full px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:border-lime-500 text-sm"
+                />
+              </div>
+
+              {/* Thuế nhập khẩu */}
+              <div>
+                <label className="text-xs font-medium text-gray-500 mb-1.5 block">Thuế nhập khẩu (%)</label>
+                <input
+                  type="number" min={0} max={100} step={0.5}
+                  value={settings.import_tax_rate}
+                  onChange={e => update('import_tax_rate', Number(e.target.value))}
+                  className="w-full px-3 py-2.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:border-lime-500 text-sm"
+                />
+              </div>
             </div>
           </div>
         )}
