@@ -98,7 +98,8 @@ export function AnnouncementBar() {
         {slides.map((slide, index) => {
            const content = slide.bg_gradient ? (
              <div className="w-[92%] sm:w-full mx-auto">
-               <img src={slide.bg_gradient} alt={slide.title || "Announcement Banner"} className="w-full object-contain sm:object-cover min-h-[56px] sm:min-h-0 sm:max-h-[100px]" draggable={false} />
+               <div style={{ backgroundImage: `url('${slide.bg_gradient}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} 
+                    className="w-full min-h-[56px] sm:min-h-0 sm:h-[100px]" title={slide.title || "Announcement Banner"} />
              </div>
            ) : (
              <div className="py-4 sm:py-3 px-6 sm:px-4 w-[92%] sm:w-full mx-auto flex justify-center items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-sm rounded-b-xl sm:rounded-none">

@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/'
 
-  // Dùng NEXT_PUBLIC_APP_URL (domain thật) thay vì origin (có thể là Vercel URL)
+  // Dùng NEXT_PUBLIC_APP_URL (domain thật) thay vì origin
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin
 
   if (code) {

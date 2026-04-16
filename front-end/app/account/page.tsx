@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { validatePhone, formatPhoneInput, isPhoneValid } from '@/lib/validate-phone'
+import { AddressPicker } from '@/components/pickleball/address-picker'
 
 interface UserProfile {
   id: string
@@ -234,11 +235,10 @@ export default function AccountPage() {
                   )}
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label className="text-sm font-medium">Địa chỉ</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input value={form.address} onChange={e => update('address', e.target.value)} className="pl-10 rounded-xl border-lime/30 h-12" />
-                  </div>
+                  <AddressPicker 
+                     initialAddress={form.address} 
+                     onChange={(full) => update('address', full)} 
+                  />
                 </div>
               </div>
 

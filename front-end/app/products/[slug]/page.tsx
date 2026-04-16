@@ -11,6 +11,7 @@ import { ShoppingCart, Heart, Star, Minus, Plus, Truck, Shield, RotateCcw, Chevr
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { useCart } from '@/hooks/use-cart'
+import { useWishlist } from '@/hooks/use-wishlist'
 
 interface ProductFull {
   id: string; name: string; slug: string; brand: string; price: number
@@ -47,6 +48,9 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
 
   const { addItem } = useCart()
+  const { hasItem: isWishlisted, addItem: addToWishlist, removeItem: removeFromWishlist } = useWishlist()
+  
+  const isLiked = isWishlisted(product?.id || '')
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -519,12 +523,29 @@ export default function ProductDetailPage() {
                 </button>
 
                 <button 
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all border-2 active:scale-95 shadow-sm bg-white ${liked ? 'border-red-500 text-red-500 bg-red-50/50' : 'border-border hover:border-red-400 text-foreground'}`}
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all border-2 active:scale-95 shadow-sm bg-white ${isLiked ? 'border-red-500 text-red-500 bg-red-50/50' : 'border-border hover:border-red-400 text-foreground'}`}
                   disabled={!inStock} 
-                  onClick={() => setLiked(!liked)}
+                  onClick={() => {
+                    if (isLiked) {
+                      removeFromWishlist(product.id)
+                      toast("Đã bỏ khỏi danh sách yêu thích")
+                    } else {
+                      const primaryImg = product.product_images?.find(i => i.is_primary) || product.product_images?.[0]
+                      addToWishlist({
+                        productId: product.id,
+                        name: product.name,
+                        price: product.price,
+                        image: primaryImg?.url || '',
+                        slug: product.slug
+                      })
+                      toast.success("Đã thêm vào danh sách yêu thích", {
+                        action: { label: "Xem", onClick: () => router.push('/account/wishlist') }
+                      })
+                    }
+                  }}
                   title="Yêu thích"
                 >
-                  <Heart className={`h-5 w-5 ${liked ? 'fill-current' : ''}`} />
+                  <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
                 </button>
               </div>
               
@@ -548,9 +569,15 @@ export default function ProductDetailPage() {
                   {product.specs ? (
                     <div className="rounded-xl border border-border overflow-hidden bg-white">
                       {Object.entries(product.specs).map(([key, value], i) => {
-                        let renderValue: React.ReactNode = value
-                        if (key.toLowerCase() === 'colors' || key.toLowerCase() === 'màu sắc') {
-                           const colors = value.split(/(?=[A-ZĐ])/).map(c => c.trim()).filter(Boolean)
+                        // Safely convert any non-string value (array, object, number) to string
+                        const safeValue: string = typeof value === 'string'
+                          ? value
+                          : Array.isArray(value)
+                            ? (value as any[]).join(', ')
+                            : value != null ? String(value) : ''
+                        let renderValue: React.ReactNode = safeValue
+                        if (typeof safeValue === 'string' && safeValue && (key.toLowerCase() === 'colors' || key.toLowerCase() === 'màu sắc')) {
+                           const colors = safeValue.split(/(?=[A-ZĐ])/).map(c => c.trim()).filter(Boolean)
                            const colorMap: Record<string, string> = {
                              'Đen': '#000000', 'Vàng': '#FBBF24', 'Đỏ': '#EF4444', 'Xanh': '#3B82F6', 
                              'Trắng': '#FFFFFF', 'Xám': '#9CA3AF', 'Cam': '#F97316', 'Tím': '#A855F7',

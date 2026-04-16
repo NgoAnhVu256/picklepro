@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { useCart } from '@/hooks/use-cart'
+import { useWishlist } from '@/hooks/use-wishlist'
 
 interface Product {
   id: string
@@ -83,7 +84,15 @@ function ProductsContent() {
   const [sortOrder, setSortOrder] = useState('desc')
   const [priceRange, setPriceRange] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [dbBrands, setDbBrands] = useState<string[]>([])
   const { addItem } = useCart()
+  const { items: wishlistItems, addItem: addToWishlist, removeItem: removeFromWishlist, hasItem: isWishlisted } = useWishlist()
+
+  useEffect(() => {
+    fetch('/api/brands').then(r => r.json()).then(d => {
+      if (d.brands) setDbBrands(d.brands)
+    }).catch(console.error)
+  }, [])
 
   const fetchProducts = async (page: number) => {
     if (page === 1) setLoading(true)
@@ -248,13 +257,9 @@ function ProductsContent() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tất cả thương hiệu</SelectItem>
-                <SelectItem value="JOOLA">JOOLA</SelectItem>
-                <SelectItem value="Selkirk">Selkirk</SelectItem>
-                <SelectItem value="HEAD">HEAD</SelectItem>
-                <SelectItem value="Franklin">Franklin</SelectItem>
-                <SelectItem value="Paddletek">Paddletek</SelectItem>
-                <SelectItem value="Engage">Engage</SelectItem>
-                <SelectItem value="CRBN">CRBN</SelectItem>
+                {dbBrands.map(b => (
+                   <SelectItem key={b} value={b}>{b}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -301,11 +306,36 @@ function ProductsContent() {
                         <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-lime text-lime-dark shadow-sm">⭐ Nổi bật</span>
                       )}
                     </div>
-
-                    <button className="absolute top-2 right-2 sm:top-4 sm:right-4 w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-white hover:bg-lime-dark transition-all shadow-sm z-10"
-                      onClick={(e) => handleAddToCart(e, product)}>
-                      <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
-                    </button>
+                    <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-1.5 sm:gap-2 z-10">
+                      <button className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-white hover:bg-lime-dark transition-all shadow-sm"
+                        onClick={(e) => handleAddToCart(e, product)}>
+                        <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault()
+                          if (isWishlisted(product.id)) {
+                            removeFromWishlist(product.id)
+                            toast("Đã bỏ khỏi danh sách yêu thích")
+                          } else {
+                            const primaryImg = product.product_images?.find((i: any) => i.is_primary) || product.product_images?.[0]
+                            addToWishlist({
+                              productId: product.id,
+                              name: product.name,
+                              price: product.price,
+                              image: primaryImg?.url || '',
+                              slug: product.slug
+                            })
+                            toast.success("Đã thêm vào danh sách yêu thích", {
+                               action: { label: "Xem danh sách", onClick: () => window.location.href = '/account/wishlist' }
+                            })
+                          }
+                        }}
+                        className={`w-7 h-7 sm:w-9 sm:h-9 rounded-full backdrop-blur-sm flex items-center justify-center transition-all shadow-sm ${isWishlisted(product.id) ? 'bg-red-50 text-red-500 hover:bg-white' : 'bg-white/80 text-muted-foreground hover:text-red-500 hover:bg-white'}`}
+                      >
+                        <Heart className={`h-3 w-3 sm:h-4 sm:w-4 ${isWishlisted(product.id) ? 'fill-red-500' : ''}`} />
+                      </button>
+                    </div>
 
                     {/* Image */}
                     <div className="aspect-square rounded-xl sm:rounded-2xl bg-white/50 flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-105 transition-transform duration-300 overflow-hidden">

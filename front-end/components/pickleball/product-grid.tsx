@@ -7,6 +7,7 @@ import { useCart } from "@/hooks/use-cart"
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import { useAdminRealtime } from "@/hooks/use-admin-realtime"
+import { useWishlist } from "@/hooks/use-wishlist"
 
 interface Product {
   id: string; name: string; slug: string; brand: string
@@ -36,6 +37,7 @@ function formatPrice(price: number) {
 
 export function ProductGrid() {
   const { addItem } = useCart()
+  const { items: wishlistItems, addItem: addToWishlist, removeItem: removeFromWishlist, hasItem: isWishlisted } = useWishlist()
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set())
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -146,6 +148,31 @@ export function ProductGrid() {
                       <span className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform duration-500">{emoji}</span>
                     </div>
                   </Link>
+
+                  {/* Wishlist Button */}
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (isWishlisted(product.id)) {
+                        removeFromWishlist(product.id)
+                        toast("Đã bỏ khỏi danh sách yêu thích")
+                      } else {
+                        addToWishlist({
+                          productId: product.id,
+                          name: product.name,
+                          price: product.price,
+                          image: bg,
+                          slug: product.slug
+                        })
+                        toast.success("Đã thêm vào danh sách yêu thích", {
+                           action: { label: "Xem danh sách", onClick: () => window.location.href = '/account/wishlist' }
+                        })
+                      }
+                    }}
+                    className={`absolute top-2 right-2 sm:top-4 sm:right-4 z-10 p-1.5 sm:p-2 rounded-full backdrop-blur-sm transition-all shadow-sm ${isWishlisted(product.id) ? 'bg-red-50 text-red-500 hover:bg-white' : 'bg-white/80 text-gray-400 hover:text-red-500 hover:bg-white'}`}
+                  >
+                    <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isWishlisted(product.id) ? 'fill-red-500' : ''}`} />
+                  </button>
 
                   {/* Info */}
                   <div className="p-3 sm:p-5">

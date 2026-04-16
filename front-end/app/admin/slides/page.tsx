@@ -150,68 +150,85 @@ export default function AdminSlidesPage() {
         </button>
       </div>
 
-      <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-        {POSITIONS.map(p => (
-          <button key={p.value} onClick={() => setFilterPos(p.value)} className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${filterPos === p.value ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{p.label}</button>
-        ))}
-      </div>
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* Vùng chọn Tabs - Sidebar */}
+        <div className="w-full lg:w-64 shrink-0 bg-white border border-gray-100 rounded-[20px] shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] p-4 sticky top-6">
+           <h2 className="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider px-2">KHU VỰC HIỂN THỊ</h2>
+           <div className="flex flex-row lg:flex-col gap-1 overflow-x-auto pb-2 lg:pb-0">
+             {POSITIONS.map(p => (
+               <button key={p.value} onClick={() => setFilterPos(p.value)} 
+                       className={`flex-shrink-0 lg:w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all ${filterPos === p.value ? 'bg-[#d4f962] text-black shadow-sm' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 border border-transparent'}`}>
+                 {p.label}
+               </button>
+             ))}
+           </div>
+        </div>
 
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => (
-             <div key={i} className="h-48 bg-muted/40 rounded-2xl animate-pulse" />
-          ))}
-        </div>
-      ) : filteredSlides.length === 0 ? (
-        <div className="p-16 text-center bg-card rounded-2xl border border-border">
-          <ImageIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <p className="text-muted-foreground">Chưa có banner nào ở khu vực này</p>
-          <p className="text-xs text-muted-foreground mt-1">Nhấn "Thêm Banner" để tải lên</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSlides.map((slide) => (
-            <div key={slide.id} className={`relative rounded-2xl overflow-hidden border transition-all bg-card shadow-sm ${slide.is_active ? 'border-border' : 'border-border opacity-60'}`}>
-              <div className="aspect-[16/9] relative bg-gray-100 flex items-center justify-center overflow-hidden">
-                {slide.bg_gradient && (slide.bg_gradient.startsWith('http') || slide.bg_gradient.startsWith('/')) ? (
-                  <img src={slide.bg_gradient} alt={slide.title || 'Banner'} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                ) : (
-                   <span className="text-xs text-gray-400">Không có ảnh</span>
-                )}
-                <div className="absolute top-2 left-2 px-2 py-1 bg-black/70 text-white rounded text-[10px] font-bold">
-                  {POSITIONS.find(p => p.value === slide.badge)?.label || slide.badge || 'Hero'}
-                </div>
-              </div>
-              
-              <div className="p-4">
-                <h3 className="font-semibold text-sm line-clamp-1">{slide.title || '(Không tiêu đề)'}</h3>
-                <p className="text-xs text-muted-foreground line-clamp-1 mt-1 truncate">Link: {slide.href || 'Không có'}</p>
-                
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-xs font-medium px-2 py-1 bg-gray-100 rounded">Thứ tự: {slide.sort_order}</span>
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => toggleActive(slide)} className={`p-1.5 rounded-lg bg-gray-100 transition-all ${slide.is_active ? 'text-emerald-500 hover:bg-emerald-50' : 'text-gray-400 hover:bg-gray-200'}`}>
-                      {slide.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                    </button>
-                    <button onClick={() => openEdit(slide)} className="p-1.5 rounded-lg bg-blue-50 text-blue-500 transition-all hover:bg-blue-100">
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button onClick={() => setDeleteTarget(slide)} className="p-1.5 rounded-lg bg-red-50 text-red-500 transition-all hover:bg-red-100">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              {!slide.is_active && (
-                <div className="absolute inset-0 bg-white/40 flex items-center justify-center pointer-events-none">
-                  <span className="px-3 py-1 bg-white border border-gray-200 text-gray-500 text-xs font-bold rounded-full shadow-sm shadow-black/5">Đã Ẩn</span>
-                </div>
-              )}
+        {/* Khung hiển thị Banner */}
+        <div className="flex-1 min-w-0">
+          {loading ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {[...Array(2)].map((_, i) => (
+                 <div key={i} className="h-56 bg-white/50 rounded-[20px] border border-gray-100 animate-pulse shadow-sm" />
+              ))}
             </div>
-          ))}
+          ) : filteredSlides.length === 0 ? (
+            <div className="p-16 text-center bg-white rounded-[20px] border border-gray-100 shadow-sm flex flex-col items-center">
+              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                <ImageIcon className="h-8 w-8 text-gray-300" />
+              </div>
+              <h3 className="font-bold text-gray-900 mb-1">Chưa có banner nào</h3>
+              <p className="text-sm text-gray-500 mb-4 max-w-[200px]">Hãy thêm banner mới để trang trí cho khu vực này trên hệ thống của bạn.</p>
+              <button onClick={openAdd} className="px-5 py-2 rounded-lg bg-black text-white text-sm font-bold transition-transform active:scale-95">+ Upload Banner</button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredSlides.map((slide) => (
+                <div key={slide.id} className={`group relative rounded-[20px] overflow-hidden border transition-all bg-white shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg ${slide.is_active ? 'border-gray-100' : 'border-gray-100 opacity-60'}`}>
+                  <div className="aspect-[16/9] relative bg-gray-50 flex items-center justify-center overflow-hidden border-b border-gray-50">
+                    {slide.bg_gradient && (slide.bg_gradient.startsWith('http') || slide.bg_gradient.startsWith('/')) ? (
+                      <img src={slide.bg_gradient} alt={slide.title || 'Banner'} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                    ) : (
+                       <span className="text-xs text-gray-400 font-medium">Không có ảnh</span>
+                    )}
+                    <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/80 backdrop-blur-sm text-white rounded-md text-[10px] font-bold shadow-sm">
+                      {POSITIONS.find(p => p.value === slide.badge)?.label || slide.badge || 'Hero'}
+                    </div>
+                  </div>
+                  
+                  <div className="p-5">
+                    <h3 className="font-bold text-[15px] text-gray-900 line-clamp-1">{slide.title || '(Không tiêu đề)'}</h3>
+                    <p className="text-[13px] text-gray-500 line-clamp-1 mt-1 truncate">Link: {slide.href || 'Không điều hướng'}</p>
+                    
+                    <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-50">
+                      <div className="flex items-center gap-2">
+                         <span className="text-[11px] font-bold px-2 py-1 bg-gray-100 text-gray-600 rounded">Vị trí: #{slide.sort_order}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button onClick={() => toggleActive(slide)} title={slide.is_active ? 'Đang hiện' : 'Đang ẩn'} className={`p-2 rounded-xl border transition-all ${slide.is_active ? 'border-emerald-200 text-emerald-600 bg-emerald-50 hover:bg-emerald-100' : 'border-gray-200 text-gray-400 bg-gray-50 hover:bg-gray-100'}`}>
+                          {slide.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                        </button>
+                        <button onClick={() => openEdit(slide)} title="Sửa banner" className="p-2 rounded-xl border border-blue-200 text-blue-600 bg-blue-50 transition-all hover:bg-blue-100">
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => setDeleteTarget(slide)} title="Xóa banner" className="p-2 rounded-xl border border-red-200 text-red-600 bg-red-50 transition-all hover:bg-red-100">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {!slide.is_active && (
+                    <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
+                      <span className="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 text-[11px] font-bold rounded-lg shadow-sm">Đã Tạm Ẩn</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Modal */}
       {showModal && (

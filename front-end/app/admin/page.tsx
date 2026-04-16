@@ -45,8 +45,20 @@ export default function AdminDashboard() {
   }
 
   const stats = data?.stats ?? {}
+  const trends = stats.trends ?? { revenue: 0, orders: 0, products: 0, customers: 0 }
   const statusCounts = data?.statusCounts ?? { pending: 0, paid: 0, shipping: 0, completed: 0, cancelled: 0 }
   const recentOrders = data?.recentOrders ?? []
+
+  const formatTrend = (num: number) => {
+    if (num > 0) return { text: `+${num}%`, color: 'text-emerald-500', isUp: true }
+    if (num < 0) return { text: `${num}%`, color: 'text-red-500', isUp: false }
+    return { text: '0%', color: 'text-gray-400', isUp: null }
+  }
+
+  const TREND_REV = formatTrend(trends.revenue)
+  const TREND_ORD = formatTrend(trends.orders)
+  const TREND_PROD = formatTrend(trends.products)
+  const TREND_CUST = formatTrend(trends.customers)
 
   const statCards = [
     { 
@@ -56,8 +68,9 @@ export default function AdminDashboard() {
       icon: DollarSign, 
       iconBg: 'bg-[#4ade80]', 
       iconColor: 'text-white',
-      trend: '+12%',
-      trendColor: 'text-emerald-500'
+      trend: TREND_REV.text,
+      trendColor: TREND_REV.color,
+      isUp: TREND_REV.isUp
     },
     { 
       title: 'Tổng đơn hàng', 
@@ -66,8 +79,9 @@ export default function AdminDashboard() {
       icon: ShoppingCart, 
       iconBg: 'bg-[#3b82f6]', 
       iconColor: 'text-white',
-      trend: '+8%',
-      trendColor: 'text-emerald-500'
+      trend: TREND_ORD.text,
+      trendColor: TREND_ORD.color,
+      isUp: TREND_ORD.isUp
     },
     { 
       title: 'Sản phẩm', 
@@ -76,8 +90,9 @@ export default function AdminDashboard() {
       icon: Package, 
       iconBg: 'bg-[#f97316]', 
       iconColor: 'text-white',
-      trend: '+5%',
-      trendColor: 'text-emerald-500'
+      trend: TREND_PROD.text,
+      trendColor: TREND_PROD.color,
+      isUp: TREND_PROD.isUp
     },
     { 
       title: 'Khách hàng', 
@@ -86,8 +101,9 @@ export default function AdminDashboard() {
       icon: Users, 
       iconBg: 'bg-[#a855f7]', 
       iconColor: 'text-white',
-      trend: '+16%',
-      trendColor: 'text-emerald-500'
+      trend: TREND_CUST.text,
+      trendColor: TREND_CUST.color,
+      isUp: TREND_CUST.isUp
     },
   ]
 
@@ -104,7 +120,15 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center gap-1 text-[13px] font-bold">
                 <span className={card.trendColor}>
-                  <svg className="w-3.5 h-3.5 inline mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+                  {card.isUp === true && (
+                    <svg className="w-3.5 h-3.5 inline mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+                  )}
+                  {card.isUp === false && (
+                    <svg className="w-3.5 h-3.5 inline mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline><polyline points="16 17 22 17 22 11"></polyline></svg>
+                  )}
+                  {card.isUp === null && (
+                    <svg className="w-3.5 h-3.5 inline mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  )}
                   {card.trend}
                 </span>
               </div>

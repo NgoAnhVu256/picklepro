@@ -1,284 +1,149 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { ChevronDown, MapPin, Loader2, Navigation } from 'lucide-react'
-import dynamic from 'next/dynamic'
+import { useState, useEffect } from 'react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { MapPin, Search } from 'lucide-react'
 
-const API_BASE = 'https://provinces.open-api.vn/api'
-
-interface AddressData {
-  province: string
-  district: string
-  ward: string
-  detail: string
-  fullAddress: string
-  lat?: number
-  lng?: number
-}
-
-interface Props {
-  onChange: (address: AddressData) => void
+interface AddressPickerProps {
   initialAddress?: string
+  onChange: (fullAddress: string) => void
 }
 
-// Dynamic import MapPicker (no SSR)
-const MapPicker = dynamic(() => import('./map-picker'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-[250px] rounded-xl bg-lime-dark/5 border border-lime-dark/10 flex items-center justify-center">
-      <Loader2 className="h-6 w-6 text-lime-dark animate-spin" />
-    </div>
-  ),
-})
-
-export function AddressPicker({ onChange, initialAddress }: Props) {
+export function AddressPicker({ initialAddress = '', onChange }: AddressPickerProps) {
   const [provinces, setProvinces] = useState<any[]>([])
   const [districts, setDistricts] = useState<any[]>([])
   const [wards, setWards] = useState<any[]>([])
 
-  const [selectedProvince, setSelectedProvince] = useState('')
-  const [selectedDistrict, setSelectedDistrict] = useState('')
-  const [selectedWard, setSelectedWard] = useState('')
-  const [detail, setDetail] = useState(initialAddress || '')
+  const [selectedProvince, setSelectedProvince] = useState<string>('')
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('')
+  const [selectedWard, setSelectedWard] = useState<string>('')
+  const [streetInfo, setStreetInfo] = useState<string>('')
 
-  const [provinceName, setProvinceName] = useState('')
-  const [districtName, setDistrictName] = useState('')
-  const [wardName, setWardName] = useState('')
-
-  const [loadingP, setLoadingP] = useState(true)
-  const [loadingD, setLoadingD] = useState(false)
-  const [loadingW, setLoadingW] = useState(false)
-
-  const [showMap, setShowMap] = useState(false)
-  const [mapPosition, setMapPosition] = useState<[number, number]>([10.7769, 106.7009]) // HCM default
-  const [mapAddress, setMapAddress] = useState('')
-
-  // Load provinces
+  // Khởi tạo data
   useEffect(() => {
-    setLoadingP(true)
-    fetch(`${API_BASE}/p/`)
+    fetch('https://provinces.open-api.vn/api/?depth=3')
       .then(r => r.json())
-      .then(data => { setProvinces(data); setLoadingP(false) })
-      .catch(() => setLoadingP(false))
+      .then(data => {
+        setProvinces(data)
+        
+        // Cố gắng phân tách initialAddress (rất thủ công)
+        if (initialAddress) {
+           const parts = initialAddress.split(',').map(s => s.trim())
+           if (parts.length >= 4) {
+             setStreetInfo(parts[0])
+             // Tìm khớp tương đối tỉnh/huyện/xã sẽ khó nên để simple: chỉ gán chuỗi
+           } else {
+             setStreetInfo(initialAddress)
+           }
+        }
+      })
+      .catch(console.error)
   }, [])
 
-  // Load districts when province changes
+  // Auto ghép chuỗi khi các trường thay đổi
   useEffect(() => {
-    if (!selectedProvince) { setDistricts([]); return }
-    setLoadingD(true)
+    const provName = provinces.find(p => p.code == selectedProvince)?.name || ''
+    const distName = districts.find(d => d.code == selectedDistrict)?.name || ''
+    const wardName = wards.find(w => w.code == selectedWard)?.name || ''
+    
+    // Gửi lại full string lên cha
+    const arr = [streetInfo, wardName, distName, provName].filter(Boolean)
+    const full = arr.join(', ')
+    if (full) {
+      onChange(full)
+    }
+  }, [streetInfo, selectedProvince, selectedDistrict, selectedWard])
+
+  const handleProvinceChange = (val: string) => {
+    setSelectedProvince(val)
     setSelectedDistrict('')
     setSelectedWard('')
-    setDistricts([])
+    const p = provinces.find(x => x.code == val)
+    setDistricts(p?.districts || [])
     setWards([])
-    fetch(`${API_BASE}/p/${selectedProvince}?depth=2`)
-      .then(r => r.json())
-      .then(data => {
-        setDistricts(data.districts || [])
-        setProvinceName(data.name || '')
-        setLoadingD(false)
-      })
-      .catch(() => setLoadingD(false))
-  }, [selectedProvince])
+  }
 
-  // Load wards when district changes
-  useEffect(() => {
-    if (!selectedDistrict) { setWards([]); return }
-    setLoadingW(true)
+  const handleDistrictChange = (val: string) => {
+    setSelectedDistrict(val)
     setSelectedWard('')
-    setWards([])
-    fetch(`${API_BASE}/d/${selectedDistrict}?depth=2`)
-      .then(r => r.json())
-      .then(data => {
-        setWards(data.wards || [])
-        setDistrictName(data.name || '')
-        setLoadingW(false)
-      })
-      .catch(() => setLoadingW(false))
-  }, [selectedDistrict])
-
-  // Update ward name
-  useEffect(() => {
-    if (selectedWard) {
-      const ward = wards.find(w => String(w.code) === selectedWard)
-      if (ward) setWardName(ward.name)
-    }
-  }, [selectedWard, wards])
-
-  // Update parent when address changes
-  useEffect(() => {
-    const parts = [detail, wardName, districtName, provinceName].filter(Boolean)
-    const fullAddress = parts.join(', ')
-    onChange({
-      province: provinceName,
-      district: districtName,
-      ward: wardName,
-      detail,
-      fullAddress,
-      lat: mapPosition[0],
-      lng: mapPosition[1],
-    })
-  }, [provinceName, districtName, wardName, detail, mapPosition])
-
-  // Reverse geocode when map is clicked
-  const handleMapClick = async (lat: number, lng: number) => {
-    setMapPosition([lat, lng])
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=vi`)
-      const data = await res.json()
-      if (data.display_name) {
-        setMapAddress(data.display_name)
-        setDetail(data.display_name.split(',').slice(0, 2).join(',').trim())
-      }
-    } catch {
-      // Ignore geocoding errors
-    }
+    const d = districts.find(x => x.code == val)
+    setWards(d?.wards || [])
   }
 
-  // Use current location
-  const handleUseMyLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords
-          setMapPosition([latitude, longitude])
-          handleMapClick(latitude, longitude)
-          setShowMap(true)
-        },
-        () => alert('Không thể lấy vị trí. Vui lòng cấp quyền truy cập vị trí.'),
-        { enableHighAccuracy: true }
-      )
-    } else {
-      alert('Trình duyệt không hỗ trợ định vị')
-    }
+  const searchMapNominatim = async () => {
+     if (!streetInfo && !selectedProvince) return;
+     const provName = provinces.find(p => p.code == selectedProvince)?.name || ''
+     const q = `${streetInfo}, ${provName}`;
+     try {
+       const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`)
+       const data = await res.json()
+       if (data && data.length > 0) {
+         // Auto fill what Nominatim understands
+         // We just alert logic since mapping boundaries to VN open API is complex
+         console.log("Map coordinates found:", data[0].lat, data[0].lon)
+       }
+     } catch (err) {}
   }
-
-  const selectClass = "w-full px-3 py-3 rounded-xl border border-lime-dark/20 bg-white text-foreground appearance-none focus:outline-none focus:ring-2 focus:ring-lime-dark/30 focus:border-lime-dark/50 text-sm transition-all"
 
   return (
-    <div className="space-y-3">
-      {/* Province / District Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Tỉnh/Thành phố */}
-        <div className="relative">
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Tỉnh / Thành phố *</label>
-          <div className="relative">
-            <select
-              value={selectedProvince}
-              onChange={e => setSelectedProvince(e.target.value)}
-              className={selectClass}
-              disabled={loadingP}
-            >
-              <option value="">-- Chọn Tỉnh/Thành phố --</option>
-              {provinces.map(p => (
-                <option key={p.code} value={p.code}>{p.name}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            {loadingP && <Loader2 className="absolute right-8 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-lime-dark animate-spin" />}
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label className="text-xs font-semibold text-gray-500 uppercase">Tỉnh / Thành phố</Label>
+          <Select value={selectedProvince} onValueChange={handleProvinceChange}>
+            <SelectTrigger className="w-full bg-white border-lime/30 h-11 rounded-xl">
+              <SelectValue placeholder="Chọn Tỉnh/Thành phố" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              {provinces.map(p => <SelectItem key={p.code} value={String(p.code)}>{p.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-xs font-semibold text-gray-500 uppercase">Quận / Huyện</Label>
+          <Select value={selectedDistrict} onValueChange={handleDistrictChange} disabled={!selectedProvince}>
+            <SelectTrigger className="w-full bg-white border-lime/30 h-11 rounded-xl">
+              <SelectValue placeholder="Chọn Quận/Huyện" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              {districts.map(d => <SelectItem key={d.code} value={String(d.code)}>{d.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-xs font-semibold text-gray-500 uppercase">Phường / Xã</Label>
+          <Select value={selectedWard} onValueChange={(v) => setSelectedWard(v)} disabled={!selectedDistrict}>
+            <SelectTrigger className="w-full bg-white border-lime/30 h-11 rounded-xl">
+              <SelectValue placeholder="Chọn Phường/Xã" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              {wards.map(w => <SelectItem key={w.code} value={String(w.code)}>{w.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-xs font-semibold text-gray-500 uppercase">Số nhà, Tên đường, Thôn/Xóm</Label>
+        <div className="relative flex items-center gap-2">
+          <div className="relative flex-1">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-lime-dark" />
+            <Input 
+              placeholder="Ví dụ: Số 123, Phố Chùa Láng" 
+              value={streetInfo}
+              onChange={(e) => setStreetInfo(e.target.value)}
+              className="pl-10 h-11 rounded-xl border-lime/30 shadow-sm"
+            />
           </div>
-        </div>
-
-        {/* Quận/Huyện */}
-        <div className="relative">
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Quận / Huyện *</label>
-          <div className="relative">
-            <select
-              value={selectedDistrict}
-              onChange={e => setSelectedDistrict(e.target.value)}
-              className={selectClass}
-              disabled={!selectedProvince || loadingD}
-            >
-              <option value="">-- Chọn Quận/Huyện --</option>
-              {districts.map(d => (
-                <option key={d.code} value={d.code}>{d.name}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            {loadingD && <Loader2 className="absolute right-8 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-lime-dark animate-spin" />}
-          </div>
+          {/* <button type="button" onClick={searchMapNominatim} className="h-11 px-4 rounded-xl bg-lime/20 text-lime-dark font-bold text-sm flex gap-2 items-center hover:bg-lime/30 border border-lime border-dashed shrink-0 transition-colors">
+            <Search className="h-4 w-4" /> Bản đồ
+          </button> */}
         </div>
       </div>
-
-      {/* Ward */}
-      <div className="relative">
-        <label className="text-xs font-medium text-muted-foreground mb-1 block">Phường / Xã *</label>
-        <div className="relative">
-          <select
-            value={selectedWard}
-            onChange={e => setSelectedWard(e.target.value)}
-            className={selectClass}
-            disabled={!selectedDistrict || loadingW}
-          >
-            <option value="">-- Chọn Phường/Xã --</option>
-            {wards.map(w => (
-              <option key={w.code} value={w.code}>{w.name}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-          {loadingW && <Loader2 className="absolute right-8 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-lime-dark animate-spin" />}
-        </div>
-      </div>
-
-      {/* Detail Address */}
-      <div>
-        <label className="text-xs font-medium text-muted-foreground mb-1 block">Số nhà, đường, xóm</label>
-        <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            value={detail}
-            onChange={e => setDetail(e.target.value)}
-            placeholder="Ví dụ: 123 Đường Nguyễn Huệ"
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-lime-dark/20 bg-white text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-lime-dark/30 focus:border-lime-dark/50 text-sm transition-all"
-          />
-        </div>
-      </div>
-
-      {/* Map Toggle */}
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setShowMap(!showMap)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-lime-dark/20 text-sm font-medium text-lime-dark hover:bg-lime-dark/5 transition-all"
-        >
-          <MapPin className="h-4 w-4" />
-          {showMap ? 'Ẩn bản đồ' : '📍 Chọn trên bản đồ'}
-        </button>
-        <button
-          type="button"
-          onClick={handleUseMyLocation}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-blue-500/20 text-sm font-medium text-blue-600 hover:bg-blue-500/5 transition-all"
-        >
-          <Navigation className="h-4 w-4" />
-          Vị trí của tôi
-        </button>
-      </div>
-
-      {/* Map Picker */}
-      {showMap && (
-        <div className="rounded-xl overflow-hidden border border-lime-dark/20 shadow-lg">
-          <MapPicker
-            position={mapPosition}
-            onPositionChange={handleMapClick}
-          />
-          {mapAddress && (
-            <div className="p-2.5 bg-white border-t border-lime-dark/10 flex items-start gap-2">
-              <MapPin className="h-3.5 w-3.5 text-lime-dark mt-0.5 shrink-0" />
-              <p className="text-xs text-muted-foreground leading-tight">{mapAddress}</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Full Address Preview */}
-      {(provinceName || detail) && (
-        <div className="p-3 rounded-xl bg-lime-dark/5 border border-lime-dark/10">
-          <p className="text-xs text-muted-foreground mb-0.5">📍 Địa chỉ hoàn chỉnh:</p>
-          <p className="text-sm font-medium text-foreground">
-            {[detail, wardName, districtName, provinceName].filter(Boolean).join(', ')}
-          </p>
-        </div>
-      )}
     </div>
   )
 }

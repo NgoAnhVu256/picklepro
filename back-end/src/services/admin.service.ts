@@ -13,6 +13,9 @@ export class AdminService {
   // ============================================
 
   async getDashboardStats() {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString()
+
     const [
       { count: totalProducts },
       orderStatusesResult,
@@ -21,6 +24,9 @@ export class AdminService {
       recentOrders,
       topProducts,
       monthlyRevenue,
+      timelineOrders,
+      timelineCustomers,
+      timelineProducts,
     ] = await Promise.all([
       supabaseAdmin.from('products').select('*', { count: 'exact', head: true }).eq('is_active', true),
       supabaseAdmin.from('orders').select('status'),
@@ -40,6 +46,9 @@ export class AdminService {
         .select('total_amount, created_at')
         .gte('created_at', new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000).toISOString())
         .order('created_at', { ascending: true }),
+      supabaseAdmin.from('orders').select('created_at, total_amount').gte('created_at', sixtyDaysAgo),
+      supabaseAdmin.from('profiles').select('created_at').gte('created_at', sixtyDaysAgo),
+      supabaseAdmin.from('products').select('created_at').gte('created_at', sixtyDaysAgo).eq('is_active', true),
     ])
 
     // Tính tổng doanh thu
@@ -81,12 +90,38 @@ export class AdminService {
       .slice(-6)
       .map(([month, revenue]) => ({ month, revenue }))
 
+    // Tính toán Trend (Tăng trưởng % trong 30 ngày qua so với 30 ngày trước)
+    const calcTrend = (newVal: number, oldVal: number) => {
+      if (oldVal === 0) return newVal > 0 ? 100 : 0;
+      return Math.round(((newVal - oldVal) / oldVal) * 100);
+    }
+    
+    let curRev = 0, prevRev = 0, curOrders = 0, prevOrders = 0;
+    for (const o of timelineOrders.data ?? []) {
+      if (o.created_at >= thirtyDaysAgo) { curRev += o.total_amount; curOrders++; }
+      else { prevRev += o.total_amount; prevOrders++; }
+    }
+    let curCust = 0, prevCust = 0;
+    for (const c of timelineCustomers.data ?? []) {
+      if (c.created_at >= thirtyDaysAgo) curCust++; else prevCust++;
+    }
+    let curProd = 0, prevProd = 0;
+    for (const p of timelineProducts.data ?? []) {
+      if (p.created_at >= thirtyDaysAgo) curProd++; else prevProd++;
+    }
+
     return {
       stats: {
         totalRevenue,
         totalOrders,
         totalProducts: totalProducts ?? 0,
         totalCustomers: totalCustomers ?? 0,
+        trends: {
+          revenue: calcTrend(curRev, prevRev),
+          orders: calcTrend(curOrders, prevOrders),
+          products: calcTrend(curProd, prevProd),
+          customers: calcTrend(curCust, prevCust),
+        }
       },
       statusCounts,
       recentOrders: recentOrders.data ?? [],
