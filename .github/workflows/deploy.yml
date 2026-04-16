@@ -1,0 +1,92 @@
+name: 🚀 Deploy to VPS (picklepro.vn)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:       # Cho phép trigger thủ công từ GitHub UI
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false  # KHÔNG cancel deploy đang chạy
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # ──────────────────────────────────────────────
+      # 1. Checkout code (để lấy thông tin commit)
+      # ──────────────────────────────────────────────
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # ──────────────────────────────────────────────
+      # 2. SSH vào VPS và deploy
+      # ──────────────────────────────────────────────
+      - name: 🚀 Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          command_timeout: 12m
+          script: |
+            set -e   # Dừng ngay nếu có lỗi
+
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "🚀 Bắt đầu deploy PicklePro — $(date '+%Y-%m-%d %H:%M:%S %Z')"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+            cd /var/www/picklepro
+
+            # ── 1. Pull code mới ──
+            echo "📥 Pulling latest code..."
+            git fetch --all
+            git reset --hard origin/main
+
+            # ── 2. Install dependencies ──
+            echo "📦 Installing dependencies..."
+            pnpm install --frozen-lockfile
+
+            # ── 3. Build (chỉ front-end, back-end dùng transpilePackages) ──
+            echo "🔨 Building Next.js..."
+            pnpm build
+
+            # ── 4. Zero-downtime reload (không restart, giữ nguyên connections) ──
+            echo "♻️  Reloading PM2 (zero-downtime)..."
+            pm2 reload picklepro --update-env
+
+            # ── 5. Dọn dẹp cache Next.js cũ (tiết kiệm disk) ──
+            echo "🧹 Cleaning old Next.js cache..."
+            find /var/www/picklepro/front-end/.next/cache -name "*.pack" -mtime +7 -delete 2>/dev/null || true
+
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "✅ Deploy hoàn thành!"
+            echo "🌐 https://picklepro.vn"
+            pm2 list
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      # ──────────────────────────────────────────────
+      # 3. Thông báo kết quả
+      # ──────────────────────────────────────────────
+      - name: ✅ Notify success
+        if: success()
+        run: |
+          echo "## 🎉 Deploy thành công!" >> $GITHUB_STEP_SUMMARY
+          echo "- **Repo**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY  
+          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **By**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: https://picklepro.vn" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time**: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+      - name: ❌ Notify failure
+        if: failure()
+        run: |
+          echo "## ❌ Deploy THẤT BẠI!" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **By**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "Kiểm tra logs tab Actions để debug." >> $GITHUB_STEP_SUMMARY
