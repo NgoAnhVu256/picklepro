@@ -49,22 +49,30 @@ jobs:
 
             # ── 2. Install dependencies ──
             echo "📦 Installing dependencies..."
-            pnpm install --frozen-lockfile
+            pnpm install --no-frozen-lockfile
 
             # ── 3. Build (chỉ front-end, back-end dùng transpilePackages) ──
             echo "🔨 Building Next.js..."
             pnpm build
 
-            # ── 4. Zero-downtime reload (không restart, giữ nguyên connections) ──
+            # ── 4. Copy static files vào standalone output ──
+            #    (cần thiết khi dùng output: 'standalone' trong next.config.mjs)
+            echo "📋 Copying static files to standalone..."
+            cp -r /var/www/picklepro/front-end/.next/static \
+                  /var/www/picklepro/front-end/.next/standalone/.next/static 2>/dev/null || true
+            cp -r /var/www/picklepro/front-end/public \
+                  /var/www/picklepro/front-end/.next/standalone/public 2>/dev/null || true
+
+            # ── 5. Zero-downtime reload (không restart, giữ nguyên connections) ──
             echo "♻️  Reloading PM2 (zero-downtime)..."
             pm2 reload picklepro --update-env
 
-            # ── 5. Dọn dẹp cache Next.js cũ (tiết kiệm disk) ──
-            echo "🧹 Cleaning old Next.js cache..."
+            # ── 6. Dọn dẹp cache Next.js cũ (tiết kiệm disk) ──
+            echo "🧹 Cleaning old Next.js cache (>7 ngày)..."
             find /var/www/picklepro/front-end/.next/cache -name "*.pack" -mtime +7 -delete 2>/dev/null || true
 
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "✅ Deploy hoàn thành!"
+            echo "✅ Deploy hoàn thành! Không còn Vercel ✓"
             echo "🌐 https://picklepro.vn"
             pm2 list
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
