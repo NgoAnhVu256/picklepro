@@ -64,5 +64,25 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Lấy settings từ bảng app_settings để kiểm tra chế độ bảo trì
+  const { data: settingsData } = await supabase
+    .from('app_settings')
+    .select('value')
+    .eq('key', 'system_settings')
+    .single()
+
+  const settings = settingsData?.value as Record<string, any> | null
+
+  // Paths mà lúc nào cũng được phép truy cập
+  const bypassPaths = ['/maintenance', '/admin', '/auth', '/api', '/_next']
+  const isBypassed = bypassPaths.some(p => request.nextUrl.pathname.startsWith(p))
+
+  // NẾU: đang bảo trì, KHÔNG thuộc path bị bypass, và user chưa đăng nhập → Chuyển hướng sang trang bảo trì
+  if (settings?.maintenance_mode === true && !isBypassed && !user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/maintenance'
+    return NextResponse.redirect(url)
+  }
+
   return supabaseResponse
 }
