@@ -49,9 +49,26 @@ export class BlogService {
   /** Admin: Create blog */
   async createBlog(payload: any) {
     const slug = payload.slug || this.generateSlug(payload.title)
+    const read_time = this.calcReadTime(payload.content || '')
+
+    const insertData = {
+      ...payload,
+      slug,
+      read_time,
+      seo_title: payload.seo_title || payload.title || null,
+      seo_description: payload.seo_description || null,
+      meta_keywords: payload.meta_keywords || null,
+      canonical_url: payload.canonical_url || null,
+      robots_index: payload.robots_index || 'index',
+      robots_follow: payload.robots_follow || 'follow',
+      og_title: payload.og_title || payload.title || null,
+      og_description: payload.og_description || payload.seo_description || null,
+      og_image: payload.og_image || payload.thumbnail || null,
+    }
+
     const { data, error } = await supabaseAdmin
       .from('blogs')
-      .insert({ ...payload, slug })
+      .insert(insertData)
       .select()
       .single()
 
@@ -63,6 +80,9 @@ export class BlogService {
   async updateBlog(id: string, payload: any) {
     if (payload.title && !payload.slug) {
       payload.slug = this.generateSlug(payload.title)
+    }
+    if (payload.content) {
+      payload.read_time = this.calcReadTime(payload.content)
     }
 
     const { data, error } = await supabaseAdmin
@@ -91,5 +111,12 @@ export class BlogService {
       .replace(/đ/g, 'd')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '')
+  }
+
+  /** Tính thời gian đọc: ~200 từ/phút */
+  private calcReadTime(html: string): number {
+    const text = html.replace(/<[^>]*>/g, ' ')
+    const words = text.trim().split(/\s+/).filter(Boolean).length
+    return Math.max(1, Math.ceil(words / 200))
   }
 }

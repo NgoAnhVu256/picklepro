@@ -11,6 +11,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "strict": true,
+    "noEmitOnError": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

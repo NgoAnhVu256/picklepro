@@ -14,7 +14,7 @@ export function getStripe(): Stripe {
       throw new Error('[Stripe] Thiếu biến môi trường: STRIPE_SECRET_KEY')
     }
     _stripe = new Stripe(secretKey, {
-      apiVersion: '2025-03-31.basil',
+      apiVersion: '2025-03-31.basil' as any,
       typescript: true,
     })
   }

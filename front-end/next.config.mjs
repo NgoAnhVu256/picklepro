@@ -3,6 +3,15 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+
+  // === VPS Performance Optimizations ===
+  // Build dạng standalone - nhẹ hơn ~70%, phù hợp deploy VPS
+  output: 'standalone',
+  // Bật gzip/brotli built-in
+  compress: true,
+  // Ẩn "X-Powered-By: Next.js" header (bảo mật)
+  poweredByHeader: false,
+
   images: {
     remotePatterns: [
       {
@@ -21,9 +30,22 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
     // Định dạng ảnh hiện đại, nhẹ hơn JPEG 30-50%
     formats: ['image/avif', 'image/webp'],
+    // Cache ảnh đã tối ưu trong 24h
+    minimumCacheTTL: 86400,
   },
+
+  // Tree-shaking tốt hơn cho các thư viện lớn
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'recharts',
+      '@radix-ui/react-icons',
+    ],
+  },
+
   // Transpile back-end workspace package
   transpilePackages: ['@picklepro/back-end'],
+
   // Expose env vars to Next.js runtime
   env: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -37,6 +59,7 @@ const nextConfig = {
     VNPAY_HASH_SECRET: process.env.VNPAY_HASH_SECRET,
     VNPAY_URL: process.env.VNPAY_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
   },
 }
 

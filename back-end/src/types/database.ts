@@ -37,16 +37,29 @@ export interface Database {
         Update: OrderItemUpdate
       }
       reviews: {
-        Row: any
-        Insert: any
-        Update: any
+        Row: Review
+        Insert: ReviewInsert
+        Update: ReviewUpdate
       }
       chat_history: {
         Row: ChatMessage
         Insert: ChatMessageInsert
         Update: ChatMessageUpdate
       }
+      blogs: {
+        Row: Blog
+        Insert: BlogInsert
+        Update: BlogUpdate
+      }
+      app_settings: {
+        Row: AppSetting
+        Insert: AppSettingInsert
+        Update: AppSettingUpdate
+      }
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: Record<string, never>
   }
 }
 
@@ -55,8 +68,10 @@ export interface Category {
   id: string
   name: string
   slug: string
-  image_url: string | null
+  icon: string | null
+  image_url?: string | null
   description: string | null
+  sort_order: number
   created_at: string
 }
 
@@ -73,6 +88,8 @@ export interface Product {
   price: number
   original_price: number | null
   category_id: string
+  rating: number
+  review_count: number
   stock: number
   tags: string[]
   specs: Record<string, string> | null
@@ -123,6 +140,7 @@ export interface Order {
   shipping_phone: string
   payment_method: string
   stripe_session_id: string | null
+  notes?: string | null
   created_at: string
   updated_at: string
 }
@@ -146,6 +164,18 @@ export interface OrderItem {
 export type OrderItemInsert = Omit<OrderItem, 'id'>
 export type OrderItemUpdate = Partial<OrderItemInsert>
 
+// --- Reviews ---
+export interface Review {
+  id: string
+  product_id: string
+  user_id: string
+  rating: number
+  comment: string | null
+  created_at: string
+}
+
+export type ReviewInsert = Omit<Review, 'id' | 'created_at'>
+export type ReviewUpdate = Partial<Pick<Review, 'rating' | 'comment'>>
 
 // --- Chat History ---
 export type ChatRole = 'user' | 'assistant'
@@ -160,6 +190,47 @@ export interface ChatMessage {
 
 export type ChatMessageInsert = Omit<ChatMessage, 'id' | 'created_at'>
 export type ChatMessageUpdate = Partial<ChatMessageInsert>
+
+// --- Blogs ---
+export interface Blog {
+  id: string
+  title: string
+  slug: string
+  category_name: string
+  thumbnail: string | null
+  content: string | null
+  author: string
+  is_published: boolean
+  excerpt: string | null
+  read_time: number | null
+  view_count: number
+  // SEO
+  seo_title: string | null
+  seo_description: string | null
+  meta_keywords: string | null
+  canonical_url: string | null
+  robots_index: string
+  robots_follow: string
+  // Open Graph
+  og_title: string | null
+  og_description: string | null
+  og_image: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type BlogInsert = Omit<Blog, 'id' | 'created_at' | 'updated_at'>
+export type BlogUpdate = Partial<BlogInsert>
+
+// --- App Settings ---
+export interface AppSetting {
+  key: string
+  value: Record<string, unknown>
+  updated_at: string
+}
+
+export type AppSettingInsert = AppSetting
+export type AppSettingUpdate = Partial<Pick<AppSetting, 'value'>>
 
 // --- Relations (Joined queries) ---
 export interface ProductWithCategory extends Product {
