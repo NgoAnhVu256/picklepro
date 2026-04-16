@@ -6,8 +6,6 @@ import { Toaster } from 'sonner'
 import { ToastProvider } from '@/components/ui/toast-provider'
 import './globals.css'
 
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
-
 import { createClient } from '@supabase/supabase-js'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
