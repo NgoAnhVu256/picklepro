@@ -3,7 +3,7 @@
 import { Search, ShoppingCart, User, Menu, LogOut, LayoutDashboard, Target, Package, Layers, Newspaper, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
@@ -19,15 +19,6 @@ const navItems = [
   { label: "CỘNG ĐỒNG", href: "https://www.facebook.com/profile.php?id=61575468045037", icon: Users, gradId: "grad-community", gradient: "linear-gradient(135deg, #667EEA, #764BA2)", from: "#667EEA", to: "#764BA2" },
 ]
 
-function formatVND(n: number) {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n)
-}
-
-type SearchSuggestion = {
-  id: string; name: string; slug: string; price: number;
-  original_price?: number; brand: string; image: string | null; category: string
-}
-
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -37,15 +28,6 @@ export function Header() {
   const [activeTab, setActiveTab] = useState(-1)
   const router = useRouter()
   const { getTotalItems } = useCart()
-
-  // Search suggestions state
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const [searchLoading, setSearchLoading] = useState(false)
-  const [highlightIndex, setHighlightIndex] = useState(-1)
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const desktopSearchRef = useRef<HTMLDivElement>(null)
-  const mobileSearchRef = useRef<HTMLDivElement>(null)
 
   const [totalItems, setTotalItems] = useState(0)
   useEffect(() => { setTotalItems(getTotalItems()) })
@@ -72,50 +54,6 @@ export function Header() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        desktopSearchRef.current && !desktopSearchRef.current.contains(e.target as Node) &&
-        mobileSearchRef.current && !mobileSearchRef.current.contains(e.target as Node)
-      ) {
-        setShowSuggestions(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  // Debounced search
-  const fetchSuggestions = useCallback((query: string) => {
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
-    
-    if (!query.trim() || query.trim().length < 2) {
-      setSuggestions([])
-      setShowSuggestions(false)
-      return
-    }
-
-    setSearchLoading(true)
-    setShowSuggestions(true)
-    searchTimeoutRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}`)
-        const data = await res.json()
-        setSuggestions(data.products || [])
-        setHighlightIndex(-1)
-      } catch {
-        setSuggestions([])
-      }
-      setSearchLoading(false)
-    }, 300)
-  }, [])
-
-  const handleSearchInput = (value: string) => {
-    setSearchQuery(value)
-    fetchSuggestions(value)
-  }
-
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -127,113 +65,12 @@ export function Header() {
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
   const userInitial = userName.charAt(0).toUpperCase()
 
-  const handleSearch = (e?: React.FormEvent) => {
-    e?.preventDefault()
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
     if (searchQuery.trim()) {
       router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
       setSearchQuery("")
-      setShowSuggestions(false)
     }
-  }
-
-  const navigateToProduct = (slug: string) => {
-    router.push(`/products/${slug}`)
-    setSearchQuery("")
-    setShowSuggestions(false)
-  }
-
-  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-    if (!showSuggestions || suggestions.length === 0) return
-    
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setHighlightIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : 0))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setHighlightIndex(prev => (prev > 0 ? prev - 1 : suggestions.length - 1))
-    } else if (e.key === 'Enter' && highlightIndex >= 0) {
-      e.preventDefault()
-      navigateToProduct(suggestions[highlightIndex].slug)
-    } else if (e.key === 'Escape') {
-      setShowSuggestions(false)
-    }
-  }
-
-  // Suggestion dropdown component
-  const SuggestionsDropdown = ({ isMobile = false }: { isMobile?: boolean }) => {
-    if (!showSuggestions) return null
-
-    return (
-      <div className={`absolute left-0 right-0 top-full mt-1 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] max-h-[420px] overflow-y-auto`}>
-        {searchLoading ? (
-          <div className="p-4 text-center">
-            <div className="w-5 h-5 border-2 border-lime border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-            <p className="text-xs text-gray-400">Đang tìm kiếm...</p>
-          </div>
-        ) : suggestions.length === 0 ? (
-          <div className="p-4 text-center">
-            <Search className="h-5 w-5 mx-auto text-gray-300 mb-1" />
-            <p className="text-sm text-gray-400">Không tìm thấy sản phẩm nào</p>
-          </div>
-        ) : (
-          <>
-            <div className="px-4 py-2 border-b border-gray-50">
-              <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Gợi ý sản phẩm</p>
-            </div>
-            {suggestions.map((item, idx) => {
-              const discount = item.original_price && item.original_price > item.price
-                ? Math.round((1 - item.price / item.original_price) * 100)
-                : 0
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => navigateToProduct(item.slug)}
-                  onMouseEnter={() => setHighlightIndex(idx)}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-all ${
-                    highlightIndex === idx ? 'bg-lime/10' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  {/* Product image */}
-                  <div className="w-12 h-12 rounded-lg bg-gray-50 border border-gray-100 shrink-0 overflow-hidden flex items-center justify-center">
-                    {item.image ? (
-                      <img src={item.image} alt="" className="w-full h-full object-contain" />
-                    ) : (
-                      <Package className="h-5 w-5 text-gray-300" />
-                    )}
-                  </div>
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">{item.name}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-sm font-bold text-lime-dark">{formatVND(item.price)}</span>
-                      {discount > 0 && (
-                        <>
-                          <span className="text-xs text-gray-400 line-through">{formatVND(item.original_price!)}</span>
-                          <span className="text-[10px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded">-{discount}%</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  {/* Category badge */}
-                  {item.category && (
-                    <span className="shrink-0 text-[10px] text-gray-400 bg-gray-50 px-2 py-1 rounded-full border border-gray-100 hidden sm:block">
-                      {item.category}
-                    </span>
-                  )}
-                </button>
-              )
-            })}
-            {/* See all */}
-            <button
-              onClick={() => handleSearch()}
-              className="w-full px-4 py-3 text-center text-sm font-semibold text-lime-dark bg-lime/5 hover:bg-lime/10 transition-colors border-t border-gray-100"
-            >
-              Xem tất cả kết quả cho &ldquo;{searchQuery}&rdquo; →
-            </button>
-          </>
-        )}
-      </div>
-    )
   }
 
   return (
@@ -241,30 +78,24 @@ export function Header() {
       <div className="bg-white border-b border-lime/20 shadow-lg shadow-lime/5">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
-            {/* Logo */}
+            {/* Logo — BIGGER */}
             <Link href="/" className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity">
-              <Image src="/logo.png" alt="PicklePro Logo" width={80} height={80} className="rounded-xl" priority unoptimized />
+              <Image src="/favicon.ico" alt="PicklePro Logo" width={80} height={80} className="rounded-xl" priority unoptimized />
               <span className="text-3xl font-bold text-black">
                 PicklePro
               </span>
             </Link>
 
-            {/* Search Bar - Desktop with AJAX suggestions */}
-            <div ref={desktopSearchRef} className="hidden md:flex flex-1 max-w-xl mx-4 relative">
-              <form onSubmit={handleSearch} className="w-full">
-                <div className="relative w-full drop-shadow-sm">
-                  <Input type="text" placeholder="Gõ từ khóa bạn cần tìm kiếm" value={searchQuery} 
-                    onChange={(e) => handleSearchInput(e.target.value)}
-                    onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true) }}
-                    onKeyDown={handleSearchKeyDown}
-                    className="w-full pl-6 pr-12 py-6 rounded-full border-0 bg-[#F4F5F7] text-gray-800 focus-visible:ring-1 focus-visible:ring-lime placeholder:text-gray-500 text-[15px]" />
-                  <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-[#0B0A11] hover:bg-[#0B0A11]/90 text-white h-9 w-9">
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </div>
-              </form>
-              <SuggestionsDropdown />
-            </div>
+            {/* Search Bar - Desktop */}
+            <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-4">
+              <div className="relative w-full drop-shadow-sm">
+                <Input type="text" placeholder="Gõ từ khóa bạn cần tìm kiếm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-6 pr-12 py-6 rounded-full border-0 bg-[#F4F5F7] text-gray-800 focus-visible:ring-1 focus-visible:ring-lime placeholder:text-gray-500 text-[15px]" />
+                <Button type="submit" size="icon" className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-[#0B0A11] hover:bg-[#0B0A11]/90 text-white h-9 w-9">
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+            </form>
 
             {/* Actions */}
             <div className="flex items-center gap-2">
@@ -305,7 +136,7 @@ export function Header() {
                 </Link>
               )}
 
-              {/* Cart Button */}
+              {/* Cart Button — Purple gradient */}
               <Link href="/cart">
                 <Button className="flex items-center gap-2 backdrop-blur-md text-white font-semibold rounded-full px-4 py-2 shadow-lg shadow-purple-500/20 transition-all hover:opacity-90"
                   style={{ background: 'linear-gradient(135deg, #B27BFF, #9A57FF)' }}>
@@ -321,25 +152,19 @@ export function Header() {
             </div>
           </div>
 
-          {/* Mobile Search with AJAX suggestions */}
-          <div ref={mobileSearchRef} className="md:hidden mt-3 mx-4 pb-2 relative">
-            <form onSubmit={handleSearch}>
-              <div className="relative w-full drop-shadow-sm">
-                <Input type="text" placeholder="Gõ từ khóa bạn cần tìm kiếm" value={searchQuery} 
-                  onChange={(e) => handleSearchInput(e.target.value)}
-                  onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true) }}
-                  onKeyDown={handleSearchKeyDown}
-                  className="w-full pl-5 pr-12 py-5 rounded-full border-0 bg-[#F4F5F7] text-gray-800 focus-visible:ring-1 focus-visible:ring-lime placeholder:text-gray-500 text-[14px]" />
-                <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-[#0B0A11] hover:bg-[#0B0A11]/90 text-white h-8 w-8">
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
-            </form>
-            <SuggestionsDropdown isMobile />
-          </div>
+          {/* Mobile Search */}
+          <form onSubmit={handleSearch} className="md:hidden mt-3 mx-4 pb-2">
+            <div className="relative w-full drop-shadow-sm">
+              <Input type="text" placeholder="Gõ từ khóa bạn cần tìm kiếm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-5 pr-12 py-5 rounded-full border-0 bg-[#F4F5F7] text-gray-800 focus-visible:ring-1 focus-visible:ring-lime placeholder:text-gray-500 text-[14px]" />
+              <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-[#0B0A11] hover:bg-[#0B0A11]/90 text-white h-8 w-8">
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+          </form>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation — Underline active/hover style */}
         <nav className={`border-t border-lime/10 bg-white ${isMenuOpen ? 'block' : 'hidden md:block'}`}>
           <div className="container mx-auto px-4">
             
@@ -366,10 +191,15 @@ export function Header() {
                       className="group relative flex items-center gap-2 px-5 py-3.5"
                       onClick={() => { setActiveTab(index); setIsMenuOpen(false) }}
                     >
+                      {/* Icon */}
                       <Icon className={`h-4 w-4 transition-colors ${isActive ? 'text-black' : 'text-gray-600 group-hover:text-black'}`} />
+                      
+                      {/* Label - Black and Bold */}
                       <span className={`text-[15px] transition-colors duration-200 font-bold ${isActive ? 'text-black' : 'text-black/80 group-hover:text-black'}`}>
                         {item.label}
                       </span>
+                      
+                      {/* Underline */}
                       <span className={`absolute bottom-0 left-2 right-2 h-[3px] rounded-full bg-black transition-all duration-300 ${
                         isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                       }`} />

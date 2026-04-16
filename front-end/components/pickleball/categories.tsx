@@ -1,8 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useAdminRealtime } from "@/hooks/use-admin-realtime"
 
 interface Category {
@@ -12,26 +11,30 @@ interface Category {
   image_url: string | null
 }
 
-interface CategoriesProps {
-  initialCategories?: Category[]
-}
+export function Categories() {
+  const [categories, setCategories] = useState<Category[]>([])
 
-export function Categories({ initialCategories = [] }: CategoriesProps) {
-  const [categories, setCategories] = useState<Category[]>(initialCategories)
-
-  const reloadCategories = useCallback(async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const response = await fetch('/api/categories')
       const data = await response.json()
       setCategories(data.categories ?? [])
     } catch {
-      // Ignore transient fetch errors.
+      setCategories([])
     }
   }, [])
 
+  useEffect(() => {
+    loadCategories()
+    const interval = setInterval(loadCategories, 15000)
+    return () => clearInterval(interval)
+  }, [loadCategories])
+
   useAdminRealtime({
     scopes: ['categories'],
-    onChange: () => reloadCategories(),
+    onChange: () => {
+      loadCategories()
+    },
   })
 
   if (categories.length === 0) {
@@ -62,14 +65,8 @@ export function Categories({ initialCategories = [] }: CategoriesProps) {
                 className="group flex flex-col items-center gap-2 max-w-[80px] shrink-0"
               >
                 {/* App Icon Area */}
-                <div className="w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-[1.25rem] bg-white border border-gray-100 shadow-sm flex items-center justify-center transform group-hover:scale-105 transition-all duration-300 overflow-hidden relative">
-                   <Image
-                     src={imgSrc}
-                     alt={category.name}
-                     fill
-                     className="object-cover"
-                     sizes="80px"
-                   />
+                <div className="w-[70px] h-[70px] md:w-[80px] md:h-[80px] rounded-[1.25rem] bg-white border border-gray-100 shadow-sm flex items-center justify-center transform group-hover:scale-105 transition-all duration-300 overflow-hidden">
+                   <img src={imgSrc} alt={category.name} className="w-full h-full object-cover" />
                 </div>
                 {/* Text Label */}
                 <span className="text-[12px] md:text-sm font-semibold text-black text-center leading-tight">

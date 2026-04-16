@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import Image from "next/image"
 import { useAdminRealtime } from '@/hooks/use-admin-realtime'
 
 interface Slide {
@@ -14,56 +13,55 @@ interface Slide {
   badge: string
 }
 
-interface PromoBannerProps {
-  initialSlides?: Slide[]
-}
+export function PromoBanner() {
+  const [slides, setSlides] = useState<Slide[]>([])
+  const [loading, setLoading] = useState(true)
 
-export function PromoBanner({ initialSlides = [] }: PromoBannerProps) {
-  const promoOnly = initialSlides.filter(s => s.is_active && s.badge === 'promo')
-  const [slides, setSlides] = useState<Slide[]>(promoOnly)
-
-  const reloadSlides = useCallback(async () => {
+  const loadSlides = useCallback(async (withLoading = false) => {
+    if (withLoading) setLoading(true)
     try {
       const response = await fetch('/api/admin/slides')
       const data = await response.json()
-      setSlides((data.slides ?? []).filter((s: Slide) => s.is_active && s.badge === 'promo'))
-    } catch {}
+      const active = (data.slides ?? [])
+        .filter((s: Slide) => s.is_active && s.badge === 'promo')
+      setSlides(active)
+    } finally {
+      if (withLoading) setLoading(false)
+    }
   }, [])
+
+  useEffect(() => {
+    loadSlides(true)
+    const interval = setInterval(() => loadSlides(false), 15000)
+    return () => clearInterval(interval)
+  }, [loadSlides])
 
   useAdminRealtime({
     scopes: ['slides'],
-    onChange: () => reloadSlides(),
+    onChange: () => {
+      loadSlides(false)
+    },
   })
 
+  if (loading) return null
+
   if (slides.length > 0) {
-    const slide = slides[0]
+    const slide = slides[0] // just show the first active promo banner
+    
+    const imageElement = (
+      <img src={slide.bg_gradient} alt="Promo Banner" className="w-full object-cover rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" />
+    )
     
     return (
       <section className="py-12">
         <div className="container mx-auto px-4">
           {slide.href ? (
             <Link href={slide.href} className="block relative">
-              <div className="relative w-full aspect-[4/1] sm:aspect-[5/1] rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <Image
-                  src={slide.bg_gradient}
-                  alt="Promo Banner"
-                  fill
-                  className="object-cover"
-                  sizes="100vw"
-                />
-              </div>
+              {imageElement}
             </Link>
           ) : (
             <div className="block relative">
-              <div className="relative w-full aspect-[4/1] sm:aspect-[5/1] rounded-3xl overflow-hidden shadow-sm">
-                <Image
-                  src={slide.bg_gradient}
-                  alt="Promo Banner"
-                  fill
-                  className="object-cover"
-                  sizes="100vw"
-                />
-              </div>
+              {imageElement}
             </div>
           )}
         </div>

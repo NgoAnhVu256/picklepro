@@ -67,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="min-h-screen bg-gradient-to-br from-white via-sky-50 to-[#bae6fd] flex items-center justify-center">
         <div className="text-center flex flex-col items-center">
           <div className="w-[55vw] max-w-[380px] aspect-square relative mb-6 drop-shadow-2xl">
-            <Image src="/logo.png" alt="PicklePro" fill className="object-contain" priority unoptimized />
+            <Image src="/favicon.ico" alt="PicklePro" fill className="object-contain" priority unoptimized />
           </div>
           <div className="flex items-center gap-2 text-sky-600">
             <div className="w-4 h-4 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
@@ -84,7 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="p-5 border-b border-border">
         <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-white shrink-0 shadow-sm border border-border">
-            <Image src="/logo.png" alt="PicklePro" width={40} height={40} className="object-cover" unoptimized />
+            <Image src="/favicon.ico" alt="PicklePro" width={40} height={40} className="object-cover" unoptimized />
           </div>
           <div>
             <p className="font-bold text-foreground text-sm">PicklePro</p>

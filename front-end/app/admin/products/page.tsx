@@ -12,7 +12,7 @@ const EMPTY_FORM = {
   name: '', brand: '', price: '', original_price: '', stock: '',
   description: '', category_id: '', is_featured: false, is_active: true,
   tags: '', specs: '', images: [] as any[],
-  color: '', size: ''
+  color: '', size: '', version: ''
 }
 
 export default function AdminProductsPage() {
@@ -140,13 +140,19 @@ export default function AdminProductsPage() {
       tags: form.tags ? form.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
       specs: (() => {
         let baseSpecs = form.specs ? (() => { try { return JSON.parse(form.specs) } catch { return null } })() : null
-        // Merge color/size into specs for shoes/clothing
+        // Merge specific attributes into specs base on category
         const selectedCat = categories.find((c: any) => c.id === form.category_id)
         const catSlug = selectedCat?.slug || ''
-        if (catSlug === 'giay-pickleball' || catSlug === 'quan-ao') {
+        
+        if (['giay-the-thao', 'giay-pickleball', 'quan-ao', 'vot-pickleball', 'tui-balo'].includes(catSlug)) {
           baseSpecs = baseSpecs || {}
           if (form.color) baseSpecs.color = form.color
-          if (form.size) baseSpecs.size = form.size
+          if (['giay-the-thao', 'giay-pickleball', 'quan-ao'].includes(catSlug) && form.size) {
+            baseSpecs.size = form.size
+          }
+          if (catSlug === 'vot-pickleball' && form.version) {
+            baseSpecs.version = form.version
+          }
         }
         return baseSpecs
       })(),
@@ -362,27 +368,32 @@ export default function AdminProductsPage() {
                     className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm font-mono resize-none" />
                 </div>
 
-                {/* Conditional: Color & Size for shoes/clothing */}
+                {/* Conditional: Category-Specific Attributes */}
                 {(() => {
                   const selectedCat = categories.find((c: any) => c.id === form.category_id)
                   const catSlug = selectedCat?.slug || ''
-                  if (catSlug === 'giay-pickleball' || catSlug === 'quan-ao') {
+                  
+                  const renderColorInput = () => (
+                    <div>
+                      <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Màu sắc</label>
+                      <input value={form.color || ''} onChange={e => setForm(f => ({...f, color: e.target.value}))}
+                        placeholder="VD: Đỏ, Xanh, Trắng..."
+                        className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm" />
+                    </div>
+                  );
+
+                  if (catSlug === 'giay-the-thao' || catSlug === 'giay-pickleball' || catSlug === 'quan-ao') {
                     const shoesSizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44']
                     const clothingSizes = ['S', 'M', 'L', 'XL', 'XXL']
-                    const sizes = catSlug === 'giay-pickleball' ? shoesSizes : clothingSizes
+                    const sizes = (catSlug === 'giay-the-thao' || catSlug === 'giay-pickleball') ? shoesSizes : clothingSizes
                     return (
                       <>
-                        <div>
-                          <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Màu sắc</label>
-                          <input value={form.color} onChange={e => setForm(f => ({...f, color: e.target.value}))}
-                            placeholder="VD: Đỏ, Xanh, Trắng..."
-                            className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm" />
-                        </div>
+                        {renderColorInput()}
                         <div>
                           <label className="text-muted-foreground text-xs font-medium mb-1.5 block">
-                            {catSlug === 'giay-pickleball' ? 'Size giày' : 'Size quần áo'}
+                            {(catSlug === 'giay-the-thao' || catSlug === 'giay-pickleball') ? 'Size giày' : 'Size quần áo'}
                           </label>
-                          <select value={form.size} onChange={e => setForm(f => ({...f, size: e.target.value}))}
+                          <select value={form.size || ''} onChange={e => setForm(f => ({...f, size: e.target.value}))}
                             className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm">
                             <option value="">-- Chọn size --</option>
                             {sizes.map(s => <option key={s} value={s}>{s}</option>)}
@@ -391,12 +402,34 @@ export default function AdminProductsPage() {
                       </>
                     )
                   }
+                  
+                  if (catSlug === 'vot-pickleball') {
+                    return (
+                      <>
+                        {renderColorInput()}
+                        <div>
+                          <label className="text-muted-foreground text-xs font-medium mb-1.5 block">Phiên bản (Độ dày)</label>
+                          <select value={form.version || ''} onChange={e => setForm(f => ({...f, version: e.target.value}))}
+                            className="w-full px-3 py-2.5 rounded-xl bg-muted border border-border text-foreground focus:outline-none focus:border-lime text-sm">
+                            <option value="">-- Chọn phiên bản --</option>
+                            <option value="14mm">14mm</option>
+                            <option value="16mm">16mm</option>
+                          </select>
+                        </div>
+                      </>
+                    )
+                  }
+
+                  if (catSlug === 'tui-balo') {
+                    return renderColorInput();
+                  }
+                  
                   return null
                 })()}
 
                 {/* Image Upload with Colors */}
                 <div className="sm:col-span-2 border-t border-border/50 pt-4 mt-2">
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-1">
                     <label className="text-sm font-bold text-foreground">Hình ảnh & Màu sắc</label>
                     <label className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dashed border-lime/50 text-lime-dark bg-lime/5 text-sm cursor-pointer transition-all ${
                       uploading ? 'opacity-50' : 'hover:border-lime hover:bg-lime/10'
@@ -406,6 +439,9 @@ export default function AdminProductsPage() {
                       <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={uploading} />
                     </label>
                   </div>
+                  <p className="text-xs text-muted-foreground mb-4 font-normal">
+                    📌 Kích thước khuyên dùng: <strong>800x800px (tỷ lệ 1:1)</strong> để ảnh hiển thị chuẩn nhất trên hệ thống.
+                  </p>
                   
                   {form.images.length === 0 ? (
                     <div className="text-center p-8 border-2 border-dashed border-border rounded-xl bg-muted/30">
