@@ -45,8 +45,12 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/logo.png', type: 'image/png' },
+      { url: '/icon-dark-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
     apple: '/apple-icon.png',
+    shortcut: '/logo.png',
   },
   alternates: {
     canonical: APP_URL,
@@ -73,8 +77,12 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Product+Sans:wght@400;700&display=swap" rel="stylesheet" />
+        {/* Preconnect for Google Fonts - improves Safari/slow network */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        {/* Favicon fallback for older browsers */}
+        <link rel="shortcut icon" href="/logo.png" type="image/png" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         {/* Google Analytics 4 */}
         {GA_MEASUREMENT_ID && (
