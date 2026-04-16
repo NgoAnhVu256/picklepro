@@ -10,48 +10,80 @@ import './globals.css'
 
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
+import { createClient } from '@supabase/supabase-js'
+
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''
 
-export const metadata: Metadata = {
-  metadataBase: new URL(APP_URL),
-  title: {
-    default: 'PicklePro - Cửa hàng Vợt Pickleball cao cấp số 1 Việt Nam',
-    template: '%s | PicklePro',
-  },
-  description: 'Cửa hàng vợt Pickleball cao cấp số 1 Việt Nam. Đa dạng thương hiệu JOOLA, Selkirk, Paddletek, HEAD. Bảo hành chính hãng, giao hàng toàn quốc. Giá tốt nhất thị trường.',
-  keywords: ['pickleball', 'vợt pickleball', 'phụ kiện pickleball', 'picklepro', 'mua vợt pickleball', 'pickleball việt nam', 'JOOLA', 'Selkirk', 'HEAD'],
-  authors: [{ name: 'PicklePro', url: APP_URL }],
-  creator: 'PicklePro',
-  publisher: 'PicklePro',
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, 'max-video-preview': -1, 'max-image-preview': 'large', 'max-snippet': -1 },
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'vi_VN',
-    url: APP_URL,
-    siteName: 'PicklePro',
-    title: 'PicklePro - Cửa hàng Vợt Pickleball cao cấp số 1 Việt Nam',
-    description: 'Đa dạng thương hiệu JOOLA, Selkirk, HEAD. Bảo hành chính hãng, giao hàng toàn quốc.',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'PicklePro - Vợt Pickleball cao cấp' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'PicklePro - Vợt Pickleball cao cấp',
-    description: 'Cửa hàng Pickleball số 1 Việt Nam. JOOLA, Selkirk, HEAD. Bảo hành chính hãng.',
-    images: ['/og-image.png'],
-  },
-  icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-icon.png',
-  },
-  alternates: {
-    canonical: APP_URL,
-  },
-  category: 'ecommerce',
+// Helper: fetch site settings từ Supabase (server-side, cached 60s)
+async function getSiteSettings() {
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    )
+    const { data } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'system_settings')
+      .single()
+    return (data?.value as Record<string, any>) ?? null
+  } catch {
+    return null
+  }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const s = await getSiteSettings()
+
+  const storeName = s?.store_name || 'PicklePro'
+  const logoUrl   = s?.logo_url   || '/logo.png'
+  const seoTitle  = s?.seo_title  || `${storeName} - Cửa hàng Vợt Pickleball cao cấp số 1 Việt Nam`
+  const seoDesc   = s?.seo_description || 'Cửa hàng vợt Pickleball cao cấp số 1 Việt Nam. Đa dạng thương hiệu JOOLA, Selkirk, Paddletek, HEAD. Bảo hành chính hãng, giao hàng toàn quốc.'
+  const ogImage   = s?.og_image_url || '/og-image.png'
+
+  return {
+    metadataBase: new URL(APP_URL),
+    title: {
+      default: seoTitle,
+      template: `%s | ${storeName}`,
+    },
+    description: seoDesc,
+    keywords: (s?.seo_keywords || 'pickleball,vợt pickleball,picklepro,JOOLA,Selkirk,HEAD').split(',').map((k: string) => k.trim()),
+    authors: [{ name: storeName, url: APP_URL }],
+    creator: storeName,
+    publisher: storeName,
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, 'max-video-preview': -1, 'max-image-preview': 'large', 'max-snippet': -1 },
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'vi_VN',
+      url: APP_URL,
+      siteName: storeName,
+      title: seoTitle,
+      description: seoDesc,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: `${storeName} - Vợt Pickleball cao cấp` }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${storeName} - Vợt Pickleball cao cấp`,
+      description: seoDesc,
+      images: [ogImage],
+    },
+    icons: {
+      icon: [
+        { url: logoUrl, type: logoUrl.endsWith('.svg') ? 'image/svg+xml' : 'image/png' },
+        { url: '/favicon.ico', sizes: '32x32' },
+      ],
+      apple: logoUrl,
+      shortcut: logoUrl,
+    },
+    alternates: { canonical: APP_URL },
+    category: 'ecommerce',
+  }
 }
 
 export default function RootLayout({

@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { useEffect } from "react"
+import { useSiteSettings } from "@/hooks/use-site-settings"
 
 const footerLinks = [
   { label: "LIÊN HỆ", href: "/contact" },
@@ -21,15 +23,18 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const { logoUrl, storeName, load: loadSettings } = useSiteSettings()
+  useEffect(() => { loadSettings() }, [loadSettings])
+
   return (
     <footer className="bg-white border-t border-lime/20">
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Image src="/favicon.ico" alt="PicklePro Logo" width={80} height={80} className="rounded-xl" unoptimized />
+            <Image src={logoUrl} alt={`${storeName} Logo`} width={80} height={80} className="rounded-xl" unoptimized />
             <span className="text-2xl font-bold text-black">
-              PicklePro
+              {storeName}
             </span>
           </Link>
 

@@ -8,6 +8,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import { useCart } from "@/hooks/use-cart"
+import { useSiteSettings } from "@/hooks/use-site-settings"
 import { createClient } from "@/lib/supabase/client"
 import type { User as SupabaseUser } from "@supabase/supabase-js"
 
@@ -28,6 +29,10 @@ export function Header() {
   const [activeTab, setActiveTab] = useState(-1)
   const router = useRouter()
   const { getTotalItems } = useCart()
+  const { logoUrl, storeName, load: loadSettings } = useSiteSettings()
+
+  // Load site settings once
+  useEffect(() => { loadSettings() }, [loadSettings])
 
   const [totalItems, setTotalItems] = useState(0)
   useEffect(() => { setTotalItems(getTotalItems()) })
@@ -78,11 +83,10 @@ export function Header() {
       <div className="bg-white border-b border-lime/20 shadow-lg shadow-lime/5">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
-            {/* Logo — BIGGER */}
             <Link href="/" className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity">
-              <Image src="/favicon.ico" alt="PicklePro Logo" width={80} height={80} className="rounded-xl" priority unoptimized />
+              <Image src={logoUrl} alt={`${storeName} Logo`} width={80} height={80} className="rounded-xl" priority unoptimized />
               <span className="text-3xl font-bold text-black">
-                PicklePro
+                {storeName}
               </span>
             </Link>
 
