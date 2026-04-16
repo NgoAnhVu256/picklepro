@@ -79,8 +79,20 @@ export function AnnouncementBar() {
       <div className="flex touch-pan-y cursor-grab active:cursor-grabbing w-full">
         {slides.map((slide, index) => {
            const content = slide.bg_gradient ? (
-             <div className="w-full mx-auto relative flex justify-center">
-               <img src={slide.bg_gradient} alt={slide.title || "Announcement Banner"} className="w-full h-auto max-h-[100px] sm:max-h-[120px] object-contain block" draggable={false} />
+             <div className="w-full overflow-hidden" style={{ lineHeight: 0 }}>
+               <img
+                 src={slide.bg_gradient}
+                 alt={slide.title || "Announcement Banner"}
+                 draggable={false}
+                 style={{
+                   width: '100%',
+                   height: '60px',
+                   objectFit: 'cover',
+                   objectPosition: 'center',
+                   display: 'block',
+                 }}
+                 className="sm:!h-auto sm:!max-h-[120px] sm:!object-contain"
+               />
              </div>
            ) : (
              <div className="py-4 sm:py-3 px-6 sm:px-4 w-[92%] sm:w-full mx-auto flex justify-center items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-sm rounded-b-xl sm:rounded-none">
