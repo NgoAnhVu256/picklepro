@@ -18,7 +18,22 @@ export function Categories() {
     try {
       const response = await fetch('/api/categories')
       const data = await response.json()
-      setCategories(data.categories ?? [])
+      
+      const PREFERRED_ORDER = ['vot-pickleball', 'quan-ao', 'giay-the-thao', 'tui-balo', 'bong-pickleball', 'phu-kien-grip']
+      const fetched: Category[] = data.categories ?? []
+      
+      const sorted = [...fetched].sort((a, b) => {
+        let indexA = PREFERRED_ORDER.findIndex(slug => a.slug.includes(slug) || slug.includes(a.slug))
+        let indexB = PREFERRED_ORDER.findIndex(slug => b.slug.includes(slug) || slug.includes(b.slug))
+        
+        // Push unknowns to end
+        if (indexA === -1) indexA = 999
+        if (indexB === -1) indexB = 999
+        
+        return indexA - indexB
+      })
+
+      setCategories(sorted)
     } catch {
       setCategories([])
     }

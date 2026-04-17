@@ -110,7 +110,14 @@ export function Hero() {
                 {effectiveHeroSlides.map((slide, idx) => (
                   <div key={slide.id || idx} className="relative flex-[0_0_100%] min-w-0 h-[260px] md:h-[360px] lg:h-full select-none">
                     {slide?.bg_gradient && slide.bg_gradient.length > 0 && (
-                       <Image src={slide.bg_gradient} alt={slide.title || 'Hero Slide'} fill className="object-cover" draggable={false} priority={idx === 0} />
+                       <Image 
+                         src={slide.bg_gradient} 
+                         alt={slide.title || 'Banner'} 
+                         fill 
+                         priority={idx === 0} 
+                         className="object-cover w-full h-full" 
+                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 1920px"
+                       />
                     )}
                     
                     {/* Optional clickable overlay if it has a link */}

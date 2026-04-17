@@ -14,9 +14,9 @@ import type { User as SupabaseUser } from "@supabase/supabase-js"
 
 const navItems = [
   { label: "VỢT PICKLEBALL", href: "/products?category=vot-pickleball", icon: Target, gradId: "grad-vot", gradient: "linear-gradient(135deg, #FF6B6B, #FF8E53)", from: "#FF6B6B", to: "#FF8E53" },
-  { label: "PHỤ KIỆN", href: "/products?category=phu-kien", icon: Package, gradId: "grad-pk", gradient: "linear-gradient(135deg, #5054FE, #9B56FF)", from: "#5054FE", to: "#9B56FF" },
-  { label: "BỘ SƯU TẬP", href: "/products", icon: Layers, gradId: "grad-bst", gradient: "linear-gradient(135deg, #F7971E, #FFD200)", from: "#F7971E", to: "#FFD200" },
-  { label: "TIN TỨC", href: "/#home-blog-section", icon: Newspaper, gradId: "grad-news", gradient: "linear-gradient(135deg, #11998E, #38EF7D)", from: "#11998E", to: "#38EF7D" },
+  { label: "PHỤ KIỆN", href: "/products?category=phu-kien-grip", icon: Package, gradId: "grad-pk", gradient: "linear-gradient(135deg, #5054FE, #9B56FF)", from: "#5054FE", to: "#9B56FF" },
+  { label: "BỘ SƯU TẬP", href: "/collections", icon: Layers, gradId: "grad-bst", gradient: "linear-gradient(135deg, #F7971E, #FFD200)", from: "#F7971E", to: "#FFD200" },
+  { label: "TIN TỨC", href: "/blogs", icon: Newspaper, gradId: "grad-news", gradient: "linear-gradient(135deg, #11998E, #38EF7D)", from: "#11998E", to: "#38EF7D" },
   { label: "CỘNG ĐỒNG", href: "https://www.facebook.com/profile.php?id=61575468045037", icon: Users, gradId: "grad-community", gradient: "linear-gradient(135deg, #667EEA, #764BA2)", from: "#667EEA", to: "#764BA2" },
 ]
 
@@ -80,7 +80,7 @@ export function Header() {
 
   return (
     <header className="relative z-50 w-full">
-      <div className="bg-gradient-to-r from-sky-50 via-blue-50/60 to-cyan-50/40 border-b border-sky-200/40 shadow-lg shadow-sky-100/30">
+      <div className="bg-gradient-to-r from-blue-100 via-sky-50 to-blue-100 border-b border-blue-200 shadow-md shadow-blue-100/50">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity">

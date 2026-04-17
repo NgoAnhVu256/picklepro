@@ -110,26 +110,26 @@ export function AnnouncementBar({ initialSlides }: { initialSlides?: any[] } = {
   }
 
   return (
-    <div className="sticky top-0 z-[60] w-full transition-all duration-500 relative">
-      <style dangerouslySetInnerHTML={{ __html: marqueeCSS }} />
-
-      {/* Desktop: Embla Carousel */}
-      <div className="hidden sm:block w-full" ref={emblaRef}>
-        <div className="flex touch-pan-y w-full">
-          {slides.map((slide, index) => {
+    <div className={`relative w-full overflow-hidden transition-all duration-300 ${isVisible ? 'h-[44px]' : 'h-0'}`}>
+      <div className="w-full h-full bg-[#1e293b] flex items-center overflow-hidden">
+        <div className="whitespace-nowrap inline-flex items-center" style={{ animation: 'marquee-scroll-fast 20s linear infinite' }}>
+          {/* Double map to ensure smooth continuous looping marquee */}
+          {[...slides, ...slides, ...slides, ...slides].map((slide, index) => {
             const content = slide.bg_gradient ? (
-              <div className="w-full" style={{ backgroundImage: `url('${slide.bg_gradient}')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', height: '44px' }}
-                   title={slide.title || "Announcement Banner"} />
-            ) : (
-              <div className="h-[44px] w-full flex justify-center items-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold text-xs">
-                <Megaphone className="w-3.5 h-3.5 shrink-0" />
-                <span>{slide.title || 'Thông báo mới nhất từ PicklePro'}</span>
-              </div>
-            )
+              <img 
+                src={slide.bg_gradient} 
+                alt={slide.title || 'Banner'} 
+                className="h-[44px] w-auto max-w-none inline-block object-cover" 
+                draggable={false} 
+              />
+            ) : null
+
+            if (!content) return null
+
             return (
-              <div key={slide.id || index} className="relative flex-[0_0_100%] min-w-0">
+              <div key={`${slide.id}-${index}`} className="inline-block px-1">
                 {slide.href ? (
-                  <Link href={slide.href} className="block w-full" draggable={false}>{content}</Link>
+                  <Link href={slide.href} className="block" draggable={false}>{content}</Link>
                 ) : content}
               </div>
             )
@@ -137,26 +137,17 @@ export function AnnouncementBar({ initialSlides }: { initialSlides?: any[] } = {
         </div>
       </div>
 
-      {/* Mobile: Marquee chạy ngang */}
-      <div className="sm:hidden w-full bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 h-8 overflow-hidden flex items-center">
-        <div className="whitespace-nowrap inline-flex items-center gap-8" style={{ animation: 'marquee-scroll 15s linear infinite' }}>
-          {slides.map((slide, i) => (
-            <span key={slide.id || i} className="text-white font-bold text-xs inline-flex items-center gap-1.5">
-              <Megaphone className="w-3 h-3 shrink-0" />
-              {slide.href ? (
-                <Link href={slide.href} className="text-white hover:underline">{slide.title || 'Ưu đãi đặc biệt'}</Link>
-              ) : (
-                <span>{slide.title || 'Ưu đãi đặc biệt'}</span>
-              )}
-            </span>
-          ))}
-        </div>
-      </div>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes marquee-scroll-fast {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}} />
 
       {/* Close button */}
       <button
         onClick={(e) => { e.preventDefault(); setIsVisible(false) }}
-        className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/30 text-white/80 hover:bg-black/60 transition-colors z-[70]"
+        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/40 text-white hover:bg-black/80 transition-colors z-[70] shadow-sm"
         aria-label="Đóng thông báo"
       >
         <X className="h-3 w-3" />

@@ -468,43 +468,45 @@ export default function ProductDetailPage() {
                           })}
                         </div>
                       </div>
-
-                      {/* Color display */}
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-foreground opacity-80">
-                          Màu sắc: {selectedColor && <span className="text-lime-dark font-bold">{selectedColor}</span>}
-                        </label>
-                        <div className="flex items-center gap-2">
-                          {images.length === 0 ? (
-                            <span className="inline-block px-4 py-1.5 border-2 border-lime/30 text-lime-dark text-sm font-bold rounded-lg bg-gradient-to-r from-lime/10 to-transparent shadow-sm cursor-default">
-                              {selectedColor || 'Mặc định'}
-                            </span>
-                          ) : (
-                            images.map((img, idx) => {
-                              const colorHex = (img as any).color_code || fallbackColors[idx % fallbackColors.length]
-                              const colorName = (img as any).color_name || `Màu ${idx + 1}`
-                              const isSelected = selectedImage === img.url || (!selectedImage && idx === 0)
-                              return (
-                                <button key={img.id} onClick={() => { setSelectedImage(img.url); setSelectedColor(colorName); }}
-                                  className={`w-9 h-9 rounded-lg border-2 transition-all shadow-sm ${isSelected ? 'border-lime-dark scale-110' : 'border-border hover:border-lime/50'} p-0.5 relative group/btn`}
-                                  title={colorName}>
-                                  <div className="w-full h-full rounded-md flex items-center justify-center" style={{ backgroundColor: colorHex }}>
-                                    {isSelected && <Check className="w-4 h-4 text-white drop-shadow-md" />}
-                                  </div>
-                                </button>
-                              )
-                            })
-                          )}
-                        </div>
-                      </div>
                     </>
                   )
                 }
-                
                 return null
               })()}
-            </div>
 
+              {/* Global Color display for ALL categories */}
+              {(() => {
+                  const fallbackColors = ['#000000', '#F472B6', '#3B82F6', '#EF4444', '#10B981', '#A855F7', '#FDE047']
+                  const images = product.product_images || []
+                  // Only show color picker if there's at least one named color OR more than 1 image
+                  const hasColorData = images.some(img => (img as any).color_name || (img as any).color_code)
+                  if (!hasColorData && images.length <= 1) return null;
+
+                  return (
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-foreground opacity-80">
+                        Màu sắc: {selectedColor && <span className="text-lime-dark font-bold">{selectedColor}</span>}
+                      </label>
+                      <div className="flex items-center gap-2">
+                        {images.map((img, idx) => {
+                          const colorHex = (img as any).color_code || fallbackColors[idx % fallbackColors.length]
+                          const colorName = (img as any).color_name || `Màu ${idx + 1}`
+                          const isSelected = selectedImage === img.url || (!selectedImage && img.is_primary) || (!selectedImage && idx === 0)
+                          return (
+                            <button key={img.id || idx} onClick={() => { setSelectedImage(img.url); setSelectedColor(colorName); }}
+                              className={`w-9 h-9 rounded-lg border-2 transition-all shadow-sm ${isSelected ? 'border-lime-dark scale-110' : 'border-border hover:border-lime/50'} p-0.5 relative group/btn`}
+                              title={colorName}>
+                              <div className="w-full h-full rounded-md flex items-center justify-center border border-black/10" style={{ backgroundColor: colorHex }}>
+                                {isSelected && <Check className={`w-4 h-4 drop-shadow-md ${['#ffffff', '#fff', '#f8fafc', '#f1f5f9'].includes(colorHex.toLowerCase()) ? 'text-black' : 'text-white'}`} />}
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+              })()}
+            </div>
             {/* Actions */}
             <div className="space-y-4 pt-3 border-t border-border/50">
               <div className="space-y-1.5">
