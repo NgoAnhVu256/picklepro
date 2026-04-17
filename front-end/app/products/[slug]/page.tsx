@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/pickleball/header'
 import { Footer } from '@/components/pickleball/footer'
 import { Button } from '@/components/ui/button'
@@ -34,6 +34,7 @@ function formatPrice(price: number) {
 
 export default function ProductDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const slug = params?.slug as string
 
   const [product, setProduct] = useState<ProductFull | null>(null)
@@ -142,6 +143,21 @@ export default function ProductDetailPage() {
   const emoji = product.categories ? productEmojis[product.categories.slug] || '🏓' : '🏓'
   const inStock = product.stock > 0
 
+  // Nút "Mua ngay" → thêm vào giỏ rồi chuyển checkout
+  const handleBuyNow = () => {
+    addItem({
+      productId: product.id,
+      name: product.name,
+      brand: product.brand,
+      price: product.price,
+      slug: product.slug,
+      color: selectedColor,
+      size: selectedSize
+    }, quantity)
+    router.push('/checkout')
+  }
+
+  // Nút icon giỏ hàng → thêm vào giỏ + toast thông báo
   const handleAddToCart = () => {
     addItem({
       productId: product.id,
@@ -157,7 +173,7 @@ export default function ProductDetailPage() {
       duration: 3000,
       action: {
         label: "Xem giỏ hàng",
-        onClick: () => window.location.href = "/cart"
+        onClick: () => router.push('/cart')
       }
     })
     setTimeout(() => setAddedToCart(false), 2000)
@@ -508,7 +524,7 @@ export default function ProductDetailPage() {
                 <button 
                   className="flex-1 h-12 rounded-xl text-base font-bold transition-all active:scale-95 shadow-lg shadow-lime/30 bg-gradient-to-r from-lime-dark to-lime hover:opacity-90 text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none" 
                   disabled={!inStock} 
-                  onClick={handleAddToCart}
+                  onClick={handleBuyNow}
                 >
                   Mua ngay
                 </button>

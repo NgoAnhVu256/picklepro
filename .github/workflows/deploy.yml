@@ -91,6 +91,30 @@ jobs:
           echo "- **URL**: https://picklepro.vn" >> $GITHUB_STEP_SUMMARY
           echo "- **Time**: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
 
+      - name: 📧 Send success email
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "✅ PicklePro Deploy Thành Công — ${{ github.ref_name }}"
+          to: ${{ secrets.DEPLOY_NOTIFY_EMAIL }}
+          from: "PicklePro CI/CD <${{ secrets.SMTP_USERNAME }}>"
+          body: |
+            🎉 Deploy PicklePro thành công!
+
+            📦 Repository: ${{ github.repository }}
+            🌿 Branch: ${{ github.ref_name }}
+            🔗 Commit: ${{ github.sha }}
+            👤 By: ${{ github.actor }}
+            🌐 URL: https://picklepro.vn
+            🕐 Time: ${{ github.event.head_commit.timestamp }}
+
+            ---
+            Đây là email tự động từ GitHub Actions.
+
       - name: ❌ Notify failure
         if: failure()
         run: |
@@ -98,3 +122,4 @@ jobs:
           echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **By**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "Kiểm tra logs tab Actions để debug." >> $GITHUB_STEP_SUMMARY
+

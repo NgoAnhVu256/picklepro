@@ -7,6 +7,7 @@ import { BlogSection } from "@/components/pickleball/blog-section"
 import { PromoBanner } from "@/components/pickleball/promo-banner"
 import { AnnouncementBar } from "@/components/pickleball/announcement-bar"
 import { Footer } from "@/components/pickleball/footer"
+import { PromoPopup } from "@/components/pickleball/promo-popup"
 import { getHomepageData } from "@/lib/server-data"
 
 // ISR: Tự động làm mới trang sau 60 giây
@@ -29,6 +30,7 @@ export default async function Home() {
         <PromoBanner initialSlides={slides} />
       </main>
       <Footer />
+      <PromoPopup />
     </div>
   )
 }

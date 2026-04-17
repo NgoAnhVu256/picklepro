@@ -174,7 +174,7 @@ function ProductsContent() {
         </div>
         <div className="container mx-auto px-4 relative">
           <h1 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2">
-            Sản Phẩm <span className="bg-gradient-to-r from-lime-dark to-lime bg-clip-text text-transparent">Pickleball</span>
+            Sản Phẩm Pickleball
           </h1>
           <p className="text-muted-foreground max-w-xl">
             Khám phá bộ sưu tập vợt, phụ kiện và trang phục Pickleball từ các thương hiệu hàng đầu thế giới
