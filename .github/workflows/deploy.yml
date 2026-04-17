@@ -3,11 +3,11 @@ name: 🚀 Deploy to VPS (picklepro.vn)
 on:
   push:
     branches: [main]
-  workflow_dispatch:       # Cho phép trigger thủ công từ GitHub UI
+  workflow_dispatch: 
 
 concurrency:
   group: deploy-production
-  cancel-in-progress: false  # KHÔNG cancel deploy đang chạy
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -16,15 +16,9 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      # ──────────────────────────────────────────────
-      # 1. Checkout code (để lấy thông tin commit)
-      # ──────────────────────────────────────────────
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      # ──────────────────────────────────────────────
-      # 2. SSH vào VPS và deploy
-      # ──────────────────────────────────────────────
       - name: 🚀 Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -34,7 +28,7 @@ jobs:
           port: 22
           command_timeout: 12m
           script: |
-            set -ex   # Dừng ngay nếu có lỗi và in ra từng dòng thực thi
+            set -ex 
 
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "🚀 Bắt đầu deploy PicklePro — $(date '+%Y-%m-%d %H:%M:%S %Z')"
@@ -42,84 +36,69 @@ jobs:
 
             cd /var/www/picklepro
 
-            # ── 1. Pull code mới ──
             echo "📥 Pulling latest code..."
             git fetch --all
             git reset --hard origin/main
 
-            # ── 2. Install dependencies ──
             echo "📦 Installing dependencies..."
             pnpm install --no-frozen-lockfile
 
-            # ── 3. Build (chỉ front-end, back-end dùng transpilePackages) ──
             echo "🔨 Building Next.js..."
             pnpm build
 
-            # ── 4. Copy static files vào standalone output ──
-            #    (cần thiết khi dùng output: 'standalone' trong next.config.mjs)
             echo "📋 Copying static files to standalone..."
-            cp -r /var/www/picklepro/front-end/.next/static \
-                  /var/www/picklepro/front-end/.next/standalone/.next/static 2>/dev/null || true
-            cp -r /var/www/picklepro/front-end/public \
-                  /var/www/picklepro/front-end/.next/standalone/public 2>/dev/null || true
+            cp -r ./front-end/.next/static ./front-end/.next/standalone/.next/static 2>/dev/null || true
+            cp -r ./front-end/public ./front-end/.next/standalone/public 2>/dev/null || true
 
-            # ── 5. Zero-downtime reload (không restart, giữ nguyên connections) ──
             echo "♻️  Reloading PM2 (zero-downtime)..."
             pm2 reload picklepro --update-env
 
-            # ── 6. Dọn dẹp cache Next.js cũ (tiết kiệm disk) ──
-            echo "🧹 Cleaning old Next.js cache (>7 ngày)..."
-            find /var/www/picklepro/front-end/.next/cache -name "*.pack" -mtime +7 -delete 2>/dev/null || true
+            echo "🧹 Cleaning old Next.js cache..."
+            find ./front-end/.next/cache -name "*.pack" -mtime +7 -delete 2>/dev/null || true
 
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "✅ Deploy hoàn thành! Không còn Vercel ✓"
-            echo "🌐 https://picklepro.vn"
+            echo "✅ Deploy hoàn thành!"
             pm2 list
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
       # ──────────────────────────────────────────────
-      # 3. Thông báo kết quả
+      # 3. Thông báo kết quả ra GitHub Summary
       # ──────────────────────────────────────────────
-      - name: ✅ Notify success
-        if: success()
+      - name: 📝 Update GitHub Summary
+        if: always()
         run: |
-          echo "## 🎉 Deploy thành công!" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "## 🎉 Deploy THÀNH CÔNG!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Deploy THẤT BẠI!" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "- **Repo**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY  
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **By**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "- **URL**: https://picklepro.vn" >> $GITHUB_STEP_SUMMARY
-          echo "- **Time**: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
 
-      - name: 📧 Send success email
-        if: success()
+      # ──────────────────────────────────────────────
+      # 4. Gửi Email (Cả khi thành công và thất bại)
+      # ──────────────────────────────────────────────
+      - name: 📧 Send Email Notification
+        if: always()
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_HOST }}
           server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "✅ PicklePro Deploy Thành Công — ${{ github.ref_name }}"
+          # Đổi subject dựa trên trạng thái
+          subject: "${{ job.status == 'success' && '✅' || '❌' }} PicklePro Deploy ${{ job.status == 'success' && 'Thành Công' || 'Thất Bại' }} — ${{ github.ref_name }}"
           to: ${{ secrets.DEPLOY_NOTIFY_EMAIL }}
           from: "PicklePro CI/CD <${{ secrets.SMTP_USERNAME }}>"
           body: |
-            🎉 Deploy PicklePro thành công!
+            Kết quả Deploy: ${{ job.status == 'success' && 'THÀNH CÔNG 🎉' || 'THẤT BẠI ❌' }}
 
             📦 Repository: ${{ github.repository }}
             🌿 Branch: ${{ github.ref_name }}
             🔗 Commit: ${{ github.sha }}
             👤 By: ${{ github.actor }}
             🌐 URL: https://picklepro.vn
-            🕐 Time: ${{ github.event.head_commit.timestamp }}
+            🕐 Time: $(date '+%Y-%m-%d %H:%M:%S')
 
             ---
-            Đây là email tự động từ GitHub Actions.
-
-      - name: ❌ Notify failure
-        if: failure()
-        run: |
-          echo "## ❌ Deploy THẤT BẠI!" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **By**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
-          echo "Kiểm tra logs tab Actions để debug." >> $GITHUB_STEP_SUMMARY
-
+            ${{ job.status == 'failure' && 'Vũ ơi, kiểm tra ngay logs trên GitHub Actions nhé!' || 'Mọi thứ đều ổn áp!' }}

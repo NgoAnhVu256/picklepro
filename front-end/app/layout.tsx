@@ -101,7 +101,10 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Product+Sans:wght@400;700&display=swap" rel="stylesheet" />
+        {/* Preconnect — DNS+TLS song song, tiết kiệm 200-400ms */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://xvkotjznfupazecaaucl.supabase.co" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         {/* Google Analytics 4 */}
@@ -119,7 +122,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className="font-sans antialiased overflow-x-hidden w-full" style={{ fontFamily: "'Google Sans', Inter, system-ui, sans-serif" }}>
+      <body className="font-sans antialiased overflow-x-hidden w-full" style={{ fontFamily: "Inter, system-ui, -apple-system, sans-serif" }}>
         <ToastProvider>
           <Providers>
             {children}

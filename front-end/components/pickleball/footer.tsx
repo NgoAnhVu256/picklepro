@@ -87,9 +87,7 @@ export function Footer() {
           {/* Column 1: Brand Info */}
           <div className="space-y-6">
             <Link href="/" className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <div className="bg-white p-1 rounded-xl">
-                <Image src={settings.logoUrl} alt={settings.storeName} width={48} height={48} className="rounded-lg object-cover" unoptimized />
-              </div>
+              <Image src="/logo.png" alt={settings.storeName} width={48} height={48} className="rounded-lg object-contain" unoptimized />
               <span className="text-2xl font-black text-white">{settings.storeName}</span>
             </Link>
             <p className="text-sm leading-relaxed text-gray-400">

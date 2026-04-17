@@ -30,8 +30,26 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
     // Định dạng ảnh hiện đại, nhẹ hơn JPEG 30-50%
     formats: ['image/avif', 'image/webp'],
-    // Cache ảnh đã tối ưu trong 24h
-    minimumCacheTTL: 86400,
+    // Cache ảnh đã tối ưu trong 7 ngày (trước là 24h)
+    minimumCacheTTL: 604800,
+  },
+
+  // Caching headers cho static assets — cải thiện tốc độ lần truy cập thứ 2+
+  async headers() {
+    return [
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/logo.png',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=604800, stale-while-revalidate=86400' },
+        ],
+      },
+    ]
   },
 
   // Tree-shaking tốt hơn cho các thư viện lớn

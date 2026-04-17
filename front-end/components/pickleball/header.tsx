@@ -35,7 +35,7 @@ export function Header() {
   useEffect(() => { loadSettings() }, [loadSettings])
 
   const [totalItems, setTotalItems] = useState(0)
-  useEffect(() => { setTotalItems(getTotalItems()) })
+  useEffect(() => { setTotalItems(getTotalItems()) }, [getTotalItems])
 
   useEffect(() => {
     const supabase = createClient()
@@ -80,7 +80,7 @@ export function Header() {
 
   return (
     <header className="relative z-50 w-full">
-      <div className="bg-gradient-to-r from-lime/10 via-white to-teal-50 border-b border-lime/20 shadow-lg shadow-lime/5">
+      <div className="bg-gradient-to-r from-sky-50 via-blue-50/60 to-cyan-50/40 border-b border-sky-200/40 shadow-lg shadow-sky-100/30">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity">
